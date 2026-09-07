@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16
+    container_name: alugafacil-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: alugafacil
+      POSTGRES_USER: alugafacil
+      POSTGRES_PASSWORD: alugafacil
+    ports:
+      - "5432:5432"
+    volumes:
+      - alugafacil-data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: alugafacil-api
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: alugafacil
+      DB_USER: alugafacil
+      DB_PASSWORD: alugafacil
+      JWT_SECRET: troque-esta-chave-em-producao
+    ports:
+      - "8080:8080"
+
+volumes:
+  alugafacil-data:
