@@ -1,0 +1,44 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: alugafacil
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:alugafacil}
+    username: ${DB_USER:alugafacil}
+    password: ${DB_PASSWORD:alugafacil}
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET:alugafacil-secret-trocar-em-producao}
+      expiration-hours: 2
+
+pagamento:
+  gateway:
+    # implementacao ativa do PaymentGateway (ver pacote domain.pagamento.gateway)
+    # troque para "mercadopago", "stripe" etc quando integrar o provedor real
+    provider: fake
+
+logging:
+  level:
+    com.larenegocios.alugafacil: INFO
+
+springdoc:
+  swagger-ui:
+    path: /docs
