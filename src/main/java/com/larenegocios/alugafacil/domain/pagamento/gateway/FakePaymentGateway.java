@@ -1,35 +1,48 @@
 package com.larenegocios.alugafacil.domain.pagamento.gateway;
 
-import org.springframework.beans.factory.annotation.Value;
+import com.larenegocios.alugafacil.domain.pagamento.StatusPagamento;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Implementacao falsa usada em desenvolvimento/testes e enquanto nenhum gateway
- * real (Mercado Pago, Stripe etc.) e integrado. Simula uma cobranca aprovada
- * instantaneamente, sem chamar nenhuma API externa, vou usar por enquanto para apresentar para voces como que podemos fazer para fiicar mais facil para todos
+ * Implementacao falsa usada em desenvolvimento/testes, sem chamar nenhuma API externa.
  * <p>
- * Ativa quando "pagamento.gateway.provider=fake"
- * Basta trocar esse valor e fornecer o bean equivalente quando o gateway real
- * estiver pronto para uso.
+ * Ativa quando "pagamento.gateway.provider=fake". Para usar o Mercado Pago basta
+ * trocar para "pagamento.gateway.provider=mercadopago" (ver {@code MercadoPagoGateway}).
  */
 @Service
+@ConditionalOnProperty(name = "pagamento.gateway.provider", havingValue = "fake", matchIfMissing = true)
 public class FakePaymentGateway implements PaymentGateway {
-
-    @Value("${pagamento.gateway.provider:fake}")
-    private String provider;
 
     @Override
     public RespostaCobranca criarCobranca(SolicitacaoCobranca solicitacao) {
         String idFake = "FAKE-" + UUID.randomUUID();
-        String linkFake = "https://pagamentos.alugafacil.local/checkout/" + idFake;
-        return new RespostaCobranca(idFake, "approved", linkFake);
+        return new RespostaCobranca(
+                idFake,
+                StatusPagamento.PAGO,
+                "accredited",
+                "https://pagamentos.alugafacil.local/checkout/" + idFake,
+                solicitacao.metodo() == com.larenegocios.alugafacil.domain.pagamento.MetodoPagamento.PIX
+                        ? "00020126FAKE" + idFake : null,
+                null,
+                solicitacao.metodo() == com.larenegocios.alugafacil.domain.pagamento.MetodoPagamento.BOLETO
+                        ? "23790001234567890000000000000000000000000000" : null,
+                null,
+                LocalDateTime.now().plusDays(1)
+        );
+    }
+
+    @Override
+    public RespostaCobranca consultarCobranca(String idTransacaoGateway) {
+        return new RespostaCobranca(idTransacaoGateway, StatusPagamento.PAGO, "accredited",
+                null, null, null, null, null, null);
     }
 
     @Override
     public void estornarCobranca(String idTransacaoGateway) {
         // Sem efeito real: apenas registra a intencao de estorno.
-        // Na implementacao real, aqui vai a chamada de estorno da API do provedor.
     }
 }

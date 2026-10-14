@@ -25,6 +25,12 @@ services:
       DB_USER: alugafacil
       DB_PASSWORD: alugafacil
       JWT_SECRET: troque-esta-chave-em-producao
+      # Credenciais do gateway: preencha no arquivo .env (copie de .env.example)
+      PAGAMENTO_PROVIDER: ${PAGAMENTO_PROVIDER:-mercadopago}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
+      MP_PUBLIC_KEY: ${MP_PUBLIC_KEY}
+      MP_NOTIFICATION_URL: ${MP_NOTIFICATION_URL:-}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET:-}
     ports:
       - "8080:8080"
 

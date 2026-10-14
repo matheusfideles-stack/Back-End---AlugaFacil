@@ -1,0 +1,66 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: alugafacil
+  profiles:
+    active: local
+  datasource:
+    url: jdbc:mysql://localhost:3306/alugafacil
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    # Defina DB_PASSWORD no ambiente ou em application-local.yml (ignorado pelo git).
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: create
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  flyway:
+    enabled: false
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+
+api:
+  security:
+    token:
+      secret: ${JWT_SECRET:alugafacil-secret-trocar-em-producao}
+      expiration-hours: 2
+
+pagamento:
+  gateway:
+    provider: ${PAGAMENTO_PROVIDER:mercadopago}
+  mercadopago:
+    access-token: ${MP_ACCESS_TOKEN:}
+    public-key: ${MP_PUBLIC_KEY:}
+    notification-url: ${MP_NOTIFICATION_URL:}
+    webhook-secret: ${MP_WEBHOOK_SECRET:}
+    pix-expiracao-minutos: 1440
+    boleto-dias-minimos: 3
+
+# Limite de requisicoes por IP: requests-per-second e a vazao sustentada, burst e o pico permitido.
+ratelimit:
+  enabled: ${RATELIMIT_ENABLED:true}
+  autenticacao:
+    requests-per-second: 2
+    burst: 5
+  pagamentos:
+    requests-per-second: 2
+    burst: 5
+  webhooks:
+    requests-per-second: 20
+    burst: 50
+  geral:
+    requests-per-second: 10
+    burst: 20
+
+logging:
+  level:
+    com.larenegocios.alugafacil: INFO
+
+springdoc:
+  swagger-ui:
+    path: /docs
