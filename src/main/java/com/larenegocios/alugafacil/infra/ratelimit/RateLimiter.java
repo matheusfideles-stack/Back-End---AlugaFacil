@@ -29,7 +29,6 @@ public class RateLimiter {
         this.relogioNanos = relogioNanos;
     }
 
-    /** Resultado de uma tentativa: liberada, ou bloqueada com o tempo de espera sugerido. */
     public record Decisao(boolean permitida, long segundosParaTentarNovamente) {
     }
 

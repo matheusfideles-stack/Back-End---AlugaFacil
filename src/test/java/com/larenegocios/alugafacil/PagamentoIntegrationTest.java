@@ -12,7 +12,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/** Fluxo completo de pagamento usando o gateway falso (sem chamar o Mercado Pago). */
 class PagamentoIntegrationTest extends IntegracaoBase {
 
     private String tokenLocatario;

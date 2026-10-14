@@ -16,8 +16,7 @@ api:
       secret: chave-de-teste
       expiration-hours: 2
 
-# Folgado de proposito: os testes de integracao disparam muitas chamadas do mesmo IP.
-# Os testes que exercitam o limite sobrescrevem estes valores.
+# Folgado para os testes de integracao; os testes de rate limit sobrescrevem estes valores.
 ratelimit:
   autenticacao:
     requests-per-second: 1000
@@ -34,5 +33,4 @@ ratelimit:
 
 pagamento:
   gateway:
-    # Testes automatizados nunca devem chamar a API externa.
     provider: fake

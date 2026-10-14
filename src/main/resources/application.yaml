@@ -41,7 +41,7 @@ pagamento:
     pix-expiracao-minutos: 1440
     boleto-dias-minimos: 3
 
-# Limite de requisicoes por IP: requests-per-second e a vazao sustentada, burst e o pico permitido.
+# Por IP: requests-per-second e a vazao sustentada, burst e o pico permitido.
 ratelimit:
   enabled: ${RATELIMIT_ENABLED:true}
   autenticacao:

@@ -32,14 +32,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-/**
- * Integracao com a API de pagamentos do Mercado Pago (POST /v1/payments).
- * <p>
- * Cobre Pix, boleto bancario e cartao de credito/debito. Cartao exige um token
- * gerado no frontend com a public key: dados de cartao nunca trafegam por aqui.
- * <p>
- * Ativa quando "pagamento.gateway.provider=mercadopago".
- */
 @Service
 @ConditionalOnProperty(name = "pagamento.gateway.provider", havingValue = "mercadopago")
 public class MercadoPagoGateway implements PaymentGateway {
@@ -115,8 +107,6 @@ public class MercadoPagoGateway implements PaymentGateway {
         log.info("Estorno solicitado no Mercado Pago para a transacao {}", idTransacaoGateway);
     }
 
-    // ------------------------------------------------------------------ corpo
-
     private ObjectNode montarCorpo(SolicitacaoCobranca solicitacao) {
         ObjectNode corpo = objectMapper.createObjectNode();
         corpo.put("transaction_amount", solicitacao.valor().setScale(2, RoundingMode.HALF_UP));
@@ -150,7 +140,6 @@ public class MercadoPagoGateway implements PaymentGateway {
                 corpo.put("installments", 1);
                 corpo.put("payment_method_id", solicitacao.bandeiraCartao());
                 corpo.put("capture", true);
-                // Debito no Brasil costuma exigir autenticacao 3DS; a resposta traz a URL do challenge.
                 corpo.put("three_d_secure_mode", "optional");
             }
         }
@@ -169,7 +158,7 @@ public class MercadoPagoGateway implements PaymentGateway {
         identificacao.put("type", "CPF");
         identificacao.put("number", apenasDigitos(pagador.cpf()));
 
-        // O boleto exige endereco completo do pagador; para os demais meios e opcional.
+        // Somente o boleto exige o endereco completo do pagador.
         if (solicitacao.metodo() == MetodoPagamento.BOLETO) {
             ObjectNode endereco = no.putObject("address");
             endereco.put("zip_code", apenasDigitos(pagador.cep()));
@@ -182,10 +171,6 @@ public class MercadoPagoGateway implements PaymentGateway {
         return no;
     }
 
-    /**
-     * O Mercado Pago recusa boletos com vencimento a mais de 29 dias da emissao, entao o
-     * vencimento do contrato e apenas o alvo: aqui ele e limitado a janela aceita.
-     */
     private ZonedDateTime vencimentoBoleto(LocalDate vencimento) {
         LocalDate hoje = LocalDate.now(ZONA_BRASIL);
         LocalDate minimo = hoje.plusDays(propriedades.getBoletoDiasMinimos());
@@ -195,6 +180,7 @@ public class MercadoPagoGateway implements PaymentGateway {
         if (data.isBefore(minimo)) {
             data = minimo;
         } else if (data.isAfter(maximo)) {
+            // O Mercado Pago recusa boleto com vencimento alem da janela aceita.
             log.info("Vencimento {} excede a janela aceita pelo Mercado Pago; boleto emitido para {}", data, maximo);
             data = maximo;
         }
@@ -208,8 +194,6 @@ public class MercadoPagoGateway implements PaymentGateway {
     private String apenasDigitos(String valor) {
         return valor == null ? null : valor.replaceAll("\\D", "");
     }
-
-    // --------------------------------------------------------------- resposta
 
     private RespostaCobranca traduzir(JsonNode resposta) {
         JsonNode dadosPix = resposta.path("point_of_interaction").path("transaction_data");
@@ -269,8 +253,6 @@ public class MercadoPagoGateway implements PaymentGateway {
         String texto = no.asText();
         return StringUtils.hasText(texto) ? texto : null;
     }
-
-    // ------------------------------------------------------------------ erros
 
     private JsonNode executar(Supplier<JsonNode> chamada) {
         try {

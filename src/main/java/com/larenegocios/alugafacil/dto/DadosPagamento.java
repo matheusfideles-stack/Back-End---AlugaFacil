@@ -16,22 +16,16 @@ public record DadosPagamento(
         MetodoPagamento metodo,
         StatusPagamento status,
 
-        /** Detalhe do provedor: explica por que um cartao foi recusado, por exemplo. */
         String statusDetalhe,
 
-        /** Pagina do Pix ou PDF do boleto. */
         String linkPagamento,
 
-        /** Codigo Pix copia e cola. */
         String pixCopiaECola,
 
-        /** PNG do QR Code Pix em base64, presente apenas na resposta da criacao da cobranca. */
         String pixQrCodeBase64,
 
-        /** Linha digitavel do boleto. */
         String linhaDigitavel,
 
-        /** URL do challenge 3DS, quando o cartao de debito exige autenticacao. */
         String urlAutenticacao3ds,
 
         LocalDateTime expiraEm,

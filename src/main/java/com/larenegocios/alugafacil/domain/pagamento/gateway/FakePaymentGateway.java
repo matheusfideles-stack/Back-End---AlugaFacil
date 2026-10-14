@@ -7,12 +7,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * Implementacao falsa usada em desenvolvimento/testes, sem chamar nenhuma API externa.
- * <p>
- * Ativa quando "pagamento.gateway.provider=fake". Para usar o Mercado Pago basta
- * trocar para "pagamento.gateway.provider=mercadopago" (ver {@code MercadoPagoGateway}).
- */
 @Service
 @ConditionalOnProperty(name = "pagamento.gateway.provider", havingValue = "fake", matchIfMissing = true)
 public class FakePaymentGateway implements PaymentGateway {
@@ -43,6 +37,5 @@ public class FakePaymentGateway implements PaymentGateway {
 
     @Override
     public void estornarCobranca(String idTransacaoGateway) {
-        // Sem efeito real: apenas registra a intencao de estorno.
     }
 }

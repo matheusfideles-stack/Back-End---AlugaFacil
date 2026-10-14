@@ -11,16 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.HexFormat;
 
-/**
- * Valida a assinatura HMAC-SHA256 que o Mercado Pago envia nos webhooks.
- * <p>
- * O provedor manda os cabecalhos {@code x-signature} (no formato {@code ts=...,v1=...})
- * e {@code x-request-id}. O manifesto assinado e
- * {@code id:<data.id>;request-id:<x-request-id>;ts:<ts>;}.
- * <p>
- * Se {@code pagamento.mercadopago.webhook-secret} estiver vazio a validacao e ignorada,
- * o que e util em desenvolvimento mas nunca deve ser feito em producao.
- */
 @Component
 public class MercadoPagoWebhookValidator {
 
@@ -33,6 +23,7 @@ public class MercadoPagoWebhookValidator {
     }
 
     public boolean assinaturaValida(String xSignature, String xRequestId, String dataId) {
+        // Sem webhook-secret a validacao e ignorada: serve so para desenvolvimento, nunca para producao.
         if (!StringUtils.hasText(propriedades.getWebhookSecret())) {
             log.warn("Webhook do Mercado Pago recebido sem validacao de assinatura "
                     + "(pagamento.mercadopago.webhook-secret nao configurado)");

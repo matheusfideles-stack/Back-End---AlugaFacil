@@ -5,10 +5,6 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * Limites por IP. Cada categoria aceita {@code requestsPerSecond} requisicoes por segundo
- * de forma sustentada, com picos de ate {@code burst} requisicoes seguidas.
- */
 @Component
 @ConfigurationProperties(prefix = "ratelimit")
 @Getter

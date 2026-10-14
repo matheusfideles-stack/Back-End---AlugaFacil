@@ -29,10 +29,6 @@ public class PagamentoController {
     @Value("${pagamento.gateway.provider:fake}")
     private String provider;
 
-    /**
-     * Dados que o frontend precisa para montar o formulario de cartao.
-     * A public key e publica por definicao: e ela que tokeniza o cartao no navegador.
-     */
     @GetMapping("/config")
     public ResponseEntity<DadosConfiguracaoPagamento> configuracao() {
         return ResponseEntity.ok(new DadosConfiguracaoPagamento(provider, mercadoPagoProperties.getPublicKey()));
@@ -58,10 +54,6 @@ public class PagamentoController {
         return ResponseEntity.ok(new DadosPagamento(pagamentoService.buscarPorId(id)));
     }
 
-    /**
-     * Forca a reconsulta do status no gateway. Util para Pix e boleto enquanto o
-     * webhook nao esta configurado (por exemplo, rodando em localhost).
-     */
     @PostMapping("/{id}/sincronizar")
     public ResponseEntity<DadosPagamento> sincronizar(@PathVariable Long id,
                                                       @AuthenticationPrincipal Usuario solicitante) {

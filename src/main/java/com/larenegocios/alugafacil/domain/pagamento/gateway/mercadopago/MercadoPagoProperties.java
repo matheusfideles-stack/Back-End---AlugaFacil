@@ -11,33 +11,23 @@ import org.springframework.stereotype.Component;
 @Setter
 public class MercadoPagoProperties {
 
-    /** Access token da aplicacao (TEST-... em sandbox, APP_USR-... em producao). */
     private String accessToken;
 
-    /** Public key, usada pelo frontend para tokenizar o cartao. Nunca tokenize cartao no backend. */
     private String publicKey;
 
     private String baseUrl = "https://api.mercadopago.com";
 
-    /** URL publica que recebe os webhooks. Deixe vazio em localhost: o Mercado Pago rejeita URLs nao publicas. */
+    // Deixe vazio em localhost: o Mercado Pago rejeita URLs nao publicas.
     private String notificationUrl;
 
-    /** Assinatura secreta do webhook (painel do Mercado Pago). Se vazia, a validacao e ignorada. */
     private String webhookSecret;
 
-    /** Tempo de vida do QR Code Pix, em minutos. */
     private int pixExpiracaoMinutos = 1440;
 
-    /** Prazo minimo do boleto quando o vencimento do contrato ja passou. */
     private int boletoDiasMinimos = 3;
 
-    /**
-     * Prazo maximo do boleto. O Mercado Pago recusa vencimentos a mais de 29 dias da
-     * emissao e conta a diferenca em horas; como o boleto vence as 23:59, 28 dias deixa
-     * a margem necessaria.
-     */
+    // O Mercado Pago recusa vencimento a mais de 29 dias e conta em horas; o boleto vence 23:59, entao 28.
     private int boletoDiasMaximos = 28;
 
-    /** Timeout de conexao e leitura das chamadas HTTP, em segundos. */
     private int timeoutSegundos = 20;
 }

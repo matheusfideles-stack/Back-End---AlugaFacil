@@ -17,11 +17,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-/**
- * Limita requisicoes por IP antes de qualquer autenticacao, para que tentativas de login
- * e de pagamento sejam barradas mesmo sem token. Atras de proxy/load balancer configure
- * {@code server.forward-headers-strategy=native}, senao todos os clientes parecem o mesmo IP.
- */
 @Component
 public class RateLimitFilter extends OncePerRequestFilter {
 
@@ -47,6 +42,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
         String caminho = request.getRequestURI().substring(request.getContextPath().length());
         CategoriaRateLimit categoria = CategoriaRateLimit.de(caminho);
+        // Atras de proxy configure server.forward-headers-strategy=native, senao todos os clientes parecem o mesmo IP.
         RateLimiter.Decisao decisao = rateLimiter.tentar(categoria, request.getRemoteAddr());
 
         if (decisao.permitida()) {
