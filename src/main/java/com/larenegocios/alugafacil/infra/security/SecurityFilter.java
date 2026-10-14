@@ -34,8 +34,7 @@ public class SecurityFilter extends OncePerRequestFilter {
         String tokenJWT = recuperarToken(request);
 
         if (tokenJWT != null) {
-            // Token invalido, expirado ou de usuario que nao existe mais: segue anonimo.
-            // Rotas publicas continuam funcionando e as protegidas respondem 401.
+            // Token invalido ou de usuario inexistente segue anonimo: rotas publicas funcionam e as protegidas devolvem 401.
             try {
                 String subject = tokenService.getSubject(tokenJWT);
                 usuarioRepository.findByEmail(subject).ifPresent(usuario -> {

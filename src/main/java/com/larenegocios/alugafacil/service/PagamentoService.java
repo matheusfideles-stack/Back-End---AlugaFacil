@@ -34,7 +34,6 @@ public class PagamentoService {
 
     private static final Logger log = LoggerFactory.getLogger(PagamentoService.class);
 
-    /** Uma cobranca nestes estados nao pode ser refeita: ja foi paga ou esta em captura. */
     private static final Set<StatusPagamento> ESTADOS_BLOQUEADOS =
             EnumSet.of(StatusPagamento.PAGO, StatusPagamento.PROCESSANDO);
 
@@ -76,11 +75,6 @@ public class PagamentoService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Pagamento nao encontrado"));
     }
 
-    /**
-     * Reconsulta o gateway e atualiza o status local. Pix e boleto sao confirmados de
-     * forma assincrona, entao o webhook e o caminho normal e este metodo e a rede de
-     * seguranca para quando a notificacao nao chega.
-     */
     @Transactional
     public Pagamento sincronizarComGateway(Long id, Usuario solicitante) {
         Pagamento pagamento = buscarPorId(id);
@@ -94,10 +88,6 @@ public class PagamentoService {
         return pagamento;
     }
 
-    /**
-     * Processa a notificacao do gateway. Nao recebe usuario: quem chama e o provedor.
-     * O status vem sempre de uma consulta a API, nunca do corpo da notificacao.
-     */
     @Transactional
     public void processarNotificacao(String idTransacaoGateway) {
         pagamentoRepository.findByIdTransacaoGateway(idTransacaoGateway).ifPresentOrElse(
@@ -134,8 +124,6 @@ public class PagamentoService {
         pagamento.setStatusDetalhe("refunded");
     }
 
-    // ---------------------------------------------------------------- apoio
-
     private void validarDadosDoMetodo(DadosSolicitacaoPagamento dados) {
         if (!dados.metodo().ehCartao()) {
             return;
@@ -153,12 +141,8 @@ public class PagamentoService {
         }
     }
 
-    /**
-     * Cria a cobranca do mes ou reaproveita a linha existente. A tabela tem uma restricao
-     * unica por (contrato, mes de referencia), entao uma tentativa recusada precisa reusar
-     * o mesmo registro - do contrario o locatario ficaria sem conseguir pagar o mes.
-     */
     private Pagamento prepararPagamento(DadosSolicitacaoPagamento dados, Contrato contrato) {
+        // Ha restricao unica por (contrato, mes): uma tentativa recusada reaproveita a linha em vez de criar outra.
         Pagamento pagamento = pagamentoRepository
                 .findByContratoIdAndReferenciaMes(contrato.getId(), dados.referenciaMes())
                 .orElseGet(Pagamento::new);
@@ -176,7 +160,6 @@ public class PagamentoService {
         pagamento.setStatus(StatusPagamento.PROCESSANDO);
         pagamento.setVencimento(calcularVencimento(dados.referenciaMes(), contrato.getDiaVencimento()));
 
-        // Limpa os dados da tentativa anterior antes de pedir uma nova cobranca.
         pagamento.setIdTransacaoGateway(null);
         pagamento.setStatusDetalhe(null);
         pagamento.setLinkPagamento(null);
@@ -185,7 +168,7 @@ public class PagamentoService {
         pagamento.setExpiraEm(null);
         pagamento.setPagoEm(null);
 
-        // save + flush para ter o id antes de chamar o gateway: ele vai como external_reference.
+        // saveAndFlush para ter o id antes de chamar o gateway: ele vai como external_reference.
         return pagamentoRepository.saveAndFlush(pagamento);
     }
 
@@ -194,7 +177,7 @@ public class PagamentoService {
         pagamento.setStatus(resposta.status());
         pagamento.setStatusDetalhe(resposta.statusDetalhe());
 
-        // A consulta de status nao repete os dados da cobranca; so sobrescreve o que veio preenchido.
+        // A consulta de status nao repete os dados da cobranca: so sobrescreve o que veio preenchido.
         if (resposta.linkPagamento() != null) {
             pagamento.setLinkPagamento(resposta.linkPagamento());
         }
@@ -226,7 +209,6 @@ public class PagamentoService {
         String nome = separador > 0 ? nomeCompleto.substring(0, separador) : nomeCompleto;
         String sobrenome = separador > 0 ? nomeCompleto.substring(separador + 1).trim() : nomeCompleto;
 
-        // Endereco do pagador: usamos o do imovel locado, unico endereco conhecido do locatario.
         return new Pagador(
                 nome,
                 sobrenome,
@@ -243,7 +225,7 @@ public class PagamentoService {
 
     private LocalDate calcularVencimento(String referenciaMes, Integer diaVencimento) {
         YearMonth mesReferencia = YearMonth.parse(referenciaMes);
-        // Meses curtos: um vencimento no dia 31 vira o ultimo dia do mes.
+        // Meses curtos: vencimento no dia 31 vira o ultimo dia do mes.
         return mesReferencia.atDay(Math.min(diaVencimento, mesReferencia.lengthOfMonth()));
     }
 }

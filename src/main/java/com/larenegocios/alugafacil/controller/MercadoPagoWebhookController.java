@@ -18,16 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 
-/**
- * Recebe as notificacoes de pagamento do Mercado Pago.
- * <p>
- * O endpoint e publico (o provedor nao envia JWT), entao a autenticidade vem da
- * assinatura HMAC no cabecalho {@code x-signature}. O corpo da notificacao nunca e
- * usado como fonte de verdade: dele so aproveitamos o id, e o status real e buscado
- * na API do Mercado Pago.
- * <p>
- * Responde 200 mesmo em casos que ignoramos, para que o provedor pare de reenviar.
- */
 @RestController
 @RequestMapping("/webhooks/mercadopago")
 public class MercadoPagoWebhookController {
@@ -62,10 +52,11 @@ public class MercadoPagoWebhookController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        // Do corpo so o id e aproveitado: o status real vem da consulta a API do Mercado Pago.
         try {
             pagamentoService.processarNotificacao(idTransacao);
         } catch (RuntimeException e) {
-            // Devolver 5xx faz o Mercado Pago reenviar a notificacao, que e o comportamento desejado.
+            // 5xx faz o Mercado Pago reenviar a notificacao, que e o comportamento desejado.
             log.error("Falha ao processar notificacao da transacao {}", idTransacao, e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }

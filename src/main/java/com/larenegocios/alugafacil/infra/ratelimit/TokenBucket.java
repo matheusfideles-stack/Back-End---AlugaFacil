@@ -2,7 +2,6 @@ package com.larenegocios.alugafacil.infra.ratelimit;
 
 import java.util.function.LongSupplier;
 
-/** Balde de fichas: reabastece {@code fichasPorSegundo} por segundo, ate o limite de {@code capacidade}. */
 class TokenBucket {
 
     private static final double NANOS_POR_SEGUNDO = 1_000_000_000d;
@@ -34,7 +33,6 @@ class TokenBucket {
         return false;
     }
 
-    /** Segundos ate haver uma ficha disponivel, arredondado para cima (minimo 1). */
     synchronized long segundosAteProximaFicha() {
         recarregar();
         if (fichas >= 1) {

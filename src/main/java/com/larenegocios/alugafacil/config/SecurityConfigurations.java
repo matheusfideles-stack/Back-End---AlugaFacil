@@ -39,17 +39,15 @@ public class SecurityConfigurations {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                // 401 = sem login valido; 403 = logado mas sem permissao.
                 .exceptionHandling(erros -> erros
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(authorize -> authorize
-                        // Sem isto todo erro (404, 400, 500) e redirecionado para /error, cai em
-                        // authenticated() e o cliente recebe um 403 vazio no lugar do erro real.
+                        // Sem isto todo erro (404, 400, 500) vira um 403 vazio: o dispatch para /error exige login.
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/docs/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        // Notificacoes do gateway: sem JWT, autenticadas pela assinatura HMAC do provedor
+                        // Sem JWT: o webhook e autenticado pela assinatura HMAC do provedor.
                         .requestMatchers(HttpMethod.POST, "/webhooks/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/imoveis", "/imoveis/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/imoveis").hasAnyRole("LOCADOR", "ADMIN")

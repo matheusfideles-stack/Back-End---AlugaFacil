@@ -14,10 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-/**
- * Reposicao de fichas de 0,01/s: dentro de um teste nenhuma ficha volta, entao o numero de
- * respostas liberadas e exatamente o burst. Cada teste usa um IP proprio para nao dividir balde.
- */
+// 0,01 ficha/s: dentro de um teste nenhuma ficha volta, entao o total liberado e o burst. Cada teste usa um IP proprio.
 @TestPropertySource(properties = {
         "ratelimit.autenticacao.requests-per-second=0.01",
         "ratelimit.autenticacao.burst=3",

@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-/** Base dos testes de integracao: sobe a aplicacao com H2 e gateway de pagamento falso. */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
@@ -45,7 +44,6 @@ public abstract class IntegracaoBase {
         return postJson(url, corpo).header("Authorization", "Bearer " + token);
     }
 
-    /** Usuario novo com email e CPF unicos, para que os testes nao colidam entre si. */
     protected Map<String, Object> dadosUsuario(String perfil) {
         long n = SEQUENCIA.incrementAndGet();
         Map<String, Object> dados = new LinkedHashMap<>();
@@ -71,7 +69,6 @@ public abstract class IntegracaoBase {
         return objectMapper.readTree(resposta).get("token").asText();
     }
 
-    /** Cadastra um usuario e devolve o token JWT dele. */
     protected String tokenDe(String perfil) throws Exception {
         return login(cadastrar(perfil));
     }
