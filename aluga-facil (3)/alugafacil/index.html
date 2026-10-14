@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aluga Fácil — Protótipo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">Aluga Fácil <small>validação de aluguel &amp; repasse</small></div>
+  <div class="role-switch" id="roleSwitch">
+    <button data-role="proprietario" class="active">Proprietário</button>
+    <button data-role="inquilino">Inquilino</button>
+    <button data-role="imobiliaria">Imobiliária</button>
+  </div>
+</div>
+
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <main id="main"></main>
+</div>
+
+<script src="js/state.js"></script>
+<script src="js/proprietario.js"></script>
+<script src="js/inquilino.js"></script>
+<script src="js/imobiliaria.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
