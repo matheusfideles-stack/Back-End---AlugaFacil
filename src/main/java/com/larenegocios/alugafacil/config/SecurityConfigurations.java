@@ -1,5 +1,6 @@
 package com.larenegocios.alugafacil.config;
 
+import com.larenegocios.alugafacil.infra.ratelimit.RateLimitFilter;
 import com.larenegocios.alugafacil.infra.security.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -11,8 +12,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -25,21 +30,33 @@ public class SecurityConfigurations {
     @Autowired
     private SecurityFilter securityFilter;
 
+    @Autowired
+    private RateLimitFilter rateLimitFilter;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // 401 = sem login valido; 403 = logado mas sem permissao.
+                .exceptionHandling(erros -> erros
+                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(authorize -> authorize
+                        // Sem isto todo erro (404, 400, 500) e redirecionado para /error, cai em
+                        // authenticated() e o cliente recebe um 403 vazio no lugar do erro real.
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/docs/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers("GET", "/imoveis/**").permitAll()
-                        .requestMatchers("POST", "/imoveis").hasAnyRole("LOCADOR", "ADMIN")
+                        // Notificacoes do gateway: sem JWT, autenticadas pela assinatura HMAC do provedor
+                        .requestMatchers(HttpMethod.POST, "/webhooks/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/imoveis", "/imoveis/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/imoveis").hasAnyRole("LOCADOR", "ADMIN")
                         .requestMatchers("/contratos/**").hasAnyRole("LOCADOR", "LOCATARIO", "ADMIN")
                         .requestMatchers("/pagamentos/**").hasAnyRole("LOCADOR", "LOCATARIO", "ADMIN")
                         .anyRequest().authenticated())
+                .addFilterAfter(rateLimitFilter, CorsFilter.class)
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

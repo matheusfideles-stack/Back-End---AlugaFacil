@@ -15,3 +15,24 @@ api:
     token:
       secret: chave-de-teste
       expiration-hours: 2
+
+# Folgado de proposito: os testes de integracao disparam muitas chamadas do mesmo IP.
+# Os testes que exercitam o limite sobrescrevem estes valores.
+ratelimit:
+  autenticacao:
+    requests-per-second: 1000
+    burst: 1000
+  pagamentos:
+    requests-per-second: 1000
+    burst: 1000
+  webhooks:
+    requests-per-second: 1000
+    burst: 1000
+  geral:
+    requests-per-second: 1000
+    burst: 1000
+
+pagamento:
+  gateway:
+    # Testes automatizados nunca devem chamar a API externa.
+    provider: fake

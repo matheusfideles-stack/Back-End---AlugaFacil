@@ -30,17 +30,23 @@ infra/exception -> exceções de domínio + @RestControllerAdvice
 config/       -> SecurityConfigurations (CORS, RBAC, sessão stateless)
 ```
 
-## Sistema de pagamento (sem API integrada)
+## Sistema de pagamento (Mercado Pago)
 
-O pagamento foi construído como uma **porta/adapter** (`PaymentGateway`), então nenhuma API de pagamento real está integrada — só o ponto de extensão pronto:
+O pagamento é uma **porta/adapter** (`PaymentGateway`) com duas implementações, escolhidas por
+configuração (`pagamento.gateway.provider`):
 
-- `PaymentGateway` (interface): `criarCobranca(...)` e `estornarCobranca(...)`.
-- `SolicitacaoCobranca` / `RespostaCobranca`: contratos de dados neutros, que servem para qualquer provedor.
-- `FakePaymentGateway`: implementação padrão ativa (`pagamento.gateway.provider=fake` no `application.yml`), simula uma cobrança aprovada na hora, sem chamar nada externo. É o que permite rodar e testar o fluxo completo de cobrança agora.
+- `mercadopago` (padrão) — integração real com a API `POST /v1/payments`, cobrindo **Pix, boleto,
+  cartão de crédito e cartão de débito**, com webhook de confirmação assíncrona e estorno.
+- `fake` — aprova tudo localmente, sem rede. É o que os testes automatizados usam.
 
-**Para plugar um provedor real (Mercado Pago, Stripe, PagSeguro etc.):**
-1. Crie uma classe nova implementando `PaymentGateway`, anotada com `@Service` e `@Primary` (ou removendo o `@Service` do `FakePaymentGateway`), chamando o SDK/API do provedor dentro de `criarCobranca`/`estornarCobranca`.
-2. Nenhuma outra camada muda — `PagamentoService`, controllers e o resto do domínio dependem só da interface.
+Dados de cartão nunca passam pelo backend: o frontend tokeniza o cartão com a public key
+(`GET /pagamentos/config`) e envia só o token.
+
+> **Configuração:** `MP_ACCESS_TOKEN` e `MP_PUBLIC_KEY` por variável de ambiente, ou
+> `src/main/resources/application-local.yml` (fora do git). Credenciais não vão para o repositório.
+
+📄 **Guia completo de uso e teste: [`docs/PAGAMENTOS.md`](docs/PAGAMENTOS.md)** — inclui cartões de
+teste, como simular o webhook e os erros mais comuns da API.
 
 ## Endpoints principais
 
@@ -53,8 +59,11 @@ O pagamento foi construído como uma **porta/adapter** (`PaymentGateway`), entã
 | GET | `/imoveis/meus` | LOCADOR |
 | POST | `/contratos` | LOCATARIO |
 | PUT | `/contratos/{id}/encerrar` | participantes do contrato |
+| GET | `/pagamentos/config` | autenticado |
 | POST | `/pagamentos` | participantes do contrato |
+| POST | `/pagamentos/{id}/sincronizar` | participantes do contrato |
 | POST | `/pagamentos/{id}/estornar` | participantes do contrato |
+| POST | `/webhooks/mercadopago` | público (assinatura HMAC) |
 
 Documentação interativa em `http://localhost:8080/docs` com a aplicação rodando.
 
@@ -62,7 +71,7 @@ Documentação interativa em `http://localhost:8080/docs` com a aplicação roda
 
 ```bash
 docker compose up -d db
-./mvnw spring-boot:run
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 ```
 
 Ou tudo via Docker:
@@ -71,19 +80,19 @@ Ou tudo via Docker:
 docker compose up --build
 ```
 
-Variáveis de ambiente (com defaults para dev em `application.yml`): `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`.
+Variáveis de ambiente (com defaults para dev em `application.yaml`): `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET`, `PAGAMENTO_PROVIDER`, `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `MP_NOTIFICATION_URL`, `MP_WEBHOOK_SECRET`. Copie `.env.example` para `.env` e preencha as credenciais do Mercado Pago antes de subir via Docker.
 
 ## Testes
 
 ```bash
-./mvnw test
+mvn test
 ```
 
 Usa H2 em memória (perfil `test`) — não precisa de Postgres rodando para os testes.
 
 ## Próximos passos sugeridos
 
-- Implementação real de `PaymentGateway` (ex.: Mercado Pago).
 - Job agendado para gerar cobranças automaticamente todo mês a partir dos contratos ativos.
-- Webhook para receber confirmação assíncrona de pagamento do gateway real.
+- Testes do `MercadoPagoGateway` com servidor HTTP stub (WireMock/MockWebServer).
 - Testes unitários de service (JUnit 5 + Mockito) e de integração de controller (MockMvc).
+- Notificar locador e locatário quando o pagamento é confirmado.

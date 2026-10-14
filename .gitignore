@@ -1,0 +1,21 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+### Credenciais locais - nunca versionar ###
+.env
+src/main/resources/application-local.yml
+src/main/resources/application-secrets.yml
+
+### IDE ###
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/shelf/
+*.iml
+.vscode/
+
+### SO ###
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
