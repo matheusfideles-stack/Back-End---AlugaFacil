@@ -1,10 +1,11 @@
 :root {
-  --azul: #04203f;
-  --ouro: #f5a800;
-  --fundo: #f8fafc;
-  --borda: #e5e7eb;
-  --texto: #1f2937;
-  --suave: #6b7280
+  --azul: #1e3a5f;
+  --ouro: #e0a43a;
+  --ouro-texto: #a8690f;
+  --fundo: #f5f3ef;
+  --borda: #e4e0d8;
+  --texto: #2d3748;
+  --suave: #5f6673
 }
 
 * {
@@ -13,11 +14,15 @@
   padding: 0
 }
 
+html {
+  font-size: 112.5%
+}
+
 body {
   font-family: 'Plus Jakarta Sans', Arial, sans-serif;
   color: var(--texto);
   background: var(--fundo);
-  line-height: 1.5
+  line-height: 1.65
 }
 
 a {
@@ -64,7 +69,7 @@ a {
 }
 
 .menu a.ativo {
-  color: var(--ouro);
+  color: var(--ouro-texto);
   font-weight: 700
 }
 
@@ -146,17 +151,17 @@ a {
 .numero {
   font-size: 1.8rem;
   font-weight: 800;
-  color: var(--ouro)
+  color: var(--ouro-texto)
 }
 
 .rotulo {
-  font-size: .75rem;
+  font-size: .85rem;
   color: var(--suave)
 }
 
 .foto {
   height: 150px;
-  background: linear-gradient(135deg, #8fb4d4, #1f4e79)
+  background: linear-gradient(135deg, #b9cfe0, #5b7fa3)
 }
 
 .imovel {
@@ -169,20 +174,20 @@ a {
 }
 
 .preco {
-  color: var(--ouro);
+  color: var(--ouro-texto);
   font-weight: 800;
   font-size: 1.1rem;
   margin: 4px 0
 }
 
 .info {
-  font-size: .75rem;
+  font-size: .85rem;
   color: var(--suave)
 }
 
 .selo {
   display: inline-block;
-  font-size: .7rem;
+  font-size: .8rem;
   padding: 2px 8px;
   border-radius: 99px;
   background: #dcfce7;
@@ -207,7 +212,7 @@ a {
 
 label {
   display: block;
-  font-size: .75rem;
+  font-size: .85rem;
   font-weight: 600;
   margin: 12px 0 4px
 }
@@ -249,7 +254,7 @@ textarea {
 }
 
 .abas a.ativo {
-  color: var(--ouro);
+  color: var(--ouro-texto);
   border-bottom: 2px solid var(--ouro);
   font-weight: 600
 }
@@ -286,7 +291,7 @@ textarea {
 }
 
 .valor {
-  color: var(--ouro);
+  color: var(--ouro-texto);
   font-weight: 700;
   text-align: right
 }
@@ -366,7 +371,7 @@ details p {
 .rodape {
   text-align: center;
   padding: 20px;
-  font-size: .75rem;
+  font-size: .85rem;
   color: var(--suave);
   background: #fff
 }
@@ -421,7 +426,7 @@ details p {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: .75rem;
+  font-size: .85rem;
   margin: 12px 0
 }
 
@@ -438,7 +443,7 @@ details p {
 }
 
 .opcoes a {
-  color: var(--ouro)
+  color: var(--ouro-texto)
 }
 
 @media (max-width:768px) {
@@ -472,7 +477,7 @@ details p {
     width: 100%;
     justify-content: space-between;
     gap: 10px;
-    font-size: .78rem
+    font-size: .85rem
   }
 
   .lado-azul {
@@ -507,7 +512,7 @@ details p {
 }
 
 .tipos input:checked+label {
-  color: var(--ouro);
+  color: var(--ouro-texto);
   border-bottom-color: var(--ouro);
   font-weight: 600
 }
@@ -549,7 +554,7 @@ details p {
 
 .metodo:has(input:checked) {
   border-color: var(--ouro);
-  background: #fffbf0;
+  background: #fdf8ee;
   box-shadow: 0 0 0 3px rgba(245, 168, 0, .25)
 }
 
@@ -565,7 +570,7 @@ details p {
 
 .linha .info {
   color: var(--texto);
-  font-size: .8rem
+  font-size: .88rem
 }
 
 .linha .valor {
@@ -585,7 +590,7 @@ details p {
 }
 
 .lateral p {
-  font-size: .7rem;
+  font-size: .8rem;
   color: var(--suave);
   padding: 0 10px 8px
 }
@@ -599,8 +604,8 @@ details p {
 }
 
 .lateral a.ativo {
-  background: #fff3d6;
-  color: var(--ouro);
+  background: #faf0dc;
+  color: var(--ouro-texto);
   font-weight: 700
 }
 
@@ -633,7 +638,7 @@ details p {
 }
 
 .grafico .area {
-  fill: #fdeccb
+  fill: #f6ead3
 }
 
 .grafico .curva {
@@ -651,7 +656,7 @@ details p {
 }
 
 .grafico text {
-  font-size: 11px;
+  font-size: 13px;
   fill: var(--suave)
 }
 
@@ -670,7 +675,7 @@ details p {
 }
 
 .destaque {
-  color: var(--ouro);
+  color: var(--ouro-texto);
   font-weight: 700
 }
 
