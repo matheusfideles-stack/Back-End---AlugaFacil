@@ -1,33 +1,58 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aluga Fácil — Protótipo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Início | AlugaFácil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
-
-<div class="topbar">
-  <div class="brand">Aluga Fácil <small>validação de aluguel &amp; repasse</small></div>
-  <div class="role-switch" id="roleSwitch">
-    <button data-role="proprietario" class="active">Proprietário</button>
-    <button data-role="inquilino">Inquilino</button>
-    <button data-role="imobiliaria">Imobiliária</button>
-  </div>
-</div>
-
-<div class="layout">
-  <div class="sidebar" id="sidebar"></div>
-  <main id="main"></main>
-</div>
-
-<script src="js/state.js"></script>
-<script src="js/proprietario.js"></script>
-<script src="js/inquilino.js"></script>
-<script src="js/imobiliaria.js"></script>
-<script src="js/main.js"></script>
+  <header class="topo">
+    <div class="topo-int">
+      <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
+      <a class="btn" href="login.html">Entrar</a>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div>
+        <p class="info">Lar &amp; Negócios</p>
+        <h1>Olá! Bem-vindo à Aluga<span>Fácil</span></h1>
+        <p class="sub">Gerenciamento completo de aluguéis e condomínios. Simplifique sua vida com nossa plataforma
+          intuitiva e segura.</p>
+        <div class="acoes"><a class="btn btn-ouro" href="login.html">Entrar na Plataforma</a><a class="btn"
+            href="login.html">Criar Conta</a></div>
+      </div>
+      <div class="foto"></div>
+    </section>
+    <section class="busca">
+      <form class="cartao filtros">
+        <div><label for="local">Localização</label><input id="local" type="text"
+            placeholder="Digite a cidade ou bairro"></div>
+        <div><label for="tipo">Tipo de imóvel</label><select id="tipo">
+            <option>Todos</option>
+            <option>Casa</option>
+            <option>Apartamento</option>
+            <option>Studio</option>
+          </select></div>
+        <div><label for="preco">Preço máximo</label><input id="preco" type="text" placeholder="R$ 0"></div>
+        <button class="btn btn-ouro" type="button">Buscar</button>
+      </form>
+    </section>
+    <section class="faixa">
+      <h2>Pronto para começar?</h2>
+      <p>Junte-se a milhares de usuários que já confiam na Lar &amp; Negócios para gerenciar seus imóveis.</p>
+      <div class="acoes" style="justify-content:center"><a class="btn btn-ouro" href="login.html">Criar Conta
+          Agora</a><a class="btn btn-claro" href="ajuda.html">Fale Conosco</a></div>
+    </section>
+  </main>
+  <footer class="rodape">© 2024 AlugaFácil. Todos os direitos reservados. | Privacidade | Termos</footer>
 </body>
+
 </html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuda | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="topo">
+        <div class="topo-int">
+            <a class="logo" href="cliente.html">Aluga<span>Fácil</span></a>
+            <nav class="menu"><a href="cliente.html">Início</a><a href="buscar.html">Buscar Imóvel</a><a
+                    href="alugueis.html">Meus Aluguéis</a><a href="pagamentos.html">Pagamentos</a><a href="ajuda.html"
+                    class="ativo">Ajuda</a></nav>
+            <a class="btn" href="sair.html">Sair</a>
+        </div>
+    </header>
+    <main class="container">
+        <h1 class="titulo">Central de Ajuda</h1>
+        <section class="grade g3" style="margin-top:20px">
+            <div class="cartao central"><strong>Chat ao Vivo</strong>
+                <p class="info">Fale com um especialista em tempo real (8h às 18h)</p>
+            </div>
+            <div class="cartao central"><strong>Email</strong>
+                <p class="info">Envie sua dúvida e responderemos em 24h</p>
+            </div>
+            <div class="cartao central"><strong>Telefone</strong>
+                <p class="info">Ligue para (31) 3000-0000 de segunda a sexta</p>
+            </div>
+        </section>
+        <section class="cartao" style="margin-top:24px">
+            <h2 class="secao" style="margin-top:0">Perguntas Frequentes</h2>
+            <details>
+                <summary>Como funciona o processo de aluguel?</summary>
+                <p>Você escolhe o imóvel, envia seus dados e assina o contrato digitalmente.</p>
+            </details>
+            <details>
+                <summary>Quais são os métodos de pagamento aceitos?</summary>
+                <p>Aceitamos PIX, boleto, débito e crédito em até 12x.</p>
+            </details>
+            <details>
+                <summary>Posso cancelar meu aluguel?</summary>
+                <p>Sim, seguindo as condições previstas no seu contrato.</p>
+            </details>
+            <details>
+                <summary>Como recupero minha senha?</summary>
+                <p>Na tela de login, clique em "Esqueceu a senha?" e siga as instruções.</p>
+            </details>
+        </section>
+        <form class="cartao" style="margin-top:24px">
+            <h2 class="secao" style="margin-top:0">Não encontrou o que procurava?</h2>
+            <label for="nome">Nome Completo</label><input id="nome" type="text" placeholder="Seu nome">
+            <label for="mail">Email</label><input id="mail" type="email" placeholder="seu@email.com">
+            <label for="assunto">Assunto</label><input id="assunto" type="text" placeholder="Qual é a sua dúvida?">
+            <label for="msg">Mensagem</label><textarea id="msg" rows="4"
+                placeholder="Descreva o problema com o máximo de detalhes"></textarea>
+            <button class="btn btn-ouro" type="button" style="margin-top:16px">Enviar Mensagem</button>
+        </form>
+    </main>
+</body>
+
+</html>

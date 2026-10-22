@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Imóveis | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="topo">
+        <div class="topo-int">
+            <a class="logo" href="proprietario.html">Aluga<span>Fácil</span></a>
+            <a class="info" href="proprietario.html" style="text-decoration:underline">Bem-vindo, Proprietário!</a>
+        </div>
+    </header>
+    <div class="painel">
+        <aside class="lateral">
+            <p>Menu</p>
+            <nav><a href="proprietario.html">Visão Geral</a><a href="meus-imoveis.html" class="ativo">Meus Imóveis</a><a
+                    href="financeiro.html">Financeiro</a><a href="inquilinos.html">Inquilinos</a><a
+                    href="sair.html">Sair</a></nav>
+        </aside>
+        <main class="conteudo">
+            <div class="cabeca">
+                <h1 class="titulo">Meus Imóveis</h1><a class="btn btn-ouro" href="#">+ Novo Imóvel</a>
+            </div>
+            <form class="cartao filtros" style="grid-template-columns:1fr 1fr 2fr">
+                <div><label for="st">Status</label><select id="st">
+                        <option>Todos</option>
+                        <option>Alugado</option>
+                        <option>Disponível</option>
+                    </select></div>
+                <div><label for="ci">Cidade</label><select id="ci">
+                        <option>Todas</option>
+                        <option>Patos de Minas</option>
+                        <option>Belo Horizonte</option>
+                    </select></div>
+                <div><label for="bu">Buscar</label><input id="bu" type="text" placeholder="Nome do imóvel ou endereço">
+                </div>
+            </form>
+            <section class="grade g4" style="margin-top:20px">
+                <article class="cartao imovel">
+                    <div class="foto"></div>
+                    <div class="corpo">
+                        <div class="stat"><strong>Casa - Bairro Alvorada</strong><span class="selo"
+                                style="margin:0">Alugado</span></div>
+                        <p class="info">3 quartos · 2 banheiros · 120 m²</p>
+                        <p class="preco">R$ 2.500/mês</p>
+                        <p class="info">Inquilino: João Silva</p>
+                        <div class="acoes"><a class="btn" href="#">Ver</a><a class="btn btn-ouro" href="#">Editar</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="cartao imovel">
+                    <div class="foto"></div>
+                    <div class="corpo">
+                        <div class="stat"><strong>Casa - Bairro Novo</strong><span class="selo"
+                                style="margin:0">Alugado</span></div>
+                        <p class="info">3 quartos · 2 banheiros · 140 m²</p>
+                        <p class="preco">R$ 3.200/mês</p>
+                        <p class="info">Inquilino: Maria Costa</p>
+                        <div class="acoes"><a class="btn" href="#">Ver</a><a class="btn btn-ouro" href="#">Editar</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="cartao imovel">
+                    <div class="foto"></div>
+                    <div class="corpo">
+                        <div class="stat"><strong>Studio - Centro</strong><span class="selo"
+                                style="margin:0">Alugado</span></div>
+                        <p class="info">1 quarto · 1 banheiro · 35 m²</p>
+                        <p class="preco">R$ 1.800/mês</p>
+                        <p class="info">Inquilino: Pedro Oliveira</p>
+                        <div class="acoes"><a class="btn" href="#">Ver</a><a class="btn btn-ouro" href="#">Editar</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="cartao imovel">
+                    <div class="foto"></div>
+                    <div class="corpo">
+                        <div class="stat"><strong>Casa - Bairro Jardim Europa</strong><span class="selo alerta"
+                                style="margin:0">Disponível</span></div>
+                        <p class="info">4 quartos · 3 banheiros · 220 m²</p>
+                        <p class="preco">R$ 2.600/mês</p>
+                        <p class="info">Sem inquilino no momento</p>
+                        <div class="acoes"><a class="btn" href="#">Ver</a><a class="btn btn-ouro" href="#">Editar</a>
+                        </div>
+                    </div>
+                </article>
+            </section>
+        </main>
+    </div>
+</body>
+
+</html>
