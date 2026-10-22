@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamentos | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="topo">
+        <div class="topo-int">
+            <a class="logo" href="cliente.html">Aluga<span>Fácil</span></a>
+            <nav class="menu"><a href="cliente.html">Início</a><a href="buscar.html">Buscar Imóvel</a><a
+                    href="alugueis.html">Meus Aluguéis</a><a href="pagamentos.html" class="ativo">Pagamentos</a><a
+                    href="ajuda.html">Ajuda</a></nav>
+            <a class="btn" href="sair.html">Sair</a>
+        </div>
+    </header>
+    <main class="container">
+        <h1 class="titulo">Métodos de Pagamento</h1>
+        <section class="grade g2" style="margin-top:20px">
+            <label class="cartao metodo"><input type="radio" name="metodo" value="pix"
+                    checked><strong>PIX</strong><span>Transferência instantânea 24/7</span></label>
+            <label class="cartao metodo"><input type="radio" name="metodo"
+                    value="boleto"><strong>Boleto</strong><span>Código de barras para pagamento em qualquer
+                    lugar</span></label>
+            <label class="cartao metodo"><input type="radio" name="metodo"
+                    value="debito"><strong>Débito</strong><span>Débito direto da sua conta bancária</span></label>
+            <label class="cartao metodo"><input type="radio" name="metodo"
+                    value="credito"><strong>Crédito</strong><span>Parcelamento disponível em até 12x</span></label>
+        </section>
+        <section class="cartao" style="margin-top:24px">
+            <h2 class="secao" style="margin-top:0">Histórico de Pagamentos</h2>
+            <div class="linha">
+                <div><strong>Aluguel - Apartamento Centro</strong>
+                    <p class="info">Vencimento: 10/Out · PIX</p>
+                </div>
+                <div>
+                    <p class="valor">R$ 2.500</p><span class="selo">Pago</span>
+                </div>
+            </div>
+            <div class="linha">
+                <div><strong>Aluguel - Apartamento Centro</strong>
+                    <p class="info">Vencimento: 10/Set · Boleto</p>
+                </div>
+                <div>
+                    <p class="valor">R$ 2.500</p><span class="selo">Pago</span>
+                </div>
+            </div>
+            <div class="linha">
+                <div><strong>Aluguel - Casa Bairro</strong>
+                    <p class="info">Vencimento: 10/Ago · Crédito</p>
+                </div>
+                <div>
+                    <p class="valor">R$ 3.200</p><span class="selo">Pago</span>
+                </div>
+            </div>
+            <div class="linha">
+                <div><strong>Aluguel - Studio Centro</strong>
+                    <p class="info">Vencimento: 10/Jul · PIX</p>
+                </div>
+                <div>
+                    <p class="valor">R$ 1.800</p><span class="selo">Pago</span>
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+
+</html>

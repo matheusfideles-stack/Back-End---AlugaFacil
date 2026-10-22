@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="login">
+        <section class="lado-azul">
+            <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
+            <h2>Bem-vindo de volta!</h2>
+            <p class="info" style="color:#cbd5e1">Acesse sua conta para continuar gerenciando seus imóveis.</p>
+        </section>
+        <section class="lado-form">
+            <form action="cliente.html">
+                <h1 class="titulo">Login</h1>
+                <p class="sub">Escolha seu tipo de conta para entrar</p>
+                <div class="abas tipos">
+                    <input type="radio" name="tipo" id="t-cliente" value="cliente" checked>
+                    <label for="t-cliente">Cliente</label>
+                    <input type="radio" name="tipo" id="t-proprietario" value="proprietario">
+                    <label for="t-proprietario">Proprietário</label>
+                </div>
+                <label for="cpf">Email ou CPF</label>
+                <input id="cpf" type="text" placeholder="seuemail@gmail.com ou 000.000.000-00">
+                <label for="senha">Senha</label>
+                <input id="senha" type="password" placeholder="Minha chave secreta">
+                <div class="opcoes"><label><input type="checkbox"> Lembrar-me</label><a href="ajuda.html">Esqueceu a
+                        senha?</a></div>
+                <button class="btn btn-ouro btn-cheio" type="submit">Entrar Agora</button>
+                <p class="info central" style="margin-top:12px">Não tem conta? <a href="index.html"
+                        style="color:var(--ouro)">Cadastre-se aqui</a></p>
+            </form>
+        </section>
+    </main>
