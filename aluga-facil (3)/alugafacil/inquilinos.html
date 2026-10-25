@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body>
+<body data-pagina="inquilinos">
     <header class="topo">
-        <div class="topo-int">
+        <div class="topo-int largo">
             <a class="logo" href="proprietario.html">Aluga<span>Fácil</span></a>
             <a class="info" href="proprietario.html" style="text-decoration:underline">Bem-vindo, Proprietário!</a>
         </div>
@@ -24,66 +24,14 @@
             <p>Menu</p>
             <nav><a href="proprietario.html">Visão Geral</a><a href="meus-imoveis.html">Meus Imóveis</a><a
                     href="financeiro.html">Financeiro</a><a href="inquilinos.html" class="ativo">Inquilinos</a><a
-                    href="sair.html">Sair</a></nav>
+                    href="ajuda.html">Ajuda</a><a href="sair.html">Sair</a></nav>
         </aside>
         <main class="conteudo">
             <h1 class="titulo">Meus Inquilinos</h1>
-            <section class="cartao" style="margin-top:20px">
-                <div class="tab-linha inq">
-                    <div class="avatar">JS</div>
-                    <div><strong>João Silva</strong>
-                        <p class="info">joao.silva@email.com · (31) 99999-0000</p>
-                    </div>
-                    <div><strong>Apto. 202 - Centro</strong>
-                        <p class="info">Desde Jan/2024</p>
-                    </div>
-                    <div>
-                        <p class="info">CPF: 123.456.789-00</p>
-                        <p class="info">Profissão: Engenheiro</p>
-                    </div><span class="selo">✓ Em Dia</span><a class="btn" href="inquilinos.html">Ver</a>
-                </div>
-                <div class="tab-linha inq">
-                    <div class="avatar">MC</div>
-                    <div><strong>Maria Costa</strong>
-                        <p class="info">maria.costa@email.com · (31) 99999-0001</p>
-                    </div>
-                    <div><strong>Casa - Bairro Novo</strong>
-                        <p class="info">Desde Mar/2023</p>
-                    </div>
-                    <div>
-                        <p class="info">CPF: 234.567.890-11</p>
-                        <p class="info">Profissão: Professora</p>
-                    </div><span class="selo">✓ Em Dia</span><a class="btn" href="inquilinos.html">Ver</a>
-                </div>
-                <div class="tab-linha inq">
-                    <div class="avatar">PO</div>
-                    <div><strong>Pedro Oliveira</strong>
-                        <p class="info">pedro.oliveira@email.com · (31) 99999-0002</p>
-                    </div>
-                    <div><strong>Studio - Centro</strong>
-                        <p class="info">Desde Jul/2024</p>
-                    </div>
-                    <div>
-                        <p class="info">CPF: 345.678.901-22</p>
-                        <p class="info">Profissão: Designer</p>
-                    </div><span class="selo">✓ Em Dia</span><a class="btn" href="inquilinos.html">Ver</a>
-                </div>
-                <div class="tab-linha inq">
-                    <div class="avatar">AB</div>
-                    <div><strong>Ana Batista</strong>
-                        <p class="info">ana.batista@email.com · (31) 99999-0003</p>
-                    </div>
-                    <div><strong>Apto. - Vila Nova</strong>
-                        <p class="info">Desde Set/2024</p>
-                    </div>
-                    <div>
-                        <p class="info">CPF: 456.789.012-33</p>
-                        <p class="info">Profissão: Advogada</p>
-                    </div><span class="selo">✓ Em Dia</span><a class="btn" href="inquilinos.html">Ver</a>
-                </div>
-            </section>
+            <section class="cartao" id="lista" style="margin-top:20px"></section>
         </main>
     </div>
+    <script src="js/proprietario.js"></script>
 </body>
 
 </html>
