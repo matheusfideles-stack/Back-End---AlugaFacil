@@ -16,28 +16,57 @@
     <main class="login">
         <section class="lado-azul">
             <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
-            <h2>Bem-vindo de volta!</h2>
-            <p class="info" style="color:#cbd5e1">Acesse sua conta para continuar gerenciando seus imóveis.</p>
+            <h2 id="titulo-lado">Bem-vindo de volta!</h2>
+            <p class="info" id="sub-lado" style="color:#cbd5e1">Acesse sua conta para continuar gerenciando seus imóveis.</p>
         </section>
         <section class="lado-form">
-            <form action="cliente.html">
-                <h1 class="titulo">Login</h1>
-                <p class="sub">Escolha seu tipo de conta para entrar</p>
-                <div class="abas tipos">
-                    <input type="radio" name="tipo" id="t-cliente" value="cliente" checked>
-                    <label for="t-cliente">Cliente</label>
-                    <input type="radio" name="tipo" id="t-proprietario" value="proprietario">
-                    <label for="t-proprietario">Proprietário</label>
+            <div style="width:100%;max-width:340px">
+                <div class="abas">
+                    <a href="#entrar" data-aba="entrar" class="ativo">Entrar</a>
+                    <a href="#cadastro" data-aba="cadastro">Criar conta</a>
                 </div>
-                <label for="cpf">Email ou CPF</label>
-                <input id="cpf" type="text" placeholder="seuemail@gmail.com ou 000.000.000-00">
-                <label for="senha">Senha</label>
-                <input id="senha" type="password" placeholder="Minha chave secreta">
-                <div class="opcoes"><label><input type="checkbox"> Lembrar-me</label><a href="ajuda.html">Esqueceu a
-                        senha?</a></div>
-                <button class="btn btn-ouro btn-cheio" type="submit">Entrar Agora</button>
-                <p class="info central" style="margin-top:12px">Não tem conta? <a href="index.html"
-                        style="color:var(--ouro)">Cadastre-se aqui</a></p>
-            </form>
+
+                <p class="aviso" id="aviso" hidden></p>
+
+                <form id="form-entrar" novalidate>
+                    <h1 class="titulo">Entrar</h1>
+                    <p class="sub">Acesse com seu email e senha</p>
+                    <label for="email">Email</label>
+                    <input id="email" type="email" required placeholder="seuemail@gmail.com" autocomplete="email">
+                    <label for="senha">Senha</label>
+                    <input id="senha" type="password" required placeholder="Minha chave secreta"
+                        autocomplete="current-password">
+                    <div class="opcoes"><label><input type="checkbox"> Lembrar-me</label><a href="ajuda.html">Esqueceu a
+                            senha?</a></div>
+                    <button class="btn btn-ouro btn-cheio" type="submit">Entrar Agora</button>
+                    <p class="info central" style="margin-top:12px">Não tem conta? <a href="#cadastro"
+                            data-trocar-aba="cadastro" style="color:var(--ouro-texto)">Cadastre-se aqui</a></p>
+                </form>
+
+                <form id="form-cadastro" novalidate hidden>
+                    <h1 class="titulo">Criar conta</h1>
+                    <p class="sub">Preencha seus dados para começar</p>
+                    <label for="nome">Nome completo</label>
+                    <input id="nome" name="nome" type="text" required autocomplete="name">
+                    <label for="cadastro-email">Email</label>
+                    <input id="cadastro-email" name="email" type="email" required autocomplete="email"
+                        placeholder="seuemail@gmail.com">
+                    <label for="cpf">CPF</label>
+                    <input id="cpf" name="cpf" type="text" required maxlength="14" placeholder="000.000.000-00">
+                    <label for="telefone">Telefone <span class="info">(opcional)</span></label>
+                    <input id="telefone" name="telefone" type="tel" maxlength="20" placeholder="(34) 99999-9999">
+                    <label for="cadastro-senha">Senha</label>
+                    <input id="cadastro-senha" name="senha" type="password" required minlength="8"
+                        placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+                    <button class="btn btn-ouro btn-cheio" type="submit" style="margin-top:16px">Criar conta</button>
+                    <p class="info central" style="margin-top:12px">Já tem conta? <a href="#entrar"
+                            data-trocar-aba="entrar" style="color:var(--ouro-texto)">Entrar</a></p>
+                </form>
+            </div>
         </section>
     </main>
+    <script src="js/api.js"></script>
+    <script src="js/login.js"></script>
+</body>
+
+</html>
