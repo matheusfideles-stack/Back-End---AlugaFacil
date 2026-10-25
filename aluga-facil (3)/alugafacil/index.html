@@ -13,46 +13,129 @@
 </head>
 
 <body>
-  <header class="topo">
+  <header class="topo fixo">
     <div class="topo-int">
       <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
-      <a class="btn" href="login.html">Entrar</a>
+      <nav class="menu"><a href="#como-funciona">Como funciona</a><a href="#imoveis">Imóveis</a><a
+          href="ajuda.html">Ajuda</a></nav>
+      <div class="topo-acoes"><a class="btn" href="login.html">Entrar</a><a class="btn btn-ouro"
+          href="cadastro.html">Criar Conta</a></div>
     </div>
   </header>
   <main>
-    <section class="hero">
-      <div>
-        <p class="info">Lar &amp; Negócios</p>
-        <h1>Olá! Bem-vindo à Aluga<span>Fácil</span></h1>
-        <p class="sub">Gerenciamento completo de aluguéis e condomínios. Simplifique sua vida com nossa plataforma
-          intuitiva e segura.</p>
-        <div class="acoes"><a class="btn btn-ouro" href="login.html">Entrar na Plataforma</a><a class="btn"
-            href="login.html">Criar Conta</a></div>
+    <div class="hero-fundo">
+      <section class="hero">
+        <div>
+          <p class="info">Lar &amp; Negócios</p>
+          <h1>Olá! Bem-vindo à Aluga<span>Fácil</span></h1>
+          <p class="sub">Gerenciamento completo de aluguéis e condomínios. Simplifique sua vida com nossa plataforma
+            intuitiva e segura.</p>
+          <div class="acoes"><a class="btn btn-ouro" href="login.html">Entrar na Plataforma</a><a class="btn"
+              href="cadastro.html">Criar Conta</a></div>
+        </div>
+        <div class="foto"></div>
+      </section>
+    </div>
+    <section class="secao-larga" id="como-funciona">
+      <h2 class="titulo-centro">Como funciona</h2>
+      <p class="sub-centro">Em três passos você começa a alugar ou a gerenciar seus imóveis.</p>
+      <div class="grade g3">
+        <div class="cartao central">
+          <div class="num">1</div><strong>Crie sua conta</strong>
+          <p class="info">Cadastre-se como cliente ou proprietário em poucos minutos.</p>
+        </div>
+        <div class="cartao central">
+          <div class="num">2</div><strong>Escolha o imóvel</strong>
+          <p class="info">Filtre por local, preço e quartos e encontre o ideal.</p>
+        </div>
+        <div class="cartao central">
+          <div class="num">3</div><strong>Pague online</strong>
+          <p class="info">PIX, boleto, débito ou crédito, tudo pela plataforma.</p>
+        </div>
       </div>
-      <div class="foto"></div>
     </section>
-    <section class="busca">
+    <section class="secao-larga" id="imoveis" style="padding-top:0">
+      <h2 class="titulo-centro">Imóveis disponíveis</h2>
+      <p class="sub-centro">Encontre o imóvel perfeito para você.</p>
       <form class="cartao filtros">
-        <div><label for="local">Localização</label><input id="local" type="text"
-            placeholder="Digite a cidade ou bairro"></div>
-        <div><label for="tipo">Tipo de imóvel</label><select id="tipo">
-            <option>Todos</option>
-            <option>Casa</option>
-            <option>Apartamento</option>
-            <option>Studio</option>
+        <div><label for="loc">Localização</label><input id="loc" type="text" placeholder="Digite a cidade ou bairro">
+        </div>
+        <div><label for="max">Preço máximo</label><input id="max" type="text" placeholder="R$ 0"></div>
+        <div><label for="qt">Quartos</label><select id="qt">
+            <option>Qualquer</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3+</option>
           </select></div>
-        <div><label for="preco">Preço máximo</label><input id="preco" type="text" placeholder="R$ 0"></div>
-        <button class="btn btn-ouro" type="button">Buscar</button>
+        <button class="btn btn-ouro" type="button">Filtrar</button>
       </form>
+      <p class="info" style="margin:16px 0">Mostrando 6 imóveis disponíveis</p>
+      <div class="grade g3">
+        <article class="cartao imovel">
+          <div class="foto"></div>
+          <div class="corpo"><strong>Casa - Copacabana</strong>
+            <p class="preco">R$ 3.200/mês</p>
+            <p class="info">4 quartos · 3 banheiros · 220 m²</p>
+            <div class="acoes"><a class="btn btn-ouro" href="login.html">Alugar Agora</a><a class="btn"
+                href="login.html" aria-label="Favoritar">♡</a></div>
+          </div>
+        </article>
+        <article class="cartao imovel">
+          <div class="foto"></div>
+          <div class="corpo"><strong>Apto. - Vila Nova</strong>
+            <p class="preco">R$ 2.800/mês</p>
+            <p class="info">3 quartos · 2 banheiros · 95 m²</p>
+            <div class="acoes"><a class="btn btn-ouro" href="login.html">Alugar Agora</a><a class="btn"
+                href="login.html" aria-label="Favoritar">♡</a></div>
+          </div>
+        </article>
+        <article class="cartao imovel">
+          <div class="foto"></div>
+          <div class="corpo"><strong>Studio - Próximo Centro</strong>
+            <p class="preco">R$ 1.800/mês</p>
+            <p class="info">1 quarto · 1 banheiro · 35 m²</p>
+            <div class="acoes"><a class="btn btn-ouro" href="login.html">Alugar Agora</a><a class="btn"
+                href="login.html" aria-label="Favoritar">♡</a></div>
+          </div>
+        </article>
+        <article class="cartao imovel">
+          <div class="foto"></div>
+          <div class="corpo"><strong>Casa - Paulistano</strong>
+            <p class="preco">R$ 2.500/mês</p>
+            <p class="info">2 quartos · 1 banheiro · 87 m²</p>
+            <div class="acoes"><a class="btn btn-ouro" href="login.html">Alugar Agora</a><a class="btn"
+                href="login.html" aria-label="Favoritar">♡</a></div>
+          </div>
+        </article>
+        <article class="cartao imovel">
+          <div class="foto"></div>
+          <div class="corpo"><strong>Studio - Centro</strong>
+            <p class="preco">R$ 4.000/mês</p>
+            <p class="info">4 quartos · 3 banheiros · 180 m²</p>
+            <div class="acoes"><a class="btn btn-ouro" href="login.html">Alugar Agora</a><a class="btn"
+                href="login.html" aria-label="Favoritar">♡</a></div>
+          </div>
+        </article>
+        <article class="cartao imovel">
+          <div class="foto"></div>
+          <div class="corpo"><strong>Apto. 202 - Centro</strong>
+            <p class="preco">R$ 2.500/mês</p>
+            <p class="info">2 quartos · 1 banheiro · 65 m²</p>
+            <div class="acoes"><a class="btn btn-ouro" href="login.html">Alugar Agora</a><a class="btn"
+                href="login.html" aria-label="Favoritar">♡</a></div>
+          </div>
+        </article>
+      </div>
     </section>
     <section class="faixa">
       <h2>Pronto para começar?</h2>
       <p>Junte-se a milhares de usuários que já confiam na Lar &amp; Negócios para gerenciar seus imóveis.</p>
-      <div class="acoes" style="justify-content:center"><a class="btn btn-ouro" href="login.html">Criar Conta
+      <div class="acoes" style="justify-content:center"><a class="btn btn-ouro" href="cadastro.html">Criar Conta
           Agora</a><a class="btn btn-claro" href="ajuda.html">Fale Conosco</a></div>
     </section>
   </main>
-  <footer class="rodape">© 2024 AlugaFácil. Todos os direitos reservados. | Privacidade | Termos</footer>
+  <footer class="rodape">© 2024 AlugaFácil. Todos os direitos reservados. | <a href="ajuda.html">Ajuda</a> | Privacidade
+    | Termos</footer>
 </body>
 
 </html>

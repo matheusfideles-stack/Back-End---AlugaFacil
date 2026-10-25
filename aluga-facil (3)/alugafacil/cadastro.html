@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criar Conta | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="login">
+        <section class="lado-azul">
+            <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
+            <h2>Crie sua conta</h2>
+            <p class="info" style="color:#cbd5e1">Alugue ou gerencie seus imóveis com segurança e praticidade.</p>
+        </section>
+        <section class="lado-form longo">
+            <form action="login.html">
+                <h1 class="titulo">Criar conta</h1>
+                <p class="sub">Preencha seus dados</p>
+                <label for="nome">Nome completo</label>
+                <input id="nome" type="text" placeholder="Seu nome" required>
+                <label for="cpf">CPF</label>
+                <input id="cpf" type="text" placeholder="000.000.000-00" required>
+                <label for="mail">Email</label>
+                <input id="mail" type="email" placeholder="seuemail@gmail.com" required>
+                <label for="tel">Telefone</label>
+                <input id="tel" type="tel" placeholder="(31) 99999-0000">
+                <label for="senha">Senha</label>
+                <input id="senha" type="password" minlength="6" placeholder="Mínimo de 6 caracteres" required>
+                <label for="senha2">Confirmar senha</label>
+                <input id="senha2" type="password" minlength="6" placeholder="Repita a senha" required>
+                <div class="opcoes"><label><input type="checkbox" required> Li e aceito os termos de uso</label></div>
+                <button class="btn btn-ouro btn-cheio" type="submit">Criar Conta</button>
+                <p class="info central" style="margin-top:12px">Já tem conta? <a href="login.html"
+                        style="color:var(--ouro)">Entrar</a></p>
+            </form>
+        </section>
+    </main>
+</body>
+
+</html>

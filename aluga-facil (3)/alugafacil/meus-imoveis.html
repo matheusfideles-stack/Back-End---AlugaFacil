@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body>
+<body data-pagina="imoveis">
     <header class="topo">
-        <div class="topo-int">
+        <div class="topo-int largo">
             <a class="logo" href="proprietario.html">Aluga<span>Fácil</span></a>
             <a class="info" href="proprietario.html" style="text-decoration:underline">Bem-vindo, Proprietário!</a>
         </div>
@@ -24,11 +24,11 @@
             <p>Menu</p>
             <nav><a href="proprietario.html">Visão Geral</a><a href="meus-imoveis.html" class="ativo">Meus Imóveis</a><a
                     href="financeiro.html">Financeiro</a><a href="inquilinos.html">Inquilinos</a><a
-                    href="sair.html">Sair</a></nav>
+                    href="ajuda.html">Ajuda</a><a href="sair.html">Sair</a></nav>
         </aside>
         <main class="conteudo">
             <div class="cabeca">
-                <h1 class="titulo">Meus Imóveis</h1><a class="btn btn-ouro" href="#">+ Novo Imóvel</a>
+                <h1 class="titulo">Meus Imóveis</h1><a class="btn btn-ouro" href="novo-imovel.html">+ Novo Imóvel</a>
             </div>
             <form class="cartao filtros" style="grid-template-columns:1fr 1fr 2fr">
                 <div><label for="st">Status</label><select id="st">
@@ -44,58 +44,10 @@
                 <div><label for="bu">Buscar</label><input id="bu" type="text" placeholder="Nome do imóvel ou endereço">
                 </div>
             </form>
-            <section class="grade g4" style="margin-top:20px">
-                <article class="cartao imovel">
-                    <div class="foto"></div>
-                    <div class="corpo">
-                        <div class="stat"><strong>Casa - Bairro Alvorada</strong><span class="selo"
-                                style="margin:0">Alugado</span></div>
-                        <p class="info">3 quartos · 2 banheiros · 120 m²</p>
-                        <p class="preco">R$ 2.500/mês</p>
-                        <p class="info">Inquilino: João Silva</p>
-                        <div class="acoes"><a class="btn" href="#">Ver</a><a class="btn btn-ouro" href="#">Editar</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="cartao imovel">
-                    <div class="foto"></div>
-                    <div class="corpo">
-                        <div class="stat"><strong>Casa - Bairro Novo</strong><span class="selo"
-                                style="margin:0">Alugado</span></div>
-                        <p class="info">3 quartos · 2 banheiros · 140 m²</p>
-                        <p class="preco">R$ 3.200/mês</p>
-                        <p class="info">Inquilino: Maria Costa</p>
-                        <div class="acoes"><a class="btn" href="#">Ver</a><a class="btn btn-ouro" href="#">Editar</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="cartao imovel">
-                    <div class="foto"></div>
-                    <div class="corpo">
-                        <div class="stat"><strong>Studio - Centro</strong><span class="selo"
-                                style="margin:0">Alugado</span></div>
-                        <p class="info">1 quarto · 1 banheiro · 35 m²</p>
-                        <p class="preco">R$ 1.800/mês</p>
-                        <p class="info">Inquilino: Pedro Oliveira</p>
-                        <div class="acoes"><a class="btn" href="#">Ver</a><a class="btn btn-ouro" href="#">Editar</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="cartao imovel">
-                    <div class="foto"></div>
-                    <div class="corpo">
-                        <div class="stat"><strong>Casa - Bairro Jardim Europa</strong><span class="selo alerta"
-                                style="margin:0">Disponível</span></div>
-                        <p class="info">4 quartos · 3 banheiros · 220 m²</p>
-                        <p class="preco">R$ 2.600/mês</p>
-                        <p class="info">Sem inquilino no momento</p>
-                        <div class="acoes"><a class="btn" href="#">Ver</a><a class="btn btn-ouro" href="#">Editar</a>
-                        </div>
-                    </div>
-                </article>
-            </section>
+            <section class="grade g4" id="lista" style="margin-top:20px"></section>
         </main>
     </div>
+    <script src="js/proprietario.js"></script>
 </body>
 
 </html>

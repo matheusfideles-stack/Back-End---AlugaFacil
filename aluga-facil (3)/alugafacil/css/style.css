@@ -1,11 +1,10 @@
 :root {
-  --azul: #1e3a5f;
-  --ouro: #e0a43a;
-  --ouro-texto: #a8690f;
-  --fundo: #f5f3ef;
-  --borda: #e4e0d8;
-  --texto: #2d3748;
-  --suave: #5f6673
+  --azul: #04203f;
+  --ouro: #f5a800;
+  --fundo: #f8fafc;
+  --borda: #e5e7eb;
+  --texto: #1f2937;
+  --suave: #6b7280
 }
 
 * {
@@ -14,15 +13,11 @@
   padding: 0
 }
 
-html {
-  font-size: 112.5%
-}
-
 body {
   font-family: 'Plus Jakarta Sans', Arial, sans-serif;
   color: var(--texto);
   background: var(--fundo);
-  line-height: 1.65
+  line-height: 1.5
 }
 
 a {
@@ -69,7 +64,7 @@ a {
 }
 
 .menu a.ativo {
-  color: var(--ouro-texto);
+  color: var(--ouro);
   font-weight: 700
 }
 
@@ -151,17 +146,17 @@ a {
 .numero {
   font-size: 1.8rem;
   font-weight: 800;
-  color: var(--ouro-texto)
+  color: var(--ouro)
 }
 
 .rotulo {
-  font-size: .85rem;
+  font-size: .75rem;
   color: var(--suave)
 }
 
 .foto {
   height: 150px;
-  background: linear-gradient(135deg, #b9cfe0, #5b7fa3)
+  background: linear-gradient(135deg, #8fb4d4, #1f4e79)
 }
 
 .imovel {
@@ -174,20 +169,20 @@ a {
 }
 
 .preco {
-  color: var(--ouro-texto);
+  color: var(--ouro);
   font-weight: 800;
   font-size: 1.1rem;
   margin: 4px 0
 }
 
 .info {
-  font-size: .85rem;
+  font-size: .75rem;
   color: var(--suave)
 }
 
 .selo {
   display: inline-block;
-  font-size: .8rem;
+  font-size: .7rem;
   padding: 2px 8px;
   border-radius: 99px;
   background: #dcfce7;
@@ -212,7 +207,7 @@ a {
 
 label {
   display: block;
-  font-size: .85rem;
+  font-size: .75rem;
   font-weight: 600;
   margin: 12px 0 4px
 }
@@ -254,7 +249,7 @@ textarea {
 }
 
 .abas a.ativo {
-  color: var(--ouro-texto);
+  color: var(--ouro);
   border-bottom: 2px solid var(--ouro);
   font-weight: 600
 }
@@ -291,7 +286,7 @@ textarea {
 }
 
 .valor {
-  color: var(--ouro-texto);
+  color: var(--ouro);
   font-weight: 700;
   text-align: right
 }
@@ -371,7 +366,7 @@ details p {
 .rodape {
   text-align: center;
   padding: 20px;
-  font-size: .85rem;
+  font-size: .75rem;
   color: var(--suave);
   background: #fff
 }
@@ -426,7 +421,7 @@ details p {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: .85rem;
+  font-size: .75rem;
   margin: 12px 0
 }
 
@@ -443,7 +438,7 @@ details p {
 }
 
 .opcoes a {
-  color: var(--ouro-texto)
+  color: var(--ouro)
 }
 
 @media (max-width:768px) {
@@ -477,7 +472,7 @@ details p {
     width: 100%;
     justify-content: space-between;
     gap: 10px;
-    font-size: .85rem
+    font-size: .78rem
   }
 
   .lado-azul {
@@ -512,7 +507,7 @@ details p {
 }
 
 .tipos input:checked+label {
-  color: var(--ouro-texto);
+  color: var(--ouro);
   border-bottom-color: var(--ouro);
   font-weight: 600
 }
@@ -554,7 +549,7 @@ details p {
 
 .metodo:has(input:checked) {
   border-color: var(--ouro);
-  background: #fdf8ee;
+  background: #fffbf0;
   box-shadow: 0 0 0 3px rgba(245, 168, 0, .25)
 }
 
@@ -570,7 +565,7 @@ details p {
 
 .linha .info {
   color: var(--texto);
-  font-size: .88rem
+  font-size: .8rem
 }
 
 .linha .valor {
@@ -590,7 +585,7 @@ details p {
 }
 
 .lateral p {
-  font-size: .8rem;
+  font-size: .7rem;
   color: var(--suave);
   padding: 0 10px 8px
 }
@@ -604,8 +599,8 @@ details p {
 }
 
 .lateral a.ativo {
-  background: #faf0dc;
-  color: var(--ouro-texto);
+  background: #fff3d6;
+  color: var(--ouro);
   font-weight: 700
 }
 
@@ -638,7 +633,7 @@ details p {
 }
 
 .grafico .area {
-  fill: #f6ead3
+  fill: #fdeccb
 }
 
 .grafico .curva {
@@ -656,7 +651,7 @@ details p {
 }
 
 .grafico text {
-  font-size: 13px;
+  font-size: 11px;
   fill: var(--suave)
 }
 
@@ -675,7 +670,7 @@ details p {
 }
 
 .destaque {
-  color: var(--ouro-texto);
+  color: var(--ouro);
   font-weight: 700
 }
 
@@ -757,5 +752,170 @@ details p {
   .tab-linha,
   .tab-linha.inq {
     grid-template-columns: 1fr
+  }
+}
+
+html {
+  scroll-behavior: smooth
+}
+
+.hero-fundo {
+  background: linear-gradient(180deg, #fff, var(--fundo))
+}
+
+.secao-larga {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 50px 20px
+}
+
+.titulo-centro {
+  text-align: center;
+  color: var(--azul);
+  font-size: 1.6rem;
+  margin-bottom: 8px
+}
+
+.sub-centro {
+  text-align: center;
+  color: var(--suave);
+  font-size: .9rem;
+  margin-bottom: 28px
+}
+
+.num {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--ouro);
+  color: var(--azul);
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  margin: 0 auto 12px
+}
+
+.campos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 16px
+}
+
+.campos .cheio {
+  grid-column: 1/-1
+}
+
+.lado-form.longo {
+  align-items: flex-start;
+  padding-top: 50px
+}
+
+@media (max-width:768px) {
+  .campos {
+    grid-template-columns: 1fr
+  }
+}
+
+html {
+  scroll-padding-top: 72px
+}
+
+.fixo {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  box-shadow: 0 2px 10px rgba(4, 32, 63, .06)
+}
+
+.topo-int.estreito {
+  max-width: 900px
+}
+
+.topo-acoes {
+  display: flex;
+  gap: 8px;
+  align-items: center
+}
+
+.menu a {
+  position: relative;
+  padding: 4px 0;
+  color: var(--azul);
+  font-weight: 600;
+  transition: color .2s
+}
+
+.menu a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  height: 2px;
+  width: 0;
+  background: var(--ouro);
+  transition: width .2s
+}
+
+.menu a:hover {
+  color: var(--ouro)
+}
+
+.menu a:hover::after,
+.menu a.ativo::after {
+  width: 100%
+}
+
+.btn {
+  transition: transform .15s, box-shadow .15s, background .15s
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(4, 32, 63, .15)
+}
+
+.btn-ouro:hover {
+  background: #e29b00
+}
+
+@media (max-width:768px) {
+  .topo-acoes {
+    margin-left: auto
+  }
+}
+
+[hidden] {
+  display: none !important
+}
+
+.topo-int.largo {
+  max-width: 1200px
+}
+
+.painel {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px
+}
+
+.conteudo {
+  max-width: none
+}
+
+@media (min-width:769px) {
+  .lateral {
+    background: transparent;
+    border-right: 0;
+    padding: 24px 16px 24px 0
+  }
+
+  .conteudo {
+    padding: 28px 0 28px 16px
+  }
+}
+
+@media (max-width:768px) {
+  .conteudo {
+    padding: 20px 0
   }
 }
