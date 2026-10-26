@@ -113,7 +113,7 @@ function montarListaImoveis() {
     document.getElementById("lista").innerHTML = filtrados.length ? filtrados.map(function (i) {
         const alerta = i.status === "Disponível" ? " alerta" : "";
         const dono = inquilinos.find(function (t) { return t.id === i.inquilino; });
-        return `<article class="cartao imovel"><div class="foto"></div><div class="corpo"><div class="stat"><strong>${esc(i.nome)}</strong><span class="selo${alerta}" style="margin:0">${esc(i.status)}</span></div><p class="info">${i.quartos} quartos · ${i.banheiros} banheiros · ${i.area} m²</p><p class="preco">${formatos.dinheiro(i.valor)}/mês</p><p class="info">${dono ? "Inquilino: " + esc(dono.nome) : "Sem inquilino no momento"}</p><div class="acoes"><a class="btn" href="imovel.html?id=${i.id}">Ver</a><a class="btn btn-ouro" href="editar-imovel.html?id=${i.id}">Editar</a></div></div></article>`;
+        return `<article class="cartao imovel"><div class="foto"></div><div class="corpo"><div class="stat"><strong>${esc(i.nome)}</strong><span class="selo${alerta}" style="margin:0">${esc(i.status)}</span></div><p class="info">${i.quartos} quartos · ${i.banheiros} banheiros · ${i.area} m²</p><p class="preco">${formatos.dinheiro(i.valor)}/mês</p><p class="info">${dono ? "Inquilino: " + esc(dono.nome) : "Sem inquilino no momento"}</p><div class="acoes"><button type="button" class="btn" data-ver="${i.id}">Ver</button><a class="btn btn-ouro" href="editar-imovel.html?id=${i.id}">Editar</a></div></div></article>`;
     }).join("") : '<p class="info">Nenhum imóvel encontrado.</p>';
 }
 

@@ -910,3 +910,8 @@ details p {
 .vitrine .imovel .acoes {
   margin-top: auto
 }
+.topo-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
