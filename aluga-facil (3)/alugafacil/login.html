@@ -10,6 +10,36 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        @media (max-width: 768px) {
+            .lado-azul {
+                padding: 28px 20px
+            }
+
+            .lado-azul .logo {
+                font-size: 1.5rem;
+                margin-bottom: 12px
+            }
+
+            .lado-azul h2 {
+                font-size: 1.2rem
+            }
+
+            .lado-azul .info {
+                font-size: .9rem;
+                margin: 0
+            }
+
+            .lado-form {
+                padding: 24px 20px
+            }
+
+            .opcoes {
+                flex-wrap: wrap;
+                gap: 8px
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -36,7 +66,7 @@
                     <label for="senha">Senha</label>
                     <input id="senha" type="password" required placeholder="Minha chave secreta"
                         autocomplete="current-password">
-                    <div class="opcoes"><label><input type="checkbox"> Lembrar-me</label><a href="ajuda.html">Esqueceu a
+                    <div class="opcoes"><label><input type="checkbox"> Lembrar-me</label><a href="esqueci-senha.html">Esqueceu a
                             senha?</a></div>
                     <button class="btn btn-ouro btn-cheio" type="submit">Entrar Agora</button>
                     <p class="info central" style="margin-top:12px">Não tem conta? <a href="#cadastro"

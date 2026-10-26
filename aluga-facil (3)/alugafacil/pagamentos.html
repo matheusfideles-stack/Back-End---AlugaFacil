@@ -10,6 +10,46 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100
+        }
+
+        .modal[hidden] {
+            display: none
+        }
+
+        .modal-caixa {
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow: auto;
+            background: #fff;
+            text-align: center
+        }
+
+        .modal-caixa input[readonly] {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: .8rem;
+            text-align: left
+        }
+
+        .modal .acoes {
+            justify-content: flex-end
+        }
+
+        .modal .acoes .btn {
+            flex: 0 0 auto
+        }
+    </style>
 </head>
 
 <body>
@@ -17,13 +57,23 @@
         <div class="topo-int">
             <a class="logo" href="cliente.html">Aluga<span>Fácil</span></a>
             <nav class="menu"><a href="cliente.html">Início</a><a
-                    href="alugueis.html">Meus Aluguéis</a><a href="pagamentos.html" class="ativo">Pagamentos</a></nav>
+                    href="alugueis.html">Meus Aluguéis</a><a href="pagamentos.html" class="ativo">Pagamentos</a><a href="ajuda.html">Ajuda</a></nav>
             <a class="btn" href="sair.html">Sair</a>
         </div>
     </header>
     <main class="container">
         <h1 class="titulo">Métodos de Pagamento</h1>
-        <section class="grade g2" style="margin-top:20px">
+        <p class="aviso ok" id="confirmacao" hidden></p>
+
+        <section class="cartao" style="margin-top:20px">
+            <p class="rotulo">Aluguel de Outubro</p>
+            <strong>Casa - Bairro Alvorada</strong>
+            <p class="info">Contrato nº 4801-A · Vencimento 10/Out</p>
+            <p class="valor" style="font-size:1.6rem;margin-top:8px">R$ 2.500</p>
+        </section>
+
+        <h2 class="secao" style="margin-top:24px">Escolha como pagar</h2>
+        <section class="grade g2" style="margin-top:12px">
             <label class="cartao metodo"><input type="radio" name="metodo" value="pix"
                     checked><strong>PIX</strong><span>Transferência instantânea 24/7</span></label>
             <label class="cartao metodo"><input type="radio" name="metodo"
@@ -34,6 +84,8 @@
             <label class="cartao metodo"><input type="radio" name="metodo"
                     value="credito"><strong>Crédito</strong><span>Parcelamento disponível em até 12x</span></label>
         </section>
+        <button type="button" class="btn btn-ouro btn-cheio" id="btn-pagar" style="margin-top:16px">Pagar R$ 2.500 com PIX</button>
+
         <section class="cartao" style="margin-top:24px">
             <h2 class="secao" style="margin-top:0">Histórico de Pagamentos</h2>
             <div class="linha">
@@ -70,6 +122,164 @@
             </div>
         </section>
     </main>
+
+    <div class="modal" id="modal-pagamento" hidden>
+        <div class="cartao modal-caixa" role="dialog" aria-modal="true" aria-labelledby="pag-titulo">
+            <h2 class="secao" id="pag-titulo" style="margin-top:0">Pagamento</h2>
+            <p class="info" id="pag-resumo"></p>
+            <div id="pag-corpo" style="margin-top:12px"></div>
+            <p class="aviso" id="pag-status" hidden></p>
+            <div class="acoes" style="margin-top:16px">
+                <button type="button" class="btn" id="pag-fechar">Fechar</button>
+                <button type="button" class="btn btn-ouro" id="pag-acao">Continuar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fluxo de pagamento: mostra cada método, sem coletar dados de cartão e sem cobrar nada
+        (function () {
+            var valor = 'R$ 2.500';
+            var nomes = { pix: 'PIX', boleto: 'Boleto', debito: 'Débito', credito: 'Crédito' };
+            var codigoPix = '00020126DEMO-ALUGAFACIL5204000053039865802BR5925ALUGAFACIL DEMO6009SAO PAULO62070503***6304A1B2';
+            var linhaBoleto = '23790.00000 60000.000000 00000.000000 1 00000000250000';
+
+            var botaoPagar = document.getElementById('btn-pagar');
+            var radios = document.querySelectorAll('input[name="metodo"]');
+            var confirmacao = document.getElementById('confirmacao');
+            var modal = document.getElementById('modal-pagamento');
+            var titulo = document.getElementById('pag-titulo');
+            var resumo = document.getElementById('pag-resumo');
+            var corpo = document.getElementById('pag-corpo');
+            var status = document.getElementById('pag-status');
+            var acao = document.getElementById('pag-acao');
+            var fecharBtn = document.getElementById('pag-fechar');
+
+            var metodo = 'pix';
+            var codigoAtual = '';
+            var comprovante = '';
+
+            function metodoEscolhido() {
+                var marcado = document.querySelector('input[name="metodo"]:checked');
+                return marcado ? marcado.value : 'pix';
+            }
+
+            function atualizarBotaoPagar() {
+                botaoPagar.textContent = 'Pagar ' + valor + ' com ' + nomes[metodoEscolhido()];
+            }
+
+            function mostrarStatus(mensagem, tipo) {
+                status.textContent = mensagem;
+                status.className = tipo === 'ok' ? 'aviso ok' : (tipo === 'erro' ? 'aviso' : 'info');
+                status.hidden = !mensagem;
+            }
+
+            function qrCode() {
+                var celulas = '';
+                for (var i = 0; i < 441; i++) {
+                    celulas += '<span style="background:' + (Math.random() < 0.5 ? '#111' : '#fff') + '"></span>';
+                }
+                return '<div style="display:grid;grid-template-columns:repeat(21,1fr);width:180px;height:180px;margin:0 auto 16px;border:8px solid #fff;outline:1px solid #ddd">' + celulas + '</div>';
+            }
+
+            function copiar(texto) {
+                if (!navigator.clipboard) {
+                    mostrarStatus('Não foi possível copiar. Selecione o código e copie manualmente.', 'erro');
+                    return;
+                }
+                navigator.clipboard.writeText(texto).then(function () {
+                    mostrarStatus('Código copiado!', 'ok');
+                }).catch(function () {
+                    mostrarStatus('Não foi possível copiar. Selecione o código e copie manualmente.', 'erro');
+                });
+            }
+
+            function renderizar() {
+                titulo.textContent = 'Pagar ' + valor + ' com ' + nomes[metodo];
+                resumo.textContent = 'Aluguel de Outubro · Casa - Bairro Alvorada';
+                acao.hidden = false;
+                acao.disabled = false;
+                fecharBtn.textContent = 'Fechar';
+                mostrarStatus('', '');
+
+                if (metodo === 'pix') {
+                    codigoAtual = codigoPix;
+                    corpo.innerHTML = qrCode() +
+                        '<label for="pag-codigo">Copia e cola</label>' +
+                        '<input id="pag-codigo" readonly value="' + codigoPix + '">' +
+                        '<button type="button" class="btn btn-claro" id="pag-copiar" style="margin-top:8px">Copiar código</button>';
+                    acao.textContent = 'Confirmar pagamento';
+                    mostrarStatus('Aguardando o pagamento...', 'info');
+                } else if (metodo === 'boleto') {
+                    codigoAtual = linhaBoleto;
+                    corpo.innerHTML = '<label for="pag-codigo">Linha digitável</label>' +
+                        '<input id="pag-codigo" readonly value="' + linhaBoleto + '">' +
+                        '<button type="button" class="btn btn-claro" id="pag-copiar" style="margin-top:8px">Copiar linha digitável</button>';
+                    acao.textContent = 'Confirmar pagamento';
+                    mostrarStatus('Aguardando a compensação do boleto (pode levar até 2 dias úteis).', 'info');
+                } else {
+                    corpo.innerHTML = '<p class="info">Você será levado ao ambiente seguro da sua instituição financeira para confirmar.</p>';
+                    acao.textContent = 'Confirmar no banco';
+                }
+            }
+
+            function aprovar() {
+                comprovante = 'PG-' + Math.floor(100000 + Math.random() * 900000);
+                corpo.innerHTML = '';
+                acao.hidden = true;
+                fecharBtn.textContent = 'Concluir';
+                mostrarStatus('Pagamento aprovado! Comprovante ' + comprovante + '.', 'ok');
+            }
+
+            function abrir() {
+                metodo = metodoEscolhido();
+                comprovante = '';
+                renderizar();
+                modal.hidden = false;
+            }
+
+            function fechar() {
+                modal.hidden = true;
+                if (comprovante) {
+                    confirmacao.textContent = 'Pagamento de ' + valor + ' via ' + nomes[metodo] +
+                        ' aprovado! Comprovante ' + comprovante + '.';
+                    confirmacao.hidden = false;
+                    comprovante = '';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            }
+
+            radios.forEach(function (radio) {
+                radio.addEventListener('change', atualizarBotaoPagar);
+            });
+
+            botaoPagar.addEventListener('click', abrir);
+            fecharBtn.addEventListener('click', fechar);
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) fechar();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.hidden) fechar();
+            });
+
+            corpo.addEventListener('click', function (e) {
+                if (e.target.id === 'pag-copiar') copiar(codigoAtual);
+            });
+
+            acao.addEventListener('click', function () {
+                if (metodo === 'pix' || metodo === 'boleto') {
+                    aprovar();
+                    return;
+                }
+                acao.disabled = true;
+                acao.textContent = 'Processando...';
+                mostrarStatus('Conectando ao seu banco...', 'info');
+                setTimeout(aprovar, 2000);
+            });
+
+            atualizarBotaoPagar();
+        })();
+    </script>
 </body>
 
 </html>
