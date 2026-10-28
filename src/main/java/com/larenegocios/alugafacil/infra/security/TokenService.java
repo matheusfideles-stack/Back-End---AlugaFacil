@@ -28,6 +28,7 @@ public class TokenService {
                     .withIssuer("alugafacil-api")
                     .withSubject(usuario.getEmail())
                     .withClaim("id", usuario.getId())
+                    .withClaim("nome", usuario.getNome())
                     .withClaim("perfil", usuario.getPerfil().name())
                     .withExpiresAt(dataExpiracao())
                     .sign(algoritmo);

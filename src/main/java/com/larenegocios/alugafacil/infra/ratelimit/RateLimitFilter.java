@@ -33,15 +33,16 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !propriedades.isEnabled() || HttpMethod.OPTIONS.matches(request.getMethod());
+        return !propriedades.isEnabled()
+                || HttpMethod.OPTIONS.matches(request.getMethod())
+                || ehArquivoEstatico(caminhoDe(request));
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        String caminho = request.getRequestURI().substring(request.getContextPath().length());
-        CategoriaRateLimit categoria = CategoriaRateLimit.de(caminho);
+        CategoriaRateLimit categoria = CategoriaRateLimit.de(caminhoDe(request));
         // Atras de proxy configure server.forward-headers-strategy=native, senao todos os clientes parecem o mesmo IP.
         RateLimiter.Decisao decisao = rateLimiter.tentar(categoria, request.getRemoteAddr());
 
@@ -57,5 +58,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         response.getWriter().write(CORPO_429);
+    }
+
+    private String caminhoDe(HttpServletRequest request) {
+        return request.getRequestURI().substring(request.getContextPath().length());
+    }
+
+    // Paginas, CSS, JS e imagens do frontend nao entram no limite: uma tela carrega varios arquivos de uma vez.
+    private boolean ehArquivoEstatico(String caminho) {
+        return caminho.equals("/") || caminho.substring(caminho.lastIndexOf('/') + 1).contains(".");
     }
 }

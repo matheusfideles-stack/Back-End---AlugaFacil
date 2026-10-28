@@ -8,6 +8,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.List;
 
@@ -24,6 +26,12 @@ public class TratadorDeErros {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ex.getMessage());
     }
 
+    @ExceptionHandler(EmailNaoConfirmadoException.class)
+    public ResponseEntity<DadosErroComCodigo> tratarEmailNaoConfirmado(EmailNaoConfirmadoException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new DadosErroComCodigo("EMAIL_NAO_CONFIRMADO", ex.getMessage()));
+    }
+
     @ExceptionHandler(TokenJWTInvalidoException.class)
     public ResponseEntity<String> tratarTokenInvalido(TokenJWTInvalidoException ex) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
@@ -37,6 +45,16 @@ public class TratadorDeErros {
     @ExceptionHandler(PaymentGatewayException.class)
     public ResponseEntity<String> tratarErroGatewayPagamento(PaymentGatewayException ex) {
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<String> tratarArquivoGrande(MaxUploadSizeExceededException ex) {
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body("Foto muito grande. O limite e de 5 MB por foto");
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<String> tratarParteAusente(MissingServletRequestPartException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body("Selecione ao menos uma foto");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

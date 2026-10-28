@@ -30,6 +30,9 @@ public class ContratoService {
         if (!imovel.getDisponivel()) {
             throw new RegraDeNegocioException("Este imovel nao esta disponivel para locacao");
         }
+        if (imovel.getLocador().getId().equals(locatario.getId())) {
+            throw new RegraDeNegocioException("Voce nao pode alugar o proprio imovel");
+        }
         if (contratoRepository.existsByImovelIdAndStatus(imovel.getId(), StatusContrato.ATIVO)) {
             throw new RegraDeNegocioException("Este imovel ja possui um contrato ativo");
         }

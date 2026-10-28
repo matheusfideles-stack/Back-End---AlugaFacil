@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuda | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <header class="topo fixo">
+        <div class="topo-int estreito">
+            <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
+            <nav class="menu" id="menu-principal"></nav>
+            <div class="topo-acoes" id="topo-acoes"></div>
+        </div>
+    </header>
+    <main class="container">
+        <h1 class="titulo">Central de Ajuda</h1>
+        <section class="grade g2" style="margin-top:20px">
+            <div class="cartao central"><strong>Email</strong>
+                <p class="info">Envie sua dúvida pelo formulário abaixo e responderemos em até 24h</p>
+            </div>
+            <div class="cartao central"><strong>Telefone</strong>
+                <p class="info">Ligue para (31) 3000-0000 de segunda a sexta</p>
+            </div>
+        </section>
+        <form class="cartao" id="form-contato" style="margin-top:24px" novalidate>
+            <h2 class="secao" style="margin-top:0">Envie sua mensagem</h2>
+            <p class="aviso" id="aviso" hidden></p>
+            <label for="nome">Nome Completo</label><input id="nome" type="text" placeholder="Seu nome" required maxlength="100">
+            <label for="mail">Email</label><input id="mail" type="email" placeholder="seu@email.com" required maxlength="150">
+            <label for="assunto">Assunto</label><input id="assunto" type="text" placeholder="Qual é a sua dúvida?" required maxlength="150">
+            <label for="msg">Mensagem</label><textarea id="msg" rows="4" required minlength="10" maxlength="2000"
+                placeholder="Descreva o problema com o máximo de detalhes"></textarea>
+            <button class="btn btn-ouro" type="submit" style="margin-top:16px">Enviar Mensagem</button>
+        </form>
+    </main>
+    <script src="js/api.js"></script>
+    <script>
+
+        (function () {
+            var form = document.getElementById('form-contato');
+            var aviso = document.getElementById('aviso');
+            var botao = form.querySelector('button[type=submit]');
+            var dados = Sessao.dados();
+            if (dados) document.getElementById('nome').value = dados.nome || '';
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                var campos = ['nome', 'mail', 'assunto', 'msg'].map(function (id) { return document.getElementById(id); });
+                var invalido = campos.find(function (c) { return !c.checkValidity(); });
+                if (invalido) {
+                    mostrarAviso(aviso, invalido.id === 'msg' ? 'Escreva a mensagem com pelo menos 10 caracteres.' :
+                        invalido.id === 'mail' ? 'Digite um email válido, por exemplo: nome@email.com.' : 'Preencha todos os campos.');
+                    invalido.focus();
+                    return;
+                }
+                botao.disabled = true;
+                botao.textContent = 'Enviando...';
+                try {
+                    var resposta = await api('/contato', {
+                        metodo: 'POST', autenticado: false,
+                        corpo: { nome: campos[0].value.trim(), email: campos[1].value.trim(), assunto: campos[2].value.trim(), mensagem: campos[3].value.trim() }
+                    });
+                    mostrarAviso(aviso, resposta.mensagem, 'ok');
+                    document.getElementById('assunto').value = '';
+                    document.getElementById('msg').value = '';
+                } catch (erro) {
+                    mostrarAviso(aviso, erro.message);
+                }
+                botao.disabled = false;
+                botao.textContent = 'Enviar Mensagem';
+            });
+        })();
+    </script>
+</body>
+
+</html>

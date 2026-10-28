@@ -1,10 +1,14 @@
 package com.larenegocios.alugafacil;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.larenegocios.alugafacil.domain.usuario.Perfil;
+import com.larenegocios.alugafacil.domain.usuario.Usuario;
+import com.larenegocios.alugafacil.domain.usuario.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -32,6 +36,12 @@ public abstract class IntegracaoBase {
     @Autowired
     protected ObjectMapper objectMapper;
 
+    @Autowired
+    protected UsuarioRepository usuarioRepository;
+
+    @Autowired
+    protected PasswordEncoder passwordEncoder;
+
     protected String json(Object objeto) throws Exception {
         return objectMapper.writeValueAsString(objeto);
     }
@@ -57,9 +67,24 @@ public abstract class IntegracaoBase {
     }
 
     protected Map<String, Object> cadastrar(String perfil) throws Exception {
-        Map<String, Object> dados = dadosUsuario(perfil);
+        if (!"LOCATARIO".equals(perfil)) {
+            return criarNoBanco(perfil);
+        }
+        Map<String, Object> dados = cadastrarSemConfirmar();
+        confirmarNoBanco((String) dados.get("email"));
+        return dados;
+    }
+
+    protected Map<String, Object> cadastrarSemConfirmar() throws Exception {
+        Map<String, Object> dados = dadosUsuario("LOCATARIO");
         mockMvc.perform(postJson("/auth/registro", dados)).andReturn();
         return dados;
+    }
+
+    protected void confirmarNoBanco(String email) {
+        Usuario usuario = usuarioRepository.findUsuarioByEmail(email).orElseThrow();
+        usuario.setEmailConfirmado(true);
+        usuarioRepository.save(usuario);
     }
 
     protected String login(Map<String, Object> usuario) throws Exception {
@@ -71,6 +96,22 @@ public abstract class IntegracaoBase {
 
     protected String tokenDe(String perfil) throws Exception {
         return login(cadastrar(perfil));
+    }
+
+    protected Map<String, Object> cadastrarAdmin() {
+        return criarNoBanco("ADMIN");
+    }
+
+    protected Map<String, Object> criarNoBanco(String perfil) {
+        Map<String, Object> dados = dadosUsuario(perfil);
+        Usuario usuario = new Usuario();
+        usuario.setNome((String) dados.get("nome"));
+        usuario.setEmail((String) dados.get("email"));
+        usuario.setCpf((String) dados.get("cpf"));
+        usuario.setSenha(passwordEncoder.encode(SENHA));
+        usuario.setPerfil(Perfil.valueOf(perfil));
+        usuarioRepository.save(usuario);
+        return dados;
     }
 
     protected Map<String, Object> dadosImovel() {

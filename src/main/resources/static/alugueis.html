@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Aluguéis | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100
+        }
+
+        .modal[hidden] {
+            display: none
+        }
+
+        .modal-caixa {
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow: auto;
+            background: #fff
+        }
+
+        .modal select,
+        .modal textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid var(--borda);
+            border-radius: 6px;
+            font: inherit
+        }
+
+        .modal .acoes {
+            justify-content: flex-end
+        }
+    </style>
+</head>
+
+<body data-exige="LOCATARIO">
+    <header class="topo">
+        <div class="topo-int">
+            <a class="logo" href="cliente.html">Aluga<span>Fácil</span></a>
+            <nav class="menu" id="menu-principal"></nav>
+            <div class="topo-acoes" id="topo-acoes"></div>
+        </div>
+    </header>
+    <main class="container">
+        <h1 class="titulo">Meus Aluguéis</h1>
+        <p class="sub">Faça a gestão dos seus contratos ativos e histórico de aluguel.</p>
+        <p class="aviso ok" id="confirmacao" hidden></p>
+        <p class="aviso" id="erro" hidden></p>
+        <div class="abas"><a class="ativo" href="#ativos" data-aba="ativos" id="aba-ativos">Contratos Ativos</a><a href="#historico" data-aba="historico" id="aba-historico">Histórico</a></div>
+        <section class="grade" id="ativos"><p class="vazio">Carregando...</p></section>
+        <section class="grade" id="historico" hidden></section>
+        <h2 class="secao" style="margin-top:32px">Minhas solicitações de manutenção</h2>
+        <section class="cartao" id="manutencoes"><p class="info">Carregando...</p></section>
+    </main>
+
+    <div class="modal" id="modal-manutencao" hidden>
+        <div class="cartao modal-caixa" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+            <h2 class="secao" id="modal-titulo" style="margin-top:0">Solicitar manutenção</h2>
+            <p class="info" id="modal-imovel"></p>
+            <form id="form-manutencao" novalidate>
+                <label for="m-tipo">Tipo do problema</label>
+                <select id="m-tipo">
+                    <option value="">Selecione</option>
+                    <option value="Elétrica">Elétrica</option>
+                    <option value="Hidráulica">Hidráulica</option>
+                    <option value="Vazamento">Vazamento</option>
+                    <option value="Portão ou fechadura">Portão ou fechadura</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <label for="m-urgencia">Urgência</label>
+                <select id="m-urgencia">
+                    <option value="Normal">Normal</option>
+                    <option value="Urgente">Urgente (risco à segurança ou vazamento)</option>
+                </select>
+                <label for="m-descricao">Descreva o problema</label>
+                <textarea id="m-descricao" rows="4" placeholder="Ex.: torneira da cozinha pingando"></textarea>
+                <p class="aviso" id="m-aviso" hidden></p>
+                <div class="acoes" style="margin-top:16px">
+                    <button type="button" class="btn" id="m-cancelar">Cancelar</button>
+                    <button type="submit" class="btn btn-ouro">Enviar solicitação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/alugueis.js"></script>
+</body>
+
+</html>

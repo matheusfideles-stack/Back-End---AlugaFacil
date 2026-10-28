@@ -12,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Locale;
+
 @Service
 public class AutenticacaoService implements UserDetailsService {
 
@@ -21,25 +23,47 @@ public class AutenticacaoService implements UserDetailsService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    public static String normalizarEmail(String email) {
+        return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
+    }
+
     @Override
     public UserDetails loadUserByUsername(String email) {
-        return usuarioRepository.findByEmail(email)
+        return usuarioRepository.findByEmail(normalizarEmail(email))
                 .orElseThrow(() -> new UsernameNotFoundException("Usuario nao encontrado"));
     }
 
     public Usuario cadastrar(DadosCadastroUsuario dados) {
-        if (usuarioRepository.existsByEmailOrCpf(dados.email(), dados.cpf())) {
+        if (dados.perfil() != null && dados.perfil() != Perfil.LOCATARIO) {
+            throw new RegraDeNegocioException("O cadastro pelo site e apenas para locatarios");
+        }
+        return criar(dados, Perfil.LOCATARIO);
+    }
+
+    public Usuario cadastrarLocador(DadosCadastroUsuario dados) {
+        return criar(dados, Perfil.LOCADOR);
+    }
+
+    public Usuario criar(DadosCadastroUsuario dados, Perfil perfil) {
+        String email = normalizarEmail(dados.email());
+        String cpf = dados.cpf().replaceAll("\\D", "");
+        if (cpf.length() != 11) {
+            throw new RegraDeNegocioException("CPF invalido: informe os 11 digitos");
+        }
+
+        if (usuarioRepository.existsByEmailOrCpf(email, cpf)) {
             throw new RegraDeNegocioException("Ja existe um usuario cadastrado com este email ou CPF");
         }
 
         Usuario usuario = new Usuario();
-        usuario.setNome(dados.nome());
-        usuario.setEmail(dados.email());
-        usuario.setCpf(dados.cpf());
-        usuario.setTelefone(dados.telefone());
+        usuario.setNome(dados.nome().trim());
+        usuario.setEmail(email);
+        usuario.setCpf(cpf);
+        usuario.setTelefone(dados.telefone() == null || dados.telefone().isBlank() ? null : dados.telefone().trim());
         usuario.setSenha(passwordEncoder.encode(dados.senha()));
-        usuario.setPerfil(dados.perfil() != null ? dados.perfil() : Perfil.LOCATARIO);
+        usuario.setPerfil(perfil);
         usuario.setAtivo(true);
+        usuario.setEmailConfirmado(false);
 
         return usuarioRepository.save(usuario);
     }

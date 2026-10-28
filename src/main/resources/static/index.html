@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Início | AlugaFácil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <header class="topo">
+    <div class="topo-int estreito">
+      <a class="logo" class="ativo" href="index.html">Aluga<span>Fácil</span></a>
+      <nav class="menu" id="menu-principal"><a href="index.html">Início</a><a href="imoveis.html">Imóveis</a><a
+          href="ajuda.html">Ajuda</a></nav>
+      <div class="topo-acoes" id="topo-acoes"></div>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div>
+        <p class="info">Lar &amp; Negócios</p>
+        <h1>Olá! Bem-vindo à Aluga<span>Fácil</span></h1>
+        <p class="sub">Gerenciamento completo de aluguéis e condomínios. Simplifique sua vida com nossa plataforma
+          intuitiva e segura.</p>
+        <div class="acoes" id="hero-acoes"><a class="btn btn-ouro" href="login.html">Entrar na Plataforma</a><a class="btn"
+            href="login.html?aba=cadastro">Criar Conta</a></div>
+      </div>
+      <div class="foto"><img src="img/hero.png" alt="Fachada da Lar & Negócios" onerror="this.remove()"></div>
+    </section>
+    <section class="busca">
+      <form class="cartao filtros" id="filtros" action="imoveis.html" method="get">
+        <div><label for="local">Localização</label><input id="local" name="local" type="text"
+            placeholder="Digite a cidade ou bairro"></div>
+        <div><label for="tipo">Tipo de imóvel</label><select id="tipo" name="tipo">
+            <option value="">Todos</option>
+            <option value="CASA">Casa</option>
+            <option value="APARTAMENTO">Apartamento</option>
+            <option value="KITNET">Kitnet</option>
+            <option value="SALA_COMERCIAL">Sala comercial</option>
+            <option value="GALPAO">Galpão</option>
+          </select></div>
+        <div><label for="preco">Preço máximo</label><input id="preco" name="preco" type="text" placeholder="Ex.: 3000"></div>
+        <button class="btn btn-ouro" type="submit">Buscar</button>
+      </form>
+    </section>
+    <section class="vitrine">
+      <h2 class="secao">Imóveis em destaque</h2>
+      <p class="info" id="contagem"></p>
+      <div id="vitrine" class="grade g3" style="margin-top:12px"></div>
+      <div class="acoes" style="justify-content:center;margin-top:20px"><a class="btn btn-ouro" href="imoveis.html" style="flex:none;padding:10px 24px">Ver todos os imóveis</a></div>
+    </section>
+    <section class="vitrine">
+      <h2 class="secao">Perguntas Frequentes</h2>
+      <details>
+        <summary>Como funciona o processo de aluguel?</summary>
+        <p>Você escolhe o imóvel, envia seus dados e assina o contrato digitalmente.</p>
+      </details>
+      <details>
+        <summary>Quais são os métodos de pagamento aceitos?</summary>
+        <p>Aceitamos PIX, boleto, débito e crédito em até 12x.</p>
+      </details>
+      <details>
+        <summary>Posso cancelar meu aluguel?</summary>
+        <p>Sim, seguindo as condições previstas no seu contrato.</p>
+      </details>
+      <details>
+        <summary>Como recupero minha senha?</summary>
+        <p>Na tela de login, clique em "Esqueceu a senha?" e siga as instruções.</p>
+      </details>
+    </section>
+    <section class="faixa" id="faixa-cta">
+      <h2>Pronto para começar?</h2>
+      <p>Junte-se a milhares de usuários que já confiam na Lar &amp; Negócios para gerenciar seus imóveis.</p>
+      <div class="acoes" style="justify-content:center"><a class="btn btn-ouro" href="login.html?aba=cadastro">Criar Conta Agora</a></div>
+    </section>
+  </main>
+  <footer class="rodape">© <span data-ano>2026</span> AlugaFácil. Todos os direitos reservados. | Privacidade | Termos</footer>
+  <script src="js/api.js"></script>
+  <script src="js/vitrine.js"></script>
+</body>
+
+</html>

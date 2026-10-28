@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visão Geral | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-pagina="visao-geral" data-exige="LOCADOR">
+    <header class="topo">
+        <div class="topo-int largo">
+            <a class="logo" href="proprietario.html">Aluga<span>Fácil</span></a>
+            <a class="info" href="proprietario.html" style="text-decoration:underline" data-saudacao="curta">Olá!</a>
+        </div>
+    </header>
+    <div class="painel">
+        <aside class="lateral">
+            <p>Menu</p>
+            <nav><a href="proprietario.html" class="ativo">Visão Geral</a><a href="meus-imoveis.html">Meus Imóveis</a><a
+                    href="financeiro.html">Financeiro</a><a href="inquilinos.html">Inquilinos</a><a
+                    href="proprietario-ajuda.html">Ajuda</a><a href="sair.html">Sair</a></nav>
+        </aside>
+        <main class="conteudo">
+            <h1 class="titulo">Visão Geral</h1>
+            <p class="aviso" id="erro" hidden></p>
+            <section class="cartao" style="margin-top:20px">
+                <h2 class="secao" style="margin-top:0">Receitas por Mês</h2>
+                <svg class="grafico" id="grafico" viewBox="0 0 660 190" role="img" aria-label="Receitas por mês"></svg>
+            </section>
+            <h2 class="secao">Meus Imóveis</h2>
+            <section class="cartao" id="lista-imoveis"><p class="info">Carregando...</p></section>
+            <h2 class="secao">Meus Inquilinos</h2>
+            <section class="cartao" id="lista-inquilinos"><p class="info">Carregando...</p></section>
+            <h2 class="secao">Solicitações de Manutenção</h2>
+            <section class="cartao" id="lista-manutencao"><p class="info">Carregando...</p></section>
+        </main>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/proprietario.js"></script>
+</body>
+
+</html>

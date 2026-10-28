@@ -44,6 +44,9 @@ public class Usuario implements UserDetails {
     @Column(nullable = false)
     private Boolean ativo = true;
 
+    @Column(name = "email_confirmado", nullable = false, columnDefinition = "boolean default true")
+    private Boolean emailConfirmado = true;
+
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm = LocalDateTime.now();
 

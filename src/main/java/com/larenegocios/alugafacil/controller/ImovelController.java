@@ -4,6 +4,7 @@ import com.larenegocios.alugafacil.domain.imovel.Imovel;
 import com.larenegocios.alugafacil.domain.usuario.Usuario;
 import com.larenegocios.alugafacil.dto.DadosCadastroImovel;
 import com.larenegocios.alugafacil.dto.DadosImovel;
+import com.larenegocios.alugafacil.service.AvaliacaoService;
 import com.larenegocios.alugafacil.service.ImovelService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +21,27 @@ public class ImovelController {
     @Autowired
     private ImovelService imovelService;
 
+    @Autowired
+    private AvaliacaoService avaliacaoService;
+
     @PostMapping
     public ResponseEntity<DadosImovel> cadastrar(@RequestBody @Valid DadosCadastroImovel dados,
                                                   @AuthenticationPrincipal Usuario locador) {
         Imovel imovel = imovelService.cadastrar(dados, locador);
         return ResponseEntity.ok(new DadosImovel(imovel));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DadosImovel> atualizar(@PathVariable Long id,
+                                                 @RequestBody @Valid DadosCadastroImovel dados,
+                                                 @AuthenticationPrincipal Usuario solicitante) {
+        return ResponseEntity.ok(new DadosImovel(imovelService.atualizar(id, dados, solicitante)));
+    }
+
+    @PutMapping("/{id}/reativar")
+    public ResponseEntity<Void> reativar(@PathVariable Long id, @AuthenticationPrincipal Usuario solicitante) {
+        imovelService.reativar(id, solicitante);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping
@@ -34,19 +51,19 @@ public class ImovelController {
                 ? imovelService.listarPorCidade(cidade, pageable)
                 : imovelService.listarDisponiveis(pageable);
 
-        return ResponseEntity.ok(imoveis.map(DadosImovel::new));
+        return ResponseEntity.ok(avaliacaoService.comResumos(imoveis));
     }
 
     @GetMapping("/meus")
     public ResponseEntity<Page<DadosImovel>> meusImoveis(@AuthenticationPrincipal Usuario locador,
                                                            Pageable pageable) {
         Page<Imovel> imoveis = imovelService.listarDoLocador(locador.getId(), pageable);
-        return ResponseEntity.ok(imoveis.map(DadosImovel::new));
+        return ResponseEntity.ok(avaliacaoService.comResumos(imoveis));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<DadosImovel> detalhar(@PathVariable Long id) {
-        return ResponseEntity.ok(new DadosImovel(imovelService.buscarPorId(id)));
+        return ResponseEntity.ok(avaliacaoService.comResumo(imovelService.buscarPorId(id)));
     }
 
     @DeleteMapping("/{id}")

@@ -1,0 +1,15 @@
+# Copie este arquivo para config/application.yml (ignorado pelo git) e preencha.
+# Vale para qualquer perfil (dev ou local); reinicie o servidor depois de salvar.
+#
+# Gmail: ative a verificacao em duas etapas e crie uma "senha de app" em
+# https://myaccount.google.com/apppasswords (use essa senha de 16 letras abaixo, nao a senha normal).
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: seuemail@gmail.com
+    password: sua-senha-de-app
+
+app:
+  email-remetente: seuemail@gmail.com
+  url-base: http://localhost:8080

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dados do Inquilino | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-pagina="inquilino" data-exige="LOCADOR">
+    <header class="topo">
+        <div class="topo-int largo">
+            <a class="logo" href="proprietario.html">Aluga<span>Fácil</span></a>
+            <a class="info" href="proprietario.html" style="text-decoration:underline" data-saudacao="curta">Olá!</a>
+        </div>
+    </header>
+    <div class="painel">
+        <aside class="lateral">
+            <p>Menu</p>
+            <nav><a href="proprietario.html">Visão Geral</a><a href="meus-imoveis.html">Meus Imóveis</a><a
+                    href="financeiro.html">Financeiro</a><a href="inquilinos.html" class="ativo">Inquilinos</a><a
+                    href="proprietario-ajuda.html">Ajuda</a><a href="sair.html">Sair</a></nav>
+        </aside>
+        <main class="conteudo">
+            <p class="aviso" id="erro" hidden></p>
+            <div class="cabeca">
+                <div class="stat" style="justify-content:flex-start;gap:14px">
+                    <div class="avatar" data-campo="iniciais"></div>
+                    <h1 class="titulo" data-campo="nome"></h1><span class="selo" data-selo="sim"
+                        style="margin:0"></span>
+                </div>
+                <div class="acoes" style="margin:0"><a class="btn" href="inquilinos.html">Voltar</a></div>
+            </div>
+            <section class="cartao">
+                <h2 class="secao" style="margin-top:0">Dados do inquilino</h2>
+                <div class="linha"><span class="info">Email</span><strong data-campo="email"></strong></div>
+                <div class="linha"><span class="info">Telefone</span><strong data-campo="telefone"></strong></div>
+            </section>
+            <section class="cartao" style="margin-top:20px">
+                <h2 class="secao" style="margin-top:0">Contrato</h2>
+                <div class="linha"><span class="info">Imóvel</span><strong data-campo="imovelNome"></strong></div>
+                <div class="linha"><span class="info">Endereço</span><strong data-campo="imovelEndereco"></strong></div>
+                <div class="linha"><span class="info">Valor mensal</span><strong data-campo="valor"></strong></div>
+                <div class="linha"><span class="info">Vencimento</span><strong data-campo="vencimento"></strong></div>
+                <div class="linha"><span class="info">Início</span><strong data-campo="desde"></strong></div>
+                <div class="linha"><span class="info">Fim</span><strong data-campo="fim"></strong></div>
+                <div class="linha"><span class="info">Situação do contrato</span><strong data-campo="statusContrato"></strong></div>
+                <div class="acoes"><a class="btn" id="ver-imovel" href="#">Abrir imóvel</a><button type="button" class="btn" id="encerrar">Encerrar contrato</button></div>
+            </section>
+            <section class="cartao" style="margin-top:20px">
+                <h2 class="secao" style="margin-top:0">Pagamentos</h2>
+                <div id="historico"><p class="info">Carregando...</p></div>
+            </section>
+        </main>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/proprietario.js"></script>
+</body>
+
+</html>

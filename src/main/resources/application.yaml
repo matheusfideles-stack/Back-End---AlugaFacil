@@ -12,9 +12,13 @@ spring:
     username: root
     # Defina DB_PASSWORD no ambiente ou em application-local.yml (ignorado pelo git).
     password: ${DB_PASSWORD:}
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 55MB
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     open-in-view: false
     properties:
       hibernate:
@@ -23,6 +27,29 @@ spring:
     enabled: false
     locations: classpath:db/migration
     baseline-on-migrate: true
+  # Para enviar e-mail de verdade defina SPRING_MAIL_HOST, SPRING_MAIL_USERNAME e SPRING_MAIL_PASSWORD.
+  # Sem SMTP o codigo de verificacao e escrito no log do servidor.
+  mail:
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
+app:
+  url-base: ${APP_URL_BASE:http://localhost:8080}
+  email-remetente: ${MAIL_REMETENTE:nao-responda@alugafacil.local}
+  email-suporte: ${MAIL_SUPORTE:suporte@alugafacil.local}
+  admin:
+    nome: Administrador
+    email: ${ADMIN_EMAIL:}
+    senha: ${ADMIN_SENHA:}
+  recuperacao-senha:
+    validade-minutos: 30
+  confirmacao-email:
+    validade-minutos: 60
+  codigo:
+    max-tentativas: 5
+  uploads:
+    dir: ${UPLOADS_DIR:./uploads}
 
 api:
   security:
@@ -53,6 +80,9 @@ ratelimit:
   webhooks:
     requests-per-second: 20
     burst: 50
+  contato:
+    requests-per-second: 1
+    burst: 3
   geral:
     requests-per-second: 10
     burst: 20

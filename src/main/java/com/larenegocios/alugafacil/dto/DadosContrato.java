@@ -12,6 +12,8 @@ public record DadosContrato(
         String tituloImovel,
         Long locatarioId,
         String nomeLocatario,
+        String emailLocatario,
+        String telefoneLocatario,
         LocalDate dataInicio,
         LocalDate dataFim,
         Integer diaVencimento,
@@ -21,6 +23,7 @@ public record DadosContrato(
     public DadosContrato(Contrato contrato) {
         this(contrato.getId(), contrato.getImovel().getId(), contrato.getImovel().getTitulo(),
                 contrato.getLocatario().getId(), contrato.getLocatario().getNome(),
+                contrato.getLocatario().getEmail(), contrato.getLocatario().getTelefone(),
                 contrato.getDataInicio(), contrato.getDataFim(), contrato.getDiaVencimento(),
                 contrato.getValorMensal(), contrato.getStatus());
     }

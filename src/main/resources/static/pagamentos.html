@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamentos | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100;
+            backdrop-filter: blur(3px)
+        }
+
+        .modal[hidden] {
+            display: none
+        }
+
+        .modal-caixa {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            max-height: 92vh;
+            overflow: auto;
+            background: #fff;
+            text-align: center;
+            padding-top: 30px;
+            border-radius: 18px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, .35);
+            animation: modal-subir .18s ease-out
+        }
+
+        @keyframes modal-subir {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(.98)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .modal-caixa {
+                animation: none
+            }
+        }
+
+        .modal-x {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            width: 34px;
+            height: 34px;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--azul);
+            font-size: 1.7rem;
+            line-height: 1;
+            cursor: pointer
+        }
+
+        .modal-x:hover {
+            background: #f1f5f9
+        }
+
+        .modal-caixa input[readonly] {
+            width: 100%;
+            box-sizing: border-box;
+            font-size: .8rem;
+            text-align: left
+        }
+
+        .modal .acoes {
+            justify-content: flex-end
+        }
+
+        .modal .acoes .btn {
+            flex: 0 0 auto
+        }
+
+        .qr-caixa {
+            position: relative;
+            display: inline-block;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            padding: 10px;
+            margin-bottom: 8px
+        }
+
+        .qr {
+            width: 210px;
+            height: 210px;
+            display: block
+        }
+
+        .qr-caixa.pago .qr {
+            opacity: .3
+        }
+
+        .qr-selo {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: #15803d
+        }
+
+        .pix-dica {
+            font-size: .85rem;
+            margin: 0 0 16px
+        }
+
+        .modal-caixa .copia {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+            margin-top: 4px
+        }
+
+        .modal-caixa .copia input[readonly] {
+            flex: 1;
+            width: auto;
+            min-width: 0;
+            text-overflow: ellipsis
+        }
+
+        .modal-caixa .copia .btn {
+            flex: 0 0 auto;
+            min-width: 96px
+        }
+
+        .btn-mini {
+            margin-top: 8px;
+            padding: 6px 12px;
+            font-size: .8rem
+        }
+
+        .modal-caixa form {
+            text-align: left
+        }
+
+        .cartao-previa {
+            background: linear-gradient(135deg, #1e3a5f, #3b6ea5);
+            color: #fff;
+            border-radius: 14px;
+            padding: 16px 18px;
+            text-align: left;
+            margin-bottom: 4px;
+            box-shadow: 0 8px 20px rgba(30, 58, 95, .35)
+        }
+
+        .cartao-previa .cp-topo,
+        .cartao-previa .cp-base {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .06em
+        }
+
+        .cartao-previa .cp-numero {
+            font-size: 1.1rem;
+            letter-spacing: .12em;
+            margin: 18px 0 14px;
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap
+        }
+
+        .cartao-previa .cp-base span:first-child {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap
+        }
+
+        .campos-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .nota {
+            font-size: .78rem;
+            margin-top: 12px
+        }
+
+        .qr-caixa.barras-caixa {
+            display: block
+        }
+
+        .barras {
+            display: block;
+            width: 100%;
+            height: 70px
+        }
+
+        .qr-caixa.pago .barras {
+            opacity: .3
+        }
+
+        .recibo {
+            text-align: left;
+            margin-top: 12px;
+            border-top: 1px solid #e5e7eb
+        }
+
+        .recibo div {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 9px 0;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: .88rem
+        }
+
+        .recibo span {
+            color: var(--suave)
+        }
+
+        .recibo strong {
+            text-align: right
+        }
+
+        .acoes-modal {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px
+        }
+
+        .selo.erro {
+            background: #fee2e2;
+            color: #b91c1c
+        }
+    </style>
+</head>
+
+<body data-exige="LOCATARIO">
+    <header class="topo">
+        <div class="topo-int">
+            <a class="logo" href="cliente.html">Aluga<span>Fácil</span></a>
+            <nav class="menu" id="menu-principal"></nav>
+            <div class="topo-acoes" id="topo-acoes"></div>
+        </div>
+    </header>
+    <main class="container">
+        <h1 class="titulo">Métodos de Pagamento</h1>
+        <p class="aviso ok" id="confirmacao" hidden></p>
+        <p class="aviso" id="erro" hidden></p>
+        <p class="vazio" id="carregando">Carregando...</p>
+
+        <section class="cartao" id="sec-contratar" style="margin-top:20px" hidden>
+            <p class="rotulo">Novo aluguel</p>
+            <strong id="ct-titulo"></strong>
+            <p class="info" id="ct-endereco"></p>
+            <p class="valor" id="ct-valor" style="font-size:1.6rem;margin-top:8px;text-align:left"></p>
+            <p class="info" id="ct-detalhe"></p>
+            <label for="ct-dia">Dia de vencimento do aluguel</label>
+            <select id="ct-dia"></select>
+            <p class="info" style="margin-top:8px">Contrato de 12 meses, começando hoje.</p>
+            <button type="button" class="btn btn-ouro btn-cheio" id="ct-assinar" style="margin-top:16px">Assinar contrato e continuar</button>
+        </section>
+
+        <div id="sec-pagar" hidden>
+            <label for="sel-contrato" id="rot-contrato" hidden>Contrato</label>
+            <select id="sel-contrato" hidden></select>
+
+            <section class="cartao" style="margin-top:20px">
+                <p class="rotulo" id="pg-rotulo">Aluguel</p>
+                <strong id="pg-imovel"></strong>
+                <p class="info" id="pg-info"></p>
+                <p class="valor" id="pg-valor" style="font-size:1.6rem;margin-top:8px;text-align:left"></p>
+                <label for="sel-mes">Mês de referência</label>
+                <select id="sel-mes"><option value="">Carregando...</option></select>
+            </section>
+
+            <h2 class="secao" style="margin-top:24px">Escolha como pagar</h2>
+            <section class="grade g2" style="margin-top:12px">
+                <label class="cartao metodo"><input type="radio" name="metodo" value="pix"
+                        checked><strong>PIX</strong><span>Transferência instantânea 24/7</span></label>
+                <label class="cartao metodo"><input type="radio" name="metodo"
+                        value="boleto"><strong>Boleto</strong><span>Código de barras para pagamento em qualquer
+                        lugar</span></label>
+                <label class="cartao metodo"><input type="radio" name="metodo"
+                        value="debito"><strong>Débito</strong><span>Débito direto da sua conta bancária</span></label>
+                <label class="cartao metodo"><input type="radio" name="metodo"
+                        value="credito"><strong>Crédito</strong><span>Parcelamento disponível em até 12x</span></label>
+            </section>
+            <button type="button" class="btn btn-ouro btn-cheio" id="btn-pagar" style="margin-top:16px" disabled>Pagar</button>
+
+            <section class="cartao" style="margin-top:24px">
+                <h2 class="secao" style="margin-top:0">Histórico de Pagamentos</h2>
+                <div id="historico"><p class="info">Carregando...</p></div>
+            </section>
+        </div>
+
+        <section class="cartao" id="sem-contrato" style="margin-top:20px" hidden>
+            <p>Você ainda não tem um aluguel ativo para pagar.</p>
+            <div class="acoes"><a class="btn btn-ouro" href="imoveis.html">Ver imóveis disponíveis</a></div>
+        </section>
+    </main>
+
+    <div class="modal" id="modal-pagamento" hidden>
+        <div class="cartao modal-caixa" role="dialog" aria-modal="true" aria-labelledby="pag-titulo">
+            <button type="button" class="modal-x" id="pag-x" aria-label="Fechar">&times;</button>
+            <h2 class="secao" id="pag-titulo" style="margin-top:0">Pagamento</h2>
+            <p class="info" id="pag-resumo"></p>
+            <div id="pag-corpo" style="margin-top:12px"></div>
+            <p class="aviso" id="pag-status" hidden></p>
+            <div class="acoes" style="margin-top:16px">
+                <button type="button" class="btn" id="pag-fechar">Fechar</button>
+                <button type="button" class="btn btn-ouro" id="pag-acao" hidden>Verificar pagamento</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/vendor/qrcode.js"></script>
+    <script src="js/pagamentos.js"></script>
+</body>
+
+</html>

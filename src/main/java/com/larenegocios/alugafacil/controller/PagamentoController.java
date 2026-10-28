@@ -49,9 +49,24 @@ public class PagamentoController {
         return ResponseEntity.ok(pagamentos.map(DadosPagamento::new));
     }
 
+    @GetMapping("/meus")
+    public ResponseEntity<Page<DadosPagamento>> meusPagamentos(@AuthenticationPrincipal Usuario solicitante,
+                                                               Pageable pageable) {
+        return ResponseEntity.ok(pagamentoService.listarDoLocatario(solicitante.getId(), pageable)
+                .map(DadosPagamento::new));
+    }
+
+    @GetMapping("/recebidos")
+    public ResponseEntity<Page<DadosPagamento>> recebidos(@AuthenticationPrincipal Usuario solicitante,
+                                                          Pageable pageable) {
+        return ResponseEntity.ok(pagamentoService.listarDoLocador(solicitante.getId(), pageable)
+                .map(DadosPagamento::new));
+    }
+
     @GetMapping("/{id}")
-    public ResponseEntity<DadosPagamento> detalhar(@PathVariable Long id) {
-        return ResponseEntity.ok(new DadosPagamento(pagamentoService.buscarPorId(id)));
+    public ResponseEntity<DadosPagamento> detalhar(@PathVariable Long id,
+                                                   @AuthenticationPrincipal Usuario solicitante) {
+        return ResponseEntity.ok(new DadosPagamento(pagamentoService.detalhar(id, solicitante)));
     }
 
     @PostMapping("/{id}/sincronizar")

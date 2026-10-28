@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inquilinos | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-pagina="inquilinos" data-exige="LOCADOR">
+    <header class="topo">
+        <div class="topo-int largo">
+            <a class="logo" href="proprietario.html">Aluga<span>Fácil</span></a>
+            <a class="info" href="proprietario.html" style="text-decoration:underline" data-saudacao="curta">Olá!</a>
+        </div>
+    </header>
+    <div class="painel">
+        <aside class="lateral">
+            <p>Menu</p>
+            <nav><a href="proprietario.html">Visão Geral</a><a href="meus-imoveis.html">Meus Imóveis</a><a
+                    href="financeiro.html">Financeiro</a><a href="inquilinos.html" class="ativo">Inquilinos</a><a
+                    href="proprietario-ajuda.html">Ajuda</a><a href="sair.html">Sair</a></nav>
+        </aside>
+        <main class="conteudo">
+            <h1 class="titulo">Meus Inquilinos</h1>
+            <p class="aviso" id="erro" hidden></p>
+            <section class="cartao" id="lista" style="margin-top:20px"><p class="info">Carregando...</p></section>
+        </main>
+    </div>
+    <script src="js/api.js"></script>
+    <script src="js/proprietario.js"></script>
+</body>
+
+</html>

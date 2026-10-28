@@ -4,6 +4,7 @@ public enum CategoriaRateLimit {
     AUTENTICACAO,
     PAGAMENTOS,
     WEBHOOKS,
+    CONTATO,
     GERAL;
 
     public static CategoriaRateLimit de(String caminho) {
@@ -12,6 +13,9 @@ public enum CategoriaRateLimit {
         }
         if (caminho.equals("/pagamentos") || caminho.startsWith("/pagamentos/")) {
             return PAGAMENTOS;
+        }
+        if (caminho.equals("/contato") || caminho.startsWith("/contato/")) {
+            return CONTATO;
         }
         if (caminho.equals("/webhooks") || caminho.startsWith("/webhooks/")) {
             return WEBHOOKS;
