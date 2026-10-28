@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Confirmar e-mail | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="login">
+        <section class="lado-azul">
+            <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
+            <h2>Confirmação de e-mail</h2>
+            <p class="info" style="color:#cbd5e1">Confirmar o e-mail garante que a conta é sua.</p>
+        </section>
+        <section class="lado-form">
+            <div style="width:100%;max-width:340px">
+                <div id="formulario">
+                    <h1 class="titulo">Digite o código</h1>
+                    <p class="sub">Enviamos um código de 6 dígitos para o seu e-mail.</p>
+                    <p class="aviso" id="aviso" hidden></p>
+                    <p class="aviso ok" id="resultado" hidden></p>
+                    <p class="aviso ok" id="codigo-teste" hidden>
+                        Modo de teste (e-mail não configurado neste servidor):
+                        seu código é <strong id="codigo-teste-valor" style="letter-spacing:3px"></strong>
+                    </p>
+                    <form id="form-confirmar" novalidate>
+                        <label for="email">Email</label>
+                        <input id="email" type="email" required placeholder="seuemail@gmail.com" autocomplete="email">
+                        <label for="codigo">Código de verificação</label>
+                        <input id="codigo" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+                            required placeholder="000000" style="letter-spacing:6px;font-size:20px;text-align:center">
+                        <button class="btn btn-ouro btn-cheio" type="submit" style="margin-top:16px">Confirmar e-mail</button>
+                    </form>
+                    <p class="info central" style="margin-top:12px">Não chegou?
+                        <a href="#" id="reenviar" style="color:var(--ouro-texto);font-weight:700">Enviar um novo código</a></p>
+                </div>
+                <div id="sucesso" hidden>
+                    <h1 class="titulo">E-mail confirmado!</h1>
+                    <p class="sub">Sua conta está ativa. Agora é só entrar.</p>
+                    <a class="btn btn-ouro btn-cheio" href="login.html">Entrar</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="js/api.js"></script>
+    <script>
+        (function () {
+            var email = document.getElementById('email');
+            var codigo = document.getElementById('codigo');
+            var aviso = document.getElementById('aviso');
+            var resultado = document.getElementById('resultado');
+
+            function mostrarCodigoDeTeste(valor) {
+                document.getElementById('codigo-teste').hidden = !valor;
+                if (valor) document.getElementById('codigo-teste-valor').textContent = valor;
+            }
+
+            function emailValido() {
+                if (email.checkValidity() && email.value) return true;
+                mostrarAviso(aviso, 'Digite o email da sua conta, por exemplo: nome@email.com.');
+                email.focus();
+                return false;
+            }
+
+            codigo.addEventListener('input', function () {
+                codigo.value = codigo.value.replace(/\D/g, '').slice(0, 6);
+            });
+
+            document.getElementById('form-confirmar').addEventListener('submit', async function (e) {
+                e.preventDefault();
+                mostrarAviso(resultado, '');
+                if (!emailValido()) return;
+                if (!/^\d{6}$/.test(codigo.value)) {
+                    mostrarAviso(aviso, 'Digite o código de 6 dígitos que chegou no seu e-mail.');
+                    codigo.focus();
+                    return;
+                }
+                try {
+                    await api('/auth/confirmar-email', { metodo: 'POST', corpo: { email: email.value.trim(), codigo: codigo.value }, autenticado: false });
+                    document.getElementById('formulario').hidden = true;
+                    document.getElementById('sucesso').hidden = false;
+                } catch (erro) {
+                    mostrarAviso(aviso, erro.message);
+                }
+            });
+
+            document.getElementById('reenviar').addEventListener('click', async function (e) {
+                e.preventDefault();
+                mostrarAviso(aviso, '');
+                mostrarCodigoDeTeste(null);
+                if (!emailValido()) return;
+                try {
+                    var resposta = await api('/auth/reenviar-confirmacao', { metodo: 'POST', corpo: { email: email.value.trim() }, autenticado: false });
+                    mostrarAviso(resultado, resposta.mensagem, 'ok');
+                    mostrarCodigoDeTeste(resposta.codigoDeTeste);
+                    codigo.focus();
+                } catch (erro) {
+                    mostrarAviso(aviso, erro.message);
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 public record DadosPagamento(
         Long id,
         Long contratoId,
+        String tituloImovel,
+        String nomeLocatario,
         String referenciaMes,
         BigDecimal valor,
         MetodoPagamento metodo,
@@ -35,6 +37,8 @@ public record DadosPagamento(
     public DadosPagamento(Pagamento pagamento) {
         this(pagamento.getId(),
                 pagamento.getContrato().getId(),
+                pagamento.getContrato().getImovel().getTitulo(),
+                pagamento.getContrato().getLocatario().getNome(),
                 pagamento.getReferenciaMes(),
                 pagamento.getValor(),
                 pagamento.getMetodo(),

@@ -19,3 +19,15 @@ Thumbs.db
 
 ### Logs ###
 *.log
+
+### Banco local do perfil dev ###
+data/
+
+### Configuracao local com credenciais (e-mail) ###
+config/application.yml
+
+### Fotos enviadas pelos proprietarios ###
+uploads/
+
+### Configuracao local do Claude Code ###
+.claude/

@@ -35,6 +35,7 @@ class RateLimiterTest {
             "/pagamentos, PAGAMENTOS",
             "/pagamentos/10/estornar, PAGAMENTOS",
             "/webhooks/mercadopago, WEBHOOKS",
+            "/contato, CONTATO",
             "/imoveis, GERAL",
             "/contratos/meus, GERAL",
             "/authentication, GERAL",

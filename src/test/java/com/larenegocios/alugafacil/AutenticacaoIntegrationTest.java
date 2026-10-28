@@ -23,12 +23,12 @@ class AutenticacaoIntegrationTest extends IntegracaoBase {
 
     @Test
     void registraUsuarioSemDevolverASenha() throws Exception {
-        Map<String, Object> dados = dadosUsuario("LOCADOR");
+        Map<String, Object> dados = dadosUsuario("LOCATARIO");
 
         mockMvc.perform(postJson("/auth/registro", dados))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value(dados.get("email")))
-                .andExpect(jsonPath("$.perfil").value("LOCADOR"))
+                .andExpect(jsonPath("$.perfil").value("LOCATARIO"))
                 .andExpect(content().string(not(containsString("senha"))));
     }
 
@@ -52,16 +52,14 @@ class AutenticacaoIntegrationTest extends IntegracaoBase {
 
     @Test
     void rejeitaCadastroInvalidoComListaDeErros() throws Exception {
-        Map<String, Object> dados = dadosUsuario("LOCADOR");
+        Map<String, Object> dados = dadosUsuario("LOCATARIO");
         dados.put("email", "isso-nao-e-email");
         dados.put("senha", "curta");
-        dados.remove("perfil");
 
         mockMvc.perform(postJson("/auth/registro", dados))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$[?(@.campo == 'email')]").exists())
-                .andExpect(jsonPath("$[?(@.campo == 'senha')]").exists())
-                .andExpect(jsonPath("$[?(@.campo == 'perfil')]").exists());
+                .andExpect(jsonPath("$[?(@.campo == 'senha')]").exists());
     }
 
     @Test
@@ -88,8 +86,70 @@ class AutenticacaoIntegrationTest extends IntegracaoBase {
     }
 
     @Test
+    void loginDevolveNomeEPerfilAlemDoToken() throws Exception {
+        Map<String, Object> dados = cadastrar("LOCADOR");
+
+        mockMvc.perform(postJson("/auth/login", Map.of("email", dados.get("email"), "senha", SENHA)))
+                .andExpect(jsonPath("$.nome").value(dados.get("nome")))
+                .andExpect(jsonPath("$.perfil").value("LOCADOR"));
+    }
+
+    @Test
+    void cadastroPublicoNaoPermiteProprietarioNemAdmin() throws Exception {
+        mockMvc.perform(postJson("/auth/registro", dadosUsuario("ADMIN")))
+                .andExpect(status().isUnprocessableEntity());
+        mockMvc.perform(postJson("/auth/registro", dadosUsuario("LOCADOR")))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void cadastroPublicoSemPerfilCriaLocatario() throws Exception {
+        Map<String, Object> dados = dadosUsuario("LOCATARIO");
+        dados.remove("perfil");
+
+        mockMvc.perform(postJson("/auth/registro", dados))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.perfil").value("LOCATARIO"));
+    }
+
+    @Test
+    void cpfComMascaraEGuardadoSoComDigitos() throws Exception {
+        Map<String, Object> dados = dadosUsuario("LOCATARIO");
+        String cpf = (String) dados.get("cpf");
+        dados.put("cpf", cpf.substring(0, 3) + "." + cpf.substring(3, 6) + "." + cpf.substring(6, 9) + "-" + cpf.substring(9));
+
+        mockMvc.perform(postJson("/auth/registro", dados))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.cpf").value(cpf));
+    }
+
+    @Test
+    void cpfComDigitosAMenosEhRejeitado() throws Exception {
+        Map<String, Object> dados = dadosUsuario("LOCATARIO");
+        dados.put("cpf", "123.456");
+
+        mockMvc.perform(postJson("/auth/registro", dados))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void emailNaoDiferenciaMaiusculasNoCadastroENoLogin() throws Exception {
+        Map<String, Object> dados = dadosUsuario("LOCATARIO");
+        String original = (String) dados.get("email");
+        dados.put("email", original.toUpperCase());
+
+        mockMvc.perform(postJson("/auth/registro", dados))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(original));
+        confirmarNoBanco(original);
+
+        mockMvc.perform(postJson("/auth/login", Map.of("email", "  " + original.toUpperCase() + " ", "senha", SENHA)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void rotaInexistenteDevolve404EmVezDe403() throws Exception {
-        mockMvc.perform(postJson("/auth/registrar", dadosUsuario("LOCADOR")))
+        mockMvc.perform(postJson("/auth/registrar", dadosUsuario("LOCATARIO")))
                 .andExpect(status().isNotFound());
         mockMvc.perform(get("/rota-que-nao-existe").header("Authorization", "Bearer " + tokenDe("LOCATARIO")))
                 .andExpect(status().isNotFound());

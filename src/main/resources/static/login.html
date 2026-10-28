@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        @media (max-width: 768px) {
+            .lado-azul {
+                padding: 28px 20px
+            }
+
+            .lado-azul .logo {
+                font-size: 1.5rem;
+                margin-bottom: 12px
+            }
+
+            .lado-azul h2 {
+                font-size: 1.2rem
+            }
+
+            .lado-azul .info {
+                font-size: .9rem;
+                margin: 0
+            }
+
+            .lado-form {
+                padding: 24px 20px
+            }
+
+            .opcoes {
+                flex-wrap: wrap;
+                gap: 8px
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="login">
+        <section class="lado-azul">
+            <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
+            <h2 id="titulo-lado">Bem-vindo de volta!</h2>
+            <p class="info" id="sub-lado" style="color:#cbd5e1">Acesse sua conta para continuar gerenciando seus imóveis.</p>
+        </section>
+        <section class="lado-form">
+            <div style="width:100%;max-width:340px">
+                <div class="abas">
+                    <a href="#entrar" data-aba="entrar" class="ativo">Entrar</a>
+                    <a href="#cadastro" data-aba="cadastro">Criar conta</a>
+                </div>
+
+                <div class="aviso ok" id="ja-logado" hidden>
+                    <p id="ja-logado-texto"></p>
+                    <div class="acoes">
+                        <a class="btn btn-ouro" id="ja-logado-painel" href="#">Ir para meu painel</a>
+                        <button class="btn" type="button" id="ja-logado-sair">Sair e trocar de conta</button>
+                    </div>
+                </div>
+                <p class="aviso" id="aviso" hidden></p>
+                <div class="aviso ok" id="confirmacao-box" hidden>
+                    <p id="confirmacao-texto"></p>
+                    <p id="confirmacao-teste" hidden style="margin-top:8px">Modo de teste (e-mail não configurado neste servidor):
+                        seu código é <strong id="confirmacao-teste-codigo" style="letter-spacing:3px"></strong></p>
+                    <label for="confirmacao-codigo" style="margin-top:12px">Código de verificação</label>
+                    <input id="confirmacao-codigo" type="text" inputmode="numeric" autocomplete="one-time-code"
+                        maxlength="6" placeholder="000000" style="letter-spacing:6px;font-size:20px;text-align:center">
+                    <div class="acoes acoes-quebra">
+                        <button class="btn btn-ouro" type="button" id="confirmacao-confirmar">Confirmar e-mail</button>
+                        <button class="btn" type="button" id="confirmacao-reenviar">Reenviar código</button>
+                        <button class="btn" type="button" id="confirmacao-entrar">Ir para o login</button>
+                    </div>
+                </div>
+
+                <form id="form-entrar" novalidate>
+                    <h1 class="titulo">Entrar</h1>
+                    <p class="sub">Acesse com seu email e senha</p>
+                    <label for="email">Email</label>
+                    <input id="email" type="email" required placeholder="seuemail@gmail.com" autocomplete="email">
+                    <label for="senha">Senha</label>
+                    <input id="senha" type="password" required placeholder="Minha chave secreta"
+                        autocomplete="current-password">
+                    <div class="opcoes"><label><input type="checkbox" id="lembrar" checked> Lembrar-me</label><a href="esqueci-senha.html">Esqueceu a
+                            senha?</a></div>
+                    <button class="btn btn-ouro btn-cheio" type="submit">Entrar Agora</button>
+                    <p class="info central" style="margin-top:12px">Não tem conta? <a href="#cadastro"
+                            data-trocar-aba="cadastro" style="color:var(--ouro-texto)">Cadastre-se aqui</a></p>
+                </form>
+
+                <form id="form-cadastro" novalidate hidden>
+                    <h1 class="titulo">Criar conta</h1>
+                    <p class="sub">Preencha seus dados para começar</p>
+                    <label for="nome">Nome completo</label>
+                    <input id="nome" name="nome" type="text" required autocomplete="name">
+                    <label for="cadastro-email">Email</label>
+                    <input id="cadastro-email" name="email" type="email" required autocomplete="email"
+                        placeholder="seuemail@gmail.com">
+                    <label for="cpf">CPF</label>
+                    <input id="cpf" name="cpf" type="text" required maxlength="14" placeholder="000.000.000-00">
+                    <label for="telefone">Telefone <span class="info">(opcional)</span></label>
+                    <input id="telefone" name="telefone" type="tel" maxlength="20" placeholder="(34) 99999-9999">
+                    <label for="cadastro-senha">Senha</label>
+                    <input id="cadastro-senha" name="senha" type="password" required minlength="8"
+                        placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+                    <label for="cadastro-senha2">Confirmar senha</label>
+                    <input id="cadastro-senha2" name="senha2" type="password" required minlength="8"
+                        placeholder="Repita a senha" autocomplete="new-password">
+                    <button class="btn btn-ouro btn-cheio" type="submit" style="margin-top:16px">Criar conta</button>
+                    <p class="info central" style="margin-top:12px">Já tem conta? <a href="#entrar"
+                            data-trocar-aba="entrar" style="color:var(--ouro-texto)">Entrar</a></p>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script src="js/api.js"></script>
+    <script src="js/login.js"></script>
+</body>
+
+</html>

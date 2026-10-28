@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Imóveis | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100
+        }
+
+        .modal[hidden] {
+            display: none
+        }
+
+        .modal-caixa {
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow: auto;
+            background: #fff
+        }
+
+        .linha-det {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--borda);
+            text-align: left
+        }
+
+        .linha-det strong {
+            text-align: right
+        }
+
+        .modal .acoes {
+            justify-content: flex-end
+        }
+
+        .modal .acoes .btn {
+            flex: 0 0 auto
+        }
+    </style>
+</head>
+
+<body data-pagina="imoveis" data-exige="LOCADOR">
+    <header class="topo">
+        <div class="topo-int largo">
+            <a class="logo" href="proprietario.html">Aluga<span>Fácil</span></a>
+            <a class="info" href="proprietario.html" style="text-decoration:underline" data-saudacao="curta">Olá!</a>
+        </div>
+    </header>
+    <div class="painel">
+        <aside class="lateral">
+            <p>Menu</p>
+            <nav><a href="proprietario.html">Visão Geral</a><a href="meus-imoveis.html" class="ativo">Meus Imóveis</a><a
+                    href="financeiro.html">Financeiro</a><a href="inquilinos.html">Inquilinos</a><a
+                    href="proprietario-ajuda.html">Ajuda</a><a href="sair.html">Sair</a></nav>
+        </aside>
+        <main class="conteudo">
+            <div class="cabeca">
+                <h1 class="titulo">Meus Imóveis</h1><a class="btn btn-ouro" href="novo-imovel.html">+ Novo Imóvel</a>
+            </div>
+            <p class="aviso ok" id="confirmacao" hidden></p>
+            <p class="aviso" id="erro" hidden></p>
+            <form class="cartao filtros" style="grid-template-columns:1fr 1fr 2fr">
+                <div><label for="st">Status</label><select id="st">
+                        <option>Todos</option>
+                        <option>Alugado</option>
+                        <option>Disponível</option>
+                        <option>Inativo</option>
+                    </select></div>
+                <div><label for="ci">Cidade</label><select id="ci">
+                        <option>Todas</option>
+                    </select></div>
+                <div><label for="bu">Buscar</label><input id="bu" type="text" placeholder="Nome do imóvel ou endereço">
+                </div>
+            </form>
+            <section class="grade g4" id="lista" style="margin-top:20px"></section>
+        </main>
+    </div>
+
+    <div class="modal" id="modal-imovel" hidden>
+        <div class="cartao modal-caixa" role="dialog" aria-modal="true" aria-labelledby="det-titulo">
+            <div class="stat"><h2 class="secao" id="det-titulo" style="margin:0"></h2><span class="selo" id="det-status"></span></div>
+            <div id="det-corpo" style="margin-top:12px"></div>
+            <div class="acoes" style="margin-top:16px">
+                <button type="button" class="btn" id="det-alternar" hidden>Desativar anúncio</button>
+                <button type="button" class="btn" id="det-fechar">Fechar</button>
+                <a class="btn btn-ouro" id="det-editar" href="#">Editar</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/proprietario.js"></script>
+</body>
+
+</html>

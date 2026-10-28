@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Nova senha | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <main class="login">
+        <section class="lado-azul">
+            <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
+            <h2>Crie uma nova senha</h2>
+            <p class="info" style="color:#cbd5e1">Digite o código que enviamos para o seu e-mail e escolha uma senha com pelo menos 8 caracteres.</p>
+        </section>
+        <section class="lado-form">
+            <div style="width:100%;max-width:340px">
+                <p class="aviso" id="aviso" hidden></p>
+                <p class="aviso ok" id="resultado" hidden></p>
+                <p class="aviso ok" id="codigo-teste" hidden>
+                    Modo de teste (e-mail não configurado neste servidor):
+                    seu código é <strong id="codigo-teste-valor" style="letter-spacing:3px"></strong>
+                </p>
+                <form id="form-redefinir" novalidate>
+                    <h1 class="titulo">Nova senha</h1>
+                    <p class="sub">Confira o e-mail, digite o código e a nova senha</p>
+                    <label for="email">Email</label>
+                    <input id="email" type="email" required placeholder="seuemail@gmail.com" autocomplete="email">
+                    <label for="codigo">Código de 6 dígitos</label>
+                    <input id="codigo" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6"
+                        required placeholder="000000" style="letter-spacing:6px;font-size:20px;text-align:center">
+                    <label for="senha">Nova senha</label>
+                    <input id="senha" type="password" required minlength="8" placeholder="Mínimo 8 caracteres"
+                        autocomplete="new-password">
+                    <label for="senha2">Confirmar nova senha</label>
+                    <input id="senha2" type="password" required minlength="8" placeholder="Repita a senha"
+                        autocomplete="new-password">
+                    <button class="btn btn-ouro btn-cheio" type="submit" style="margin-top:16px">Salvar nova senha</button>
+                    <p class="info central" style="margin-top:12px">Não chegou?
+                        <a href="#" id="reenviar" style="color:var(--ouro-texto);font-weight:700">Enviar um novo código</a></p>
+                    <p class="info central" style="margin-top:8px"><a href="login.html" style="color:var(--ouro-texto)">Voltar para o login</a></p>
+                </form>
+            </div>
+        </section>
+    </main>
+    <script src="js/api.js"></script>
+    <script>
+        (function () {
+            var form = document.getElementById('form-redefinir');
+            var aviso = document.getElementById('aviso');
+            var resultado = document.getElementById('resultado');
+            var email = document.getElementById('email');
+            var codigo = document.getElementById('codigo');
+            var senha = document.getElementById('senha');
+            var senha2 = document.getElementById('senha2');
+            var botao = form.querySelector('button[type=submit]');
+
+            function mostrarCodigoDeTeste(valor) {
+                document.getElementById('codigo-teste').hidden = !valor;
+                if (valor) document.getElementById('codigo-teste-valor').textContent = valor;
+            }
+
+            try {
+                email.value = sessionStorage.getItem('recuperar-email') || '';
+                mostrarCodigoDeTeste(sessionStorage.getItem('recuperar-codigo-teste'));
+            } catch (e) { }
+            if (email.value) mostrarAviso(resultado, 'Se o email estiver cadastrado, enviamos um código de 6 dígitos para ' + email.value + '.', 'ok');
+            (email.value ? codigo : email).focus();
+
+            codigo.addEventListener('input', function () {
+                codigo.value = codigo.value.replace(/\D/g, '').slice(0, 6);
+            });
+
+            document.getElementById('reenviar').addEventListener('click', async function (e) {
+                e.preventDefault();
+                mostrarAviso(aviso, '');
+                mostrarCodigoDeTeste(null);
+                if (!email.checkValidity() || !email.value) {
+                    mostrarAviso(aviso, 'Digite o email da sua conta para receber um novo código.');
+                    email.focus();
+                    return;
+                }
+                try {
+                    var resposta = await api('/auth/esqueci-senha', { metodo: 'POST', corpo: { email: email.value.trim() }, autenticado: false });
+                    mostrarAviso(resultado, resposta.mensagem, 'ok');
+                    mostrarCodigoDeTeste(resposta.codigoDeTeste);
+                    codigo.value = '';
+                    codigo.focus();
+                } catch (erro) {
+                    mostrarAviso(aviso, erro.message);
+                }
+            });
+
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                mostrarAviso(resultado, '');
+                if (!email.checkValidity() || !email.value) {
+                    mostrarAviso(aviso, 'Digite um email válido, por exemplo: nome@email.com.');
+                    email.focus();
+                    return;
+                }
+                if (!/^\d{6}$/.test(codigo.value)) {
+                    mostrarAviso(aviso, 'Digite o código de 6 dígitos que chegou no seu e-mail.');
+                    codigo.focus();
+                    return;
+                }
+                if (senha.value.length < 8) {
+                    mostrarAviso(aviso, 'A senha precisa ter pelo menos 8 caracteres.');
+                    senha.focus();
+                    return;
+                }
+                if (senha.value !== senha2.value) {
+                    mostrarAviso(aviso, 'As senhas não são iguais.');
+                    senha2.focus();
+                    return;
+                }
+                botao.disabled = true;
+                botao.textContent = 'Salvando...';
+                try {
+                    await api('/auth/redefinir-senha', {
+                        metodo: 'POST',
+                        corpo: { email: email.value.trim(), codigo: codigo.value, novaSenha: senha.value },
+                        autenticado: false
+                    });
+                    try {
+                        sessionStorage.removeItem('recuperar-email');
+                        sessionStorage.removeItem('recuperar-codigo-teste');
+                    } catch (e) { }
+                    location.href = 'login.html?msg=senha-alterada';
+                } catch (erro) {
+                    mostrarAviso(aviso, erro.message);
+                    botao.disabled = false;
+                    botao.textContent = 'Salvar nova senha';
+                }
+            });
+        })();
+    </script>
+</body>
+
+</html>

@@ -2,6 +2,7 @@ package com.larenegocios.alugafacil.dto;
 
 import com.larenegocios.alugafacil.domain.imovel.TipoImovel;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -41,5 +42,17 @@ public record DadosCadastroImovel(
         @DecimalMin("0.01")
         BigDecimal valorAluguel,
 
-        BigDecimal valorCondominio) {
+        BigDecimal valorCondominio,
+
+        @Min(0)
+        Integer quartos,
+
+        @Min(0)
+        Integer banheiros,
+
+        @Min(0)
+        Integer vagas,
+
+        @Min(0)
+        Integer areaM2) {
 }

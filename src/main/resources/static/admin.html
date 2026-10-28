@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administração | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body data-exige="ADMIN">
+    <header class="topo">
+        <div class="topo-int">
+            <a class="logo" href="admin.html">Aluga<span>Fácil</span></a>
+            <nav class="menu" id="menu-principal"></nav>
+            <a class="btn" href="sair.html">Sair</a>
+        </div>
+    </header>
+    <main class="container">
+        <h1 class="titulo">Administração</h1>
+        <p class="sub">Cadastre os proprietários que vão anunciar imóveis. Locatários criam a própria conta pelo site.</p>
+        <p class="aviso ok" id="confirmacao" hidden></p>
+        <p class="aviso ok" id="codigo-teste" hidden>
+            Modo de teste (e-mail não configurado neste servidor):
+            código de verificação do proprietário: <strong id="codigo-teste-valor" style="letter-spacing:3px"></strong>
+        </p>
+        <p class="aviso" id="erro" hidden></p>
+
+        <form class="cartao" id="form-locador" novalidate>
+            <h2 class="secao" style="margin-top:0">Cadastrar proprietário</h2>
+            <div class="campos">
+                <div class="cheio"><label for="nome">Nome completo</label><input id="nome" type="text" required maxlength="150"></div>
+                <div><label for="email">Email</label><input id="email" type="email" required maxlength="150"
+                        placeholder="proprietario@email.com" autocomplete="off"></div>
+                <div><label for="telefone">Telefone <span class="info">(opcional)</span></label><input id="telefone"
+                        type="tel" maxlength="20" placeholder="(34) 99999-9999"></div>
+                <div><label for="cpf">CPF</label><input id="cpf" type="text" required maxlength="14"
+                        placeholder="000.000.000-00"></div>
+                <div><label for="senha">Senha provisória</label><input id="senha" type="text" required minlength="8"
+                        placeholder="Mínimo 8 caracteres" autocomplete="off"></div>
+            </div>
+            <p class="info" style="margin-top:12px">Passe essa senha ao proprietário. Ele recebe um código de verificação por e-mail e só consegue entrar depois de digitá-lo na tela de login. A senha pode ser trocada depois em "Esqueceu a senha?".</p>
+            <button class="btn btn-ouro" type="submit" style="margin-top:16px">Cadastrar proprietário</button>
+        </form>
+
+        <section class="cartao" style="margin-top:24px">
+            <h2 class="secao" style="margin-top:0">Proprietários cadastrados</h2>
+            <div id="lista"><p class="info">Carregando...</p></div>
+        </section>
+    </main>
+    <script src="js/api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>

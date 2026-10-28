@@ -15,11 +15,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class PagamentoIntegrationTest extends IntegracaoBase {
 
     private String tokenLocatario;
+    private String tokenLocador;
     private long contratoId;
 
     @BeforeEach
     void criarContrato() throws Exception {
-        String tokenLocador = tokenDe("LOCADOR");
+        tokenLocador = tokenDe("LOCADOR");
         tokenLocatario = tokenDe("LOCATARIO");
 
         long imovelId = idDaResposta(mockMvc.perform(postJson("/imoveis", dadosImovel(), tokenLocador)));
@@ -121,6 +122,33 @@ class PagamentoIntegrationTest extends IntegracaoBase {
         mockMvc.perform(post("/pagamentos/" + pagamentoId + "/estornar")
                         .header("Authorization", "Bearer " + tokenLocatario))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    void locatarioVeSeusPagamentosELocadorVeOsRecebidos() throws Exception {
+        long pagamentoId = idDaResposta(
+                mockMvc.perform(postJson("/pagamentos", cobranca("PIX", "2027-06"), tokenLocatario)));
+
+        mockMvc.perform(get("/pagamentos/meus").header("Authorization", "Bearer " + tokenLocatario))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value((int) pagamentoId))
+                .andExpect(jsonPath("$.content[0].tituloImovel").value("Apartamento 2 quartos"));
+
+        mockMvc.perform(get("/pagamentos/recebidos").header("Authorization", "Bearer " + tokenLocador))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value((int) pagamentoId))
+                .andExpect(jsonPath("$.content[0].nomeLocatario").isNotEmpty());
+    }
+
+    @Test
+    void estranhoNaoVeOPagamentoDeOutroContrato() throws Exception {
+        long pagamentoId = idDaResposta(
+                mockMvc.perform(postJson("/pagamentos", cobranca("PIX", "2027-07"), tokenLocatario)));
+
+        mockMvc.perform(get("/pagamentos/" + pagamentoId).header("Authorization", "Bearer " + tokenDe("LOCATARIO")))
+                .andExpect(status().isUnprocessableEntity());
+        mockMvc.perform(get("/pagamentos/" + pagamentoId).header("Authorization", "Bearer " + tokenLocador))
+                .andExpect(status().isOk());
     }
 
     @Test

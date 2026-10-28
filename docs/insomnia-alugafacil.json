@@ -1,0 +1,1586 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-10-27T12:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:v13.2.0",
+  "resources": [
+    {
+      "_id": "wrk_alugafacil",
+      "_type": "workspace",
+      "parentId": null,
+      "name": "AlugaFacil API (importado)",
+      "description": "Rotas da API AlugaFacil. Selecione o ambiente Local, rode os logins (administrador, locador e locatário) e use o resto.",
+      "scope": "collection"
+    },
+    {
+      "_id": "env_alugafacil_base",
+      "_type": "environment",
+      "parentId": "wrk_alugafacil",
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:8080"
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 1
+    },
+    {
+      "_id": "env_alugafacil_local",
+      "_type": "environment",
+      "parentId": "env_alugafacil_base",
+      "name": "Local",
+      "data": {
+        "base_url": "http://localhost:8080",
+        "token_admin": "",
+        "token_locador": "",
+        "token_locatario": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "token_admin",
+          "token_locador",
+          "token_locatario"
+        ]
+      },
+      "color": "#7d69cb",
+      "isPrivate": false,
+      "metaSortKey": 2
+    },
+    {
+      "_id": "fld_alugafacil_auth",
+      "_type": "request_group",
+      "parentId": "wrk_alugafacil",
+      "name": "Autenticação",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 1000
+    },
+    {
+      "_id": "req_alugafacil_reg_locatario",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "1. Registrar Locatário (cadastro público)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/registro",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Joao Locatario\",\n  \"email\": \"locatario@teste.com\",\n  \"cpf\": \"98765432100\",\n  \"telefone\": \"11988888888\",\n  \"senha\": \"Senha123!\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_confirmar_locatario",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "1b. Confirmar e-mail do Locatário (código do e-mail)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/confirmar-email",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"locatario@teste.com\",\n  \"codigo\": \"COLE_AQUI_O_CODIGO_DE_6_DIGITOS\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_login_admin",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "2. Login Administrador (salva token_admin)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 4000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@alugafacil.local\",\n  \"senha\": \"Admin1234\"\n}"
+      },
+      "afterResponseScript": "const corpo = insomnia.response.json();\ninsomnia.environment.set('token_admin', corpo.token);"
+    },
+    {
+      "_id": "req_alugafacil_reg_locador",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "3. Cadastrar Locador (feito pelo Administrador)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/admin/locadores",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 5000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Maria Locadora\",\n  \"email\": \"locador@teste.com\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"11999999999\",\n  \"senha\": \"Senha123!\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_confirmar_locador",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "3b. Confirmar e-mail do Locador (código do e-mail)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/confirmar-email",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 6000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"locador@teste.com\",\n  \"codigo\": \"COLE_AQUI_O_CODIGO_DE_6_DIGITOS\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_login_locador",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "4. Login Locador (salva token_locador)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 7000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"locador@teste.com\",\n  \"senha\": \"Senha123!\"\n}"
+      },
+      "afterResponseScript": "const corpo = insomnia.response.json();\ninsomnia.environment.set('token_locador', corpo.token);"
+    },
+    {
+      "_id": "req_alugafacil_login_locatario",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "5. Login Locatário (salva token_locatario)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/login",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 8000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"locatario@teste.com\",\n  \"senha\": \"Senha123!\"\n}"
+      },
+      "afterResponseScript": "const corpo = insomnia.response.json();\ninsomnia.environment.set('token_locatario', corpo.token);"
+    },
+    {
+      "_id": "req_alugafacil_reenviar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "5b. Reenviar e-mail de confirmação",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/reenviar-confirmacao",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 9000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"locatario@teste.com\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_esqueci",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "6. Esqueci minha senha (o código sai por e-mail ou no log do servidor)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/esqueci-senha",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 10000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"locatario@teste.com\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_redefinir",
+      "_type": "request",
+      "parentId": "fld_alugafacil_auth",
+      "name": "7. Redefinir senha (cole o código de 6 dígitos)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/auth/redefinir-senha",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 11000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"locatario@teste.com\",\n  \"codigo\": \"COLE_AQUI_O_CODIGO_DE_6_DIGITOS\",\n  \"novaSenha\": \"NovaSenha123!\"\n}"
+      }
+    },
+    {
+      "_id": "fld_alugafacil_admin",
+      "_type": "request_group",
+      "parentId": "wrk_alugafacil",
+      "name": "Administração",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 12000
+    },
+    {
+      "_id": "req_alugafacil_adm_listar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_admin",
+      "name": "Listar locadores (Administrador)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/admin/locadores",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 13000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "fld_alugafacil_imoveis",
+      "_type": "request_group",
+      "parentId": "wrk_alugafacil",
+      "name": "Imóveis",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 14000
+    },
+    {
+      "_id": "req_alugafacil_imv_listar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Listar imóveis disponíveis (público)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 15000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_imv_cidade",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Listar por cidade (público)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis?cidade=Sao Paulo",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 16000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_imv_meus",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Meus imóveis (Locador)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis/meus",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 17000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_imv_obter",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Obter imóvel por ID (público)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis/1",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 18000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_imv_criar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Criar imóvel (Locador)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/imoveis",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 19000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Apartamento 2 quartos\",\n  \"descricao\": \"Apartamento confortável no centro\",\n  \"tipo\": \"APARTAMENTO\",\n  \"logradouro\": \"Rua das Flores\",\n  \"numero\": \"123\",\n  \"complemento\": \"Apto 101\",\n  \"bairro\": \"Centro\",\n  \"cidade\": \"Sao Paulo\",\n  \"uf\": \"SP\",\n  \"cep\": \"01310-100\",\n  \"valorAluguel\": 1500.00,\n  \"valorCondominio\": 300.00,\n  \"quartos\": 2,\n  \"banheiros\": 1,\n  \"vagas\": 1,\n  \"areaM2\": 65\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_imv_atualizar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Atualizar imóvel (Locador)",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/imoveis/1",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 20000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Apartamento 2 quartos reformado\",\n  \"descricao\": \"Apartamento confortável no centro\",\n  \"tipo\": \"APARTAMENTO\",\n  \"logradouro\": \"Rua das Flores\",\n  \"numero\": \"123\",\n  \"complemento\": \"Apto 101\",\n  \"bairro\": \"Centro\",\n  \"cidade\": \"Sao Paulo\",\n  \"uf\": \"SP\",\n  \"cep\": \"01310-100\",\n  \"valorAluguel\": 1600.00,\n  \"valorCondominio\": 300.00,\n  \"quartos\": 2,\n  \"banheiros\": 1,\n  \"vagas\": 1,\n  \"areaM2\": 65\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_imv_desativar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Desativar imóvel (Locador)",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/imoveis/1",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 21000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_imv_reativar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Reativar imóvel (Locador)",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/imoveis/1/reativar",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 22000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "fld_alugafacil_contratos",
+      "_type": "request_group",
+      "parentId": "wrk_alugafacil",
+      "name": "Contratos",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 23000
+    },
+    {
+      "_id": "req_alugafacil_ctr_criar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_contratos",
+      "name": "Criar contrato (Locatário)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/contratos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 24000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"imovelId\": 1,\n  \"dataInicio\": \"2026-10-27\",\n  \"dataFim\": \"2027-10-27\",\n  \"diaVencimento\": 10\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_ctr_meus_locatario",
+      "_type": "request",
+      "parentId": "fld_alugafacil_contratos",
+      "name": "Meus contratos como Locatário",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/contratos/meus?papel=locatario",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 25000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_ctr_meus_locador",
+      "_type": "request",
+      "parentId": "fld_alugafacil_contratos",
+      "name": "Meus contratos como Locador",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/contratos/meus?papel=locador",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 26000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_ctr_obter",
+      "_type": "request",
+      "parentId": "fld_alugafacil_contratos",
+      "name": "Obter contrato por ID (Locatário)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/contratos/1",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 27000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_ctr_encerrar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_contratos",
+      "name": "Encerrar contrato (Locatário)",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/contratos/1/encerrar",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 28000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "fld_alugafacil_pagamentos",
+      "_type": "request_group",
+      "parentId": "wrk_alugafacil",
+      "name": "Pagamentos",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 29000
+    },
+    {
+      "_id": "req_alugafacil_pag_config",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Configuração do gateway",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pagamentos/config",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 30000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_pag_pix",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Gerar cobrança Pix",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pagamentos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 31000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"contratoId\": 1,\n  \"referenciaMes\": \"2026-10\",\n  \"metodo\": \"PIX\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_pag_boleto",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Gerar cobrança Boleto",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pagamentos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 32000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"contratoId\": 1,\n  \"referenciaMes\": \"2026-11\",\n  \"metodo\": \"BOLETO\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_pag_credito",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Gerar cobrança Cartão de crédito",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pagamentos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 33000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"contratoId\": 1,\n  \"referenciaMes\": \"2026-12\",\n  \"metodo\": \"CARTAO_CREDITO\",\n  \"tokenCartao\": \"TOKEN_GERADO_NO_FRONTEND\",\n  \"bandeiraCartao\": \"visa\",\n  \"parcelas\": 1\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_pag_debito",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Gerar cobrança Cartão de débito",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pagamentos",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 34000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"contratoId\": 1,\n  \"referenciaMes\": \"2027-01\",\n  \"metodo\": \"CARTAO_DEBITO\",\n  \"tokenCartao\": \"TOKEN_GERADO_NO_FRONTEND\",\n  \"bandeiraCartao\": \"debmaster\",\n  \"parcelas\": 1\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_pag_meus",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Meus pagamentos (Locatário)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pagamentos/meus",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 35000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_pag_recebidos",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Pagamentos recebidos (Locador)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pagamentos/recebidos",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 36000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_pag_contrato",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Listar pagamentos do contrato",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pagamentos/contrato/1",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 37000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_pag_obter",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Obter pagamento por ID",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/pagamentos/1",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 38000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_pag_sync",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Sincronizar com o gateway",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pagamentos/1/sincronizar",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 39000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_pag_estorno",
+      "_type": "request",
+      "parentId": "fld_alugafacil_pagamentos",
+      "name": "Estornar pagamento",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/pagamentos/1/estornar",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 40000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "fld_alugafacil_manutencao",
+      "_type": "request_group",
+      "parentId": "wrk_alugafacil",
+      "name": "Manutenção",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 41000
+    },
+    {
+      "_id": "req_alugafacil_man_criar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_manutencao",
+      "name": "Solicitar manutenção (Locatário)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/manutencoes",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 42000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"contratoId\": 1,\n  \"tipo\": \"Hidráulica\",\n  \"urgencia\": \"URGENTE\",\n  \"descricao\": \"Vazamento embaixo da pia da cozinha\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_man_meus",
+      "_type": "request",
+      "parentId": "fld_alugafacil_manutencao",
+      "name": "Minhas solicitações (Locatário)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/manutencoes/meus",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 43000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_man_recebidas",
+      "_type": "request",
+      "parentId": "fld_alugafacil_manutencao",
+      "name": "Solicitações recebidas (Locador)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/manutencoes/recebidas",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 44000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_man_status",
+      "_type": "request",
+      "parentId": "fld_alugafacil_manutencao",
+      "name": "Atualizar status (Locador)",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/manutencoes/1/status",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 45000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"status\": \"EM_ANDAMENTO\"\n}"
+      }
+    },
+    {
+      "_id": "fld_alugafacil_outros",
+      "_type": "request_group",
+      "parentId": "wrk_alugafacil",
+      "name": "Webhook e saúde",
+      "description": "",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 46000
+    },
+    {
+      "_id": "req_alugafacil_webhook",
+      "_type": "request",
+      "parentId": "fld_alugafacil_outros",
+      "name": "Webhook Mercado Pago (simulado)",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/webhooks/mercadopago",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 47000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"type\": \"payment\",\n  \"data\": { \"id\": \"123456789\" }\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_health",
+      "_type": "request",
+      "parentId": "fld_alugafacil_outros",
+      "name": "Health check",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/actuator/health",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 48000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {}
+    },
+    {
+      "_id": "req_alugafacil_foto_enviar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Enviar fotos do imóvel (Locador) - escolha os arquivos no campo \"fotos\"",
+      "description": "",
+      "method": "POST",
+      "url": "{{ _.base_url }}/imoveis/1/fotos",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 49000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "multipart/form-data",
+        "params": [
+          {
+            "name": "fotos",
+            "type": "file",
+            "fileName": "",
+            "value": ""
+          },
+          {
+            "name": "fotos",
+            "type": "file",
+            "fileName": "",
+            "value": ""
+          }
+        ]
+      }
+    },
+    {
+      "_id": "req_alugafacil_foto_listar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Listar fotos do imóvel (público)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis/1/fotos",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 50000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_foto_capa_url",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Foto de capa do imóvel (público, redireciona)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis/1/capa",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 51000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_foto_arquivo",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Baixar uma foto (público) - troque 1 pelo id da foto",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis/1/fotos/1/arquivo",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 52000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_foto_capa",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Definir foto de capa (Locador)",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/imoveis/1/fotos/1/capa",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 53000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_foto_remover",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Remover foto (Locador)",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/imoveis/1/fotos/1",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locador }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 54000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_aval_avaliar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Avaliar imóvel de 0 a 5 (Locatário) - cria ou atualiza a sua avaliação",
+      "description": "",
+      "method": "PUT",
+      "url": "{{ _.base_url }}/imoveis/1/avaliacoes/minha",
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 55000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nota\": 5,\n  \"comentario\": \"Imóvel muito bem cuidado e vizinhança tranquila.\"\n}"
+      }
+    },
+    {
+      "_id": "req_alugafacil_aval_minha",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Ver minha avaliação do imóvel (Locatário)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis/1/avaliacoes/minha",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 56000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_aval_listar",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Listar avaliações do imóvel (público)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis/1/avaliacoes?page=0&size=10",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 57000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_aval_resumo",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Resumo das avaliações: média, total e notas (público)",
+      "description": "",
+      "method": "GET",
+      "url": "{{ _.base_url }}/imoveis/1/avaliacoes/resumo",
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 58000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_aval_remover",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Excluir minha avaliação (Locatário)",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/imoveis/1/avaliacoes/minha",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_locatario }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 59000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    },
+    {
+      "_id": "req_alugafacil_aval_admin",
+      "_type": "request",
+      "parentId": "fld_alugafacil_imoveis",
+      "name": "Excluir avaliação de qualquer pessoa (Admin)",
+      "description": "",
+      "method": "DELETE",
+      "url": "{{ _.base_url }}/avaliacoes/1",
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.token_admin }}",
+        "prefix": "",
+        "disabled": false
+      },
+      "metaSortKey": 60000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global"
+    }
+  ]
+}

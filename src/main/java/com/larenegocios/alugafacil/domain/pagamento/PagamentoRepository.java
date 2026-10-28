@@ -12,6 +12,8 @@ public interface PagamentoRepository extends JpaRepository<Pagamento, Long> {
 
     Page<Pagamento> findByContratoLocatarioId(Long locatarioId, Pageable pageable);
 
+    Page<Pagamento> findByContratoImovelLocadorId(Long locadorId, Pageable pageable);
+
     Optional<Pagamento> findByContratoIdAndReferenciaMes(Long contratoId, String referenciaMes);
 
     Optional<Pagamento> findByIdTransacaoGateway(String idTransacaoGateway);

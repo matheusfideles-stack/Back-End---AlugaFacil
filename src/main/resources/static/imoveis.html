@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Imóveis | AlugaFácil</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+  <header class="topo">
+    <div class="topo-int estreito">
+      <a class="logo" href="index.html">Aluga<span>Fácil</span></a>
+      <nav class="menu" id="menu-principal"></nav>
+      <div class="topo-acoes" id="topo-acoes"></div>
+    </div>
+  </header>
+  <main>
+    <section class="vitrine" style="padding-top:32px">
+      <h1 class="titulo">Imóveis disponíveis para alugar</h1>
+      <form class="cartao filtros completo" id="filtros" style="margin-top:16px" novalidate>
+        <div><label for="local">Localização</label><input id="local" type="search" autocomplete="off"
+            placeholder="Cidade, bairro, rua ou título"></div>
+        <div><label for="tipo">Tipo de imóvel</label><select id="tipo">
+            <option value="">Todos</option>
+            <option value="CASA">Casa</option>
+            <option value="APARTAMENTO">Apartamento</option>
+            <option value="KITNET">Kitnet</option>
+            <option value="SALA_COMERCIAL">Sala comercial</option>
+            <option value="GALPAO">Galpão</option>
+          </select></div>
+        <div><label for="preco">Preço máximo</label><input id="preco" type="text" inputmode="decimal"
+            placeholder="Ex.: 3000"></div>
+        <div><label for="quartos">Quartos</label><select id="quartos">
+            <option value="0">Qualquer</option>
+            <option value="1">1 ou mais</option>
+            <option value="2">2 ou mais</option>
+            <option value="3">3 ou mais</option>
+            <option value="4">4 ou mais</option>
+          </select></div>
+        <div><label for="ordem">Ordenar por</label><select id="ordem">
+            <option value="recentes">Mais recentes</option>
+            <option value="menor">Menor preço</option>
+            <option value="maior">Maior preço</option>
+            <option value="avaliacao">Melhor avaliados</option>
+          </select></div>
+        <button class="btn" type="button" id="limpar">Limpar</button>
+      </form>
+      <p class="info" id="contagem" style="margin-top:16px" aria-live="polite"></p>
+      <p class="aviso" id="erro" hidden></p>
+      <div id="vitrine" class="grade g3" style="margin-top:12px"></div>
+    </section>
+  </main>
+  <footer class="rodape">© <span data-ano>2026</span> AlugaFácil. Todos os direitos reservados.</footer>
+  <script src="js/api.js"></script>
+  <script src="js/imoveis.js"></script>
+</body>
+
+</html>

@@ -110,6 +110,16 @@ public class PagamentoService {
         return pagamentoRepository.findByContratoLocatarioId(locatarioId, pageable);
     }
 
+    public Page<Pagamento> listarDoLocador(Long locadorId, Pageable pageable) {
+        return pagamentoRepository.findByContratoImovelLocadorId(locadorId, pageable);
+    }
+
+    public Pagamento detalhar(Long id, Usuario solicitante) {
+        Pagamento pagamento = buscarPorId(id);
+        contratoService.validarParticipante(pagamento.getContrato(), solicitante);
+        return pagamento;
+    }
+
     @Transactional
     public void estornar(Long id, Usuario solicitante) {
         Pagamento pagamento = buscarPorId(id);

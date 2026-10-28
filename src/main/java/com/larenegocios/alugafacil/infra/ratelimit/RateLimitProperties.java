@@ -16,6 +16,7 @@ public class RateLimitProperties {
     private Regra autenticacao = new Regra(2, 5);
     private Regra pagamentos = new Regra(2, 5);
     private Regra webhooks = new Regra(20, 50);
+    private Regra contato = new Regra(1, 3);
     private Regra geral = new Regra(10, 20);
 
     public Regra regraDe(CategoriaRateLimit categoria) {
@@ -23,6 +24,7 @@ public class RateLimitProperties {
             case AUTENTICACAO -> autenticacao;
             case PAGAMENTOS -> pagamentos;
             case WEBHOOKS -> webhooks;
+            case CONTATO -> contato;
             case GERAL -> geral;
         };
     }

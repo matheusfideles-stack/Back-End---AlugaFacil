@@ -59,6 +59,15 @@ public class Imovel {
     @Column(name = "valor_condominio")
     private BigDecimal valorCondominio = BigDecimal.ZERO;
 
+    private Integer quartos;
+
+    private Integer banheiros;
+
+    private Integer vagas;
+
+    @Column(name = "area_m2")
+    private Integer areaM2;
+
     @Column(nullable = false)
     private Boolean disponivel = true;
 
