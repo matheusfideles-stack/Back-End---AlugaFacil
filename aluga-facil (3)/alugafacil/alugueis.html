@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meus Aluguéis | AlugaFácil</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, .55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100
+        }
+
+        .modal[hidden] {
+            display: none
+        }
+
+        .modal-caixa {
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow: auto;
+            background: #fff
+        }
+
+        .modal select,
+        .modal textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid var(--borda);
+            border-radius: 6px;
+            font: inherit
+        }
+
+        .modal .acoes {
+            justify-content: flex-end
+        }
+    </style>
+</head>
+
+<body>
+    <header class="topo">
+        <div class="topo-int">
+            <a class="logo" href="cliente.html">Aluga<span>Fácil</span></a>
+            <nav class="menu"><a href="cliente.html">Início</a><a
+                    href="alugueis.html" class="ativo">Meus Aluguéis</a><a href="pagamentos.html">Pagamentos</a><a href="ajuda.html">Ajuda</a></nav>
+            <a class="btn" href="sair.html">Sair</a>
+        </div>
+    </header>
+    <main class="container">
+        <h1 class="titulo">Meus Imóveis</h1>
+        <p class="sub">Faça a gestão dos seus contratos ativos e histórico de aluguel.</p>
+        <p class="aviso ok" id="confirmacao" hidden></p>
+        <div class="abas"><a class="ativo" href="#ativos" data-aba="ativos">Contratos Ativos (3)</a><a href="#historico" data-aba="historico">Histórico (2)</a></div>
+        <section class="grade" id="ativos">
+            <article class="cartao contrato">
+                <div class="foto"></div>
+                <div class="corpo">
+                    <span class="selo">● Contrato ativo</span>
+                    <h2 class="secao" style="margin:8px 0 0">Casa - Bairro Alvorada</h2>
+                    <p class="info">Contrato nº 4801-A · Válido até 15/Dez/2027</p>
+                    <div class="valores">
+                        <div>
+                            <p class="rotulo">Valor mensal</p><strong>R$ 2.500</strong>
+                        </div>
+                        <div>
+                            <p class="rotulo">Próximo vencimento</p><strong>10 de Outubro</strong>
+                        </div>
+                    </div>
+                    <div class="acoes"><a class="btn btn-ouro" href="pagamentos.html">Pagar Aluguel</a><button type="button" class="btn abrir-manutencao">Solicitar Manutenção</button></div>
+                </div>
+            </article>
+            <article class="cartao contrato">
+                <div class="foto"></div>
+                <div class="corpo">
+                    <span class="selo">● Contrato ativo</span>
+                    <h2 class="secao" style="margin:8px 0 0">Casa - Bairro Alvorada</h2>
+                    <p class="info">Contrato nº 4801-A · Válido até 15/Dez/2027</p>
+                    <div class="valores">
+                        <div>
+                            <p class="rotulo">Valor mensal</p><strong>R$ 2.500</strong>
+                        </div>
+                        <div>
+                            <p class="rotulo">Próximo vencimento</p><strong>10 de Outubro</strong>
+                        </div>
+                    </div>
+                    <div class="acoes"><a class="btn btn-ouro" href="pagamentos.html">Pagar Aluguel</a><button type="button" class="btn abrir-manutencao">Solicitar Manutenção</button></div>
+                </div>
+            </article>
+            <article class="cartao contrato">
+                <div class="foto"></div>
+                <div class="corpo">
+                    <span class="selo">● Contrato ativo</span>
+                    <h2 class="secao" style="margin:8px 0 0">Casa - Bairro Alvorada</h2>
+                    <p class="info">Contrato nº 4801-A · Válido até 15/Dez/2027</p>
+                    <div class="valores">
+                        <div>
+                            <p class="rotulo">Valor mensal</p><strong>R$ 2.500</strong>
+                        </div>
+                        <div>
+                            <p class="rotulo">Próximo vencimento</p><strong>10 de Outubro</strong>
+                        </div>
+                    </div>
+                    <div class="acoes"><a class="btn btn-ouro" href="pagamentos.html">Pagar Aluguel</a><button type="button" class="btn abrir-manutencao">Solicitar Manutenção</button></div>
+                </div>
+            </article>
+        </section>
+        <section class="grade" id="historico" hidden>
+            <article class="cartao contrato">
+                <div class="foto"></div>
+                <div class="corpo">
+                    <span class="selo">● Encerrado</span>
+                    <h2 class="secao" style="margin:8px 0 0">Apto. 101 - Centro</h2>
+                    <p class="info">Contrato nº 3920-B · Encerrado em 10/Jun/2026</p>
+                    <div class="valores">
+                        <div>
+                            <p class="rotulo">Valor mensal</p><strong>R$ 1.900</strong>
+                        </div>
+                        <div>
+                            <p class="rotulo">Último pagamento</p><strong>10 de Junho</strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+            <article class="cartao contrato">
+                <div class="foto"></div>
+                <div class="corpo">
+                    <span class="selo">● Encerrado</span>
+                    <h2 class="secao" style="margin:8px 0 0">Studio - Jardim América</h2>
+                    <p class="info">Contrato nº 2157-C · Encerrado em 28/Fev/2026</p>
+                    <div class="valores">
+                        <div>
+                            <p class="rotulo">Valor mensal</p><strong>R$ 1.500</strong>
+                        </div>
+                        <div>
+                            <p class="rotulo">Último pagamento</p><strong>28 de Fevereiro</strong>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <div class="modal" id="modal-manutencao" hidden>
+        <div class="cartao modal-caixa" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+            <h2 class="secao" id="modal-titulo" style="margin-top:0">Solicitar manutenção</h2>
+            <p class="info" id="modal-imovel"></p>
+            <form id="form-manutencao" novalidate>
+                <label for="m-tipo">Tipo do problema</label>
+                <select id="m-tipo">
+                    <option value="">Selecione</option>
+                    <option value="Elétrica">Elétrica</option>
+                    <option value="Hidráulica">Hidráulica</option>
+                    <option value="Vazamento">Vazamento</option>
+                    <option value="Portão ou fechadura">Portão ou fechadura</option>
+                    <option value="Outro">Outro</option>
+                </select>
+                <label for="m-urgencia">Urgência</label>
+                <select id="m-urgencia">
+                    <option value="Normal">Normal</option>
+                    <option value="Urgente">Urgente (risco à segurança ou vazamento)</option>
+                </select>
+                <label for="m-descricao">Descreva o problema</label>
+                <textarea id="m-descricao" rows="4" placeholder="Ex.: torneira da cozinha pingando"></textarea>
+                <p class="aviso" id="m-aviso" hidden></p>
+                <div class="acoes" style="margin-top:16px">
+                    <button type="button" class="btn" id="m-cancelar">Cancelar</button>
+                    <button type="submit" class="btn btn-ouro">Enviar solicitação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Abas "Contratos Ativos" e "Histórico"
+        (function () {
+            var abas = document.querySelectorAll('.abas a[data-aba]');
+            var secoes = {
+                ativos: document.getElementById('ativos'),
+                historico: document.getElementById('historico')
+            };
+
+            function mostrar(nome) {
+                abas.forEach(function (a) {
+                    a.classList.toggle('ativo', a.dataset.aba === nome);
+                });
+                Object.keys(secoes).forEach(function (chave) {
+                    secoes[chave].hidden = chave !== nome;
+                });
+            }
+
+            abas.forEach(function (a) {
+                a.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    mostrar(a.dataset.aba);
+                });
+            });
+
+            var inicial = location.hash.replace('#', '');
+            mostrar(secoes[inicial] ? inicial : 'ativos');
+        })();
+
+        // Solicitação de manutenção (fictícia: só mostra a confirmação na tela)
+        (function () {
+            var modal = document.getElementById('modal-manutencao');
+            var form = document.getElementById('form-manutencao');
+            var imovelEl = document.getElementById('modal-imovel');
+            var tipo = document.getElementById('m-tipo');
+            var urgencia = document.getElementById('m-urgencia');
+            var descricao = document.getElementById('m-descricao');
+            var aviso = document.getElementById('m-aviso');
+            var confirmacao = document.getElementById('confirmacao');
+            var imovelAtual = '';
+
+            function abrir(nomeImovel) {
+                imovelAtual = nomeImovel;
+                imovelEl.textContent = 'Imóvel: ' + nomeImovel;
+                form.reset();
+                aviso.hidden = true;
+                modal.hidden = false;
+                tipo.focus();
+            }
+
+            function fechar() {
+                modal.hidden = true;
+            }
+
+            function mostrarErro(mensagem) {
+                aviso.textContent = mensagem;
+                aviso.className = 'aviso';
+                aviso.hidden = false;
+            }
+
+            document.querySelectorAll('.abrir-manutencao').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    abrir(btn.closest('.cartao').querySelector('h2').textContent.trim());
+                });
+            });
+
+            document.getElementById('m-cancelar').addEventListener('click', fechar);
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) fechar();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && !modal.hidden) fechar();
+            });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!tipo.value) {
+                    mostrarErro('Escolha o tipo do problema.');
+                    tipo.focus();
+                    return;
+                }
+                if (descricao.value.trim().length < 10) {
+                    mostrarErro('Descreva o problema com pelo menos 10 caracteres.');
+                    descricao.focus();
+                    return;
+                }
+                var protocolo = 'MAN-' + Math.floor(10000 + Math.random() * 90000);
+                fechar();
+                confirmacao.textContent = 'Solicitação enviada! Protocolo ' + protocolo + ' · ' + imovelAtual +
+                    ' · ' + tipo.value + ' · Urgência: ' + urgencia.value + '. Nossa equipe vai analisar e entrar em contato.';
+                confirmacao.hidden = false;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        })();
+    </script>
+</body>
+
+</html>
