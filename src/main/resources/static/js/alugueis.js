@@ -30,6 +30,7 @@ function cartaoAtivo(contrato) {
         <div class="acoes">
           <a class="btn btn-ouro" href="pagamentos.html?contrato=${contrato.id}">Pagar Aluguel</a>
           <a class="btn" href="imovel.html?id=${contrato.imovelId}#avaliacoes">Avaliar imóvel</a>
+          <button type="button" class="btn" data-baixar="/contratos/${contrato.id}/contrato.pdf" data-arquivo="contrato-${contrato.id}.pdf">Contrato (PDF)</button>
           <button type="button" class="btn abrir-manutencao" data-contrato="${contrato.id}">Solicitar Manutenção</button>
           <button type="button" class="btn encerrar" data-contrato="${contrato.id}">Encerrar contrato</button>
         </div>
@@ -176,4 +177,5 @@ el('form-manutencao').addEventListener('submit', async e => {
     el('ativos').innerHTML = '';
   }
   carregarManutencoes();
+  iniciarSolicitacoes('locatario', document.getElementById('propostas'), document.getElementById('visitas'));
 })();

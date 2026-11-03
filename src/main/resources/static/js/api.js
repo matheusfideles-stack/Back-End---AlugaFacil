@@ -223,6 +223,47 @@ function posicaoDoImovel(imovel) {
   };
 }
 
+// Baixa um arquivo que exige login (PDF do contrato ou do recibo): o link simples nao enviaria o token.
+async function baixarArquivo(caminho, nome, botao) {
+  const textoOriginal = botao ? botao.textContent : '';
+  if (botao) {
+    botao.disabled = true;
+    botao.textContent = 'Baixando...';
+  }
+  try {
+    const resposta = await fetch(caminho, { headers: { Authorization: `Bearer ${Sessao.token()}` } });
+    if (!resposta.ok) {
+      let mensagem = 'Não foi possível baixar o arquivo.';
+      try {
+        mensagem = mensagemDeErro(resposta.status, await resposta.json());
+      } catch (erro) {
+        // corpo sem JSON: fica a mensagem padrao
+      }
+      throw new Error(mensagem);
+    }
+    const url = URL.createObjectURL(await resposta.blob());
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nome;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  } catch (erro) {
+    alert(erro.message);
+  } finally {
+    if (botao) {
+      botao.disabled = false;
+      botao.textContent = textoOriginal;
+    }
+  }
+}
+
+document.addEventListener('click', e => {
+  const botao = e.target.closest('[data-baixar]');
+  if (botao) baixarArquivo(botao.dataset.baixar, botao.dataset.arquivo, botao);
+});
+
 // Preco digitado pelo usuario ("3000", "3.000,50", "R$ 3000"); vazio ou invalido nao limita nada.
 function lerPreco(texto) {
   const limpo = String(texto).replace(/[^\d,.]/g, '');
@@ -344,7 +385,8 @@ function mostrarAviso(elemento, mensagem, tipo = 'erro') {
 
 function irParaImovel(id, ancora = '') {
   const destino = `imovel.html?id=${id}${ancora ? '#' + ancora : ''}`;
-  location.href = Sessao.logado() ? destino : `login.html?redirect=${encodeURIComponent(destino)}`;
+  // A pagina do imovel e publica: o login so e pedido na hora de alugar ou avaliar.
+  location.href = destino;
 }
 
 function montarAcoesDoTopo(elemento) {

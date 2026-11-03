@@ -50,6 +50,7 @@ class ManutencaoServiceTest {
                 .criar());
 
         service = new ManutencaoService();
+        ReflectionTestUtils.setField(service, "notificador", Dobles.notificador());
         ReflectionTestUtils.setField(service, "contratoService", contratoService);
         ReflectionTestUtils.setField(service, "manutencaoRepository", Dobles.repositorio(ManutencaoRepository.class)
                 .responde("save", a -> {

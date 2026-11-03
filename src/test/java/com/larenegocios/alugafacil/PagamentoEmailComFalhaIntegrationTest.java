@@ -66,7 +66,7 @@ class PagamentoEmailComFalhaIntegrationTest extends IntegracaoBase {
         String tokenLocador = tokenDe("LOCADOR");
         tokenLocatario = tokenDe("LOCATARIO");
         long imovelId = idDaResposta(mockMvc.perform(postJson("/imoveis", dadosImovel(), tokenLocador)));
-        contratoId = idDaResposta(mockMvc.perform(postJson("/contratos", dadosContrato(imovelId), tokenLocatario)));
+        contratoId = contratar(imovelId, tokenLocatario, tokenLocador);
         servidor.tentativas.set(0);
     }
 

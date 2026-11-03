@@ -269,15 +269,17 @@
         <p class="vazio" id="carregando">Carregando...</p>
 
         <section class="cartao" id="sec-contratar" style="margin-top:20px" hidden>
-            <p class="rotulo">Novo aluguel</p>
+            <p class="rotulo">Proposta de aluguel</p>
             <strong id="ct-titulo"></strong>
             <p class="info" id="ct-endereco"></p>
             <p class="valor" id="ct-valor" style="font-size:1.6rem;margin-top:8px;text-align:left"></p>
             <p class="info" id="ct-detalhe"></p>
             <label for="ct-dia">Dia de vencimento do aluguel</label>
             <select id="ct-dia"></select>
-            <p class="info" style="margin-top:8px">Contrato de 12 meses, começando hoje.</p>
-            <button type="button" class="btn btn-ouro btn-cheio" id="ct-assinar" style="margin-top:16px">Assinar contrato e continuar</button>
+            <p class="info" style="margin-top:8px">Proposta de contrato de 12 meses, começando hoje. O contrato só começa quando o proprietário aceitar.</p>
+            <label for="ct-mensagem">Mensagem ao proprietário <span class="info">(opcional)</span></label>
+            <textarea id="ct-mensagem" rows="3" maxlength="500" placeholder="Conte um pouco sobre você e quando pretende se mudar"></textarea>
+            <button type="button" class="btn btn-ouro btn-cheio" id="ct-assinar" style="margin-top:16px">Enviar proposta ao proprietário</button>
         </section>
 
         <div id="sec-pagar" hidden>
@@ -289,6 +291,7 @@
                 <strong id="pg-imovel"></strong>
                 <p class="info" id="pg-info"></p>
                 <p class="valor" id="pg-valor" style="font-size:1.6rem;margin-top:8px;text-align:left"></p>
+                <p class="aviso" id="pg-atraso" hidden style="margin-top:8px"></p>
                 <label for="sel-mes">Mês de referência</label>
                 <select id="sel-mes"><option value="">Carregando...</option></select>
             </section>

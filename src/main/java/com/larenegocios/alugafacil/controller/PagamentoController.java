@@ -1,10 +1,14 @@
 package com.larenegocios.alugafacil.controller;
 
 import com.larenegocios.alugafacil.domain.pagamento.Pagamento;
+import com.larenegocios.alugafacil.domain.pagamento.StatusPagamento;
+import com.larenegocios.alugafacil.infra.exception.RegraDeNegocioException;
+import com.larenegocios.alugafacil.infra.pdf.GeradorDePdf;
 import com.larenegocios.alugafacil.domain.pagamento.gateway.mercadopago.MercadoPagoProperties;
 import com.larenegocios.alugafacil.domain.usuario.Usuario;
 import com.larenegocios.alugafacil.dto.DadosConfiguracaoPagamento;
 import com.larenegocios.alugafacil.dto.DadosPagamento;
+import com.larenegocios.alugafacil.dto.DadosValorAtualizado;
 import com.larenegocios.alugafacil.dto.DadosSolicitacaoPagamento;
 import com.larenegocios.alugafacil.service.PagamentoService;
 import jakarta.validation.Valid;
@@ -26,12 +30,21 @@ public class PagamentoController {
     @Autowired
     private MercadoPagoProperties mercadoPagoProperties;
 
+    @Autowired
+    private GeradorDePdf geradorDePdf;
+
     @Value("${pagamento.gateway.provider:fake}")
     private String provider;
 
     @GetMapping("/config")
     public ResponseEntity<DadosConfiguracaoPagamento> configuracao() {
         return ResponseEntity.ok(new DadosConfiguracaoPagamento(provider, mercadoPagoProperties.getPublicKey()));
+    }
+
+    @GetMapping("/valor-atualizado")
+    public ResponseEntity<DadosValorAtualizado> valorAtualizado(@RequestParam Long contratoId, @RequestParam String referenciaMes,
+                                                                @AuthenticationPrincipal Usuario solicitante) {
+        return ResponseEntity.ok(pagamentoService.valorAtualizado(contratoId, referenciaMes, solicitante));
     }
 
     @PostMapping
@@ -67,6 +80,15 @@ public class PagamentoController {
     public ResponseEntity<DadosPagamento> detalhar(@PathVariable Long id,
                                                    @AuthenticationPrincipal Usuario solicitante) {
         return ResponseEntity.ok(new DadosPagamento(pagamentoService.detalhar(id, solicitante)));
+    }
+
+    @GetMapping("/{id}/recibo.pdf")
+    public ResponseEntity<byte[]> recibo(@PathVariable Long id, @AuthenticationPrincipal Usuario solicitante) {
+        Pagamento pagamento = pagamentoService.detalhar(id, solicitante);
+        if (pagamento.getStatus() != StatusPagamento.PAGO) {
+            throw new RegraDeNegocioException("O recibo so fica disponivel depois que o pagamento for confirmado");
+        }
+        return RespostaPdf.de(geradorDePdf.recibo(pagamento), String.format("recibo-PG-%06d.pdf", pagamento.getId()));
     }
 
     @PostMapping("/{id}/sincronizar")

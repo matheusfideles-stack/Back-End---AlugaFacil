@@ -135,6 +135,21 @@ public abstract class IntegracaoBase {
         return objectMapper.readTree(resultado.andReturn().getResponse().getContentAsString()).get("id").asLong();
     }
 
+    // O contrato so nasce quando o proprietario aceita uma proposta: devolve o id do contrato criado.
+    protected long contratar(long imovelId, String tokenLocatario, String tokenLocador) throws Exception {
+        return contratar(dadosContrato(imovelId), tokenLocatario, tokenLocador);
+    }
+
+    protected long contratar(Map<String, Object> proposta, String tokenLocatario, String tokenLocador) throws Exception {
+        long propostaId = idDaResposta(mockMvc.perform(postJson("/propostas", proposta, tokenLocatario))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk()));
+        String resposta = mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+                        .put("/propostas/" + propostaId + "/aceitar").header("Authorization", "Bearer " + tokenLocador))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(resposta).get("contratoId").asLong();
+    }
+
     protected Map<String, Object> dadosContrato(long imovelId) {
         Map<String, Object> dados = new LinkedHashMap<>();
         dados.put("imovelId", imovelId);

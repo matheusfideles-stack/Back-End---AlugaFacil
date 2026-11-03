@@ -24,7 +24,7 @@ class PagamentoIntegrationTest extends IntegracaoBase {
         tokenLocatario = tokenDe("LOCATARIO");
 
         long imovelId = idDaResposta(mockMvc.perform(postJson("/imoveis", dadosImovel(), tokenLocador)));
-        contratoId = idDaResposta(mockMvc.perform(postJson("/contratos", dadosContrato(imovelId), tokenLocatario)));
+        contratoId = contratar(imovelId, tokenLocatario, tokenLocador);
     }
 
     private Map<String, Object> cobranca(String metodo, String referenciaMes) {
@@ -37,13 +37,13 @@ class PagamentoIntegrationTest extends IntegracaoBase {
 
     @Test
     void geraCobrancaPixComCopiaECola() throws Exception {
-        mockMvc.perform(postJson("/pagamentos", cobranca("PIX", "2026-10"), tokenLocatario))
+        mockMvc.perform(postJson("/pagamentos", cobranca("PIX", "2026-11"), tokenLocatario))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.metodo").value("PIX"))
                 .andExpect(jsonPath("$.status").value("PAGO"))
                 .andExpect(jsonPath("$.valor").value(1800.00))
                 .andExpect(jsonPath("$.pixCopiaECola", startsWith("00020126FAKE")))
-                .andExpect(jsonPath("$.vencimento").value("2026-10-10"));
+                .andExpect(jsonPath("$.vencimento").value("2026-11-10"));
     }
 
     @Test

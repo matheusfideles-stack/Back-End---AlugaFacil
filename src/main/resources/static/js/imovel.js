@@ -69,7 +69,8 @@ function renderizarImovel(imovel, perfil) {
 
   let acao;
   if (!imovel.disponivel) acao = '<p class="info">Este imóvel não está mais disponível para locação.</p>';
-  else if (podeAlugar) acao = `<a class="btn btn-ouro" href="pagamentos.html?imovel=${imovel.id}">Alugar este imóvel</a>`;
+  else if (podeAlugar) acao = `<a class="btn btn-ouro" href="pagamentos.html?imovel=${imovel.id}">Fazer proposta de aluguel</a>`;
+  else if (!perfil) acao = `<a class="btn btn-ouro" href="login.html?redirect=${encodeURIComponent(`imovel.html?id=${imovel.id}`)}">Entre para alugar</a><p class="info" style="margin-top:8px">Você pode ver tudo sem conta. Para alugar, entre ou crie sua conta.</p>`;
   else acao = '<p class="info">Somente contas de locatário podem alugar imóveis.</p>';
 
   conteudo.innerHTML = `
@@ -95,6 +96,7 @@ function renderizarImovel(imovel, perfil) {
           <div class="comodidades-lista">${htmlComodidades(imovel.comodidades)}</div>` : ''}
         ${imovel.descricao ? `<p class="descricao">${escaparHtml(imovel.descricao)}</p>` : ''}
         <div class="acoes" style="margin-top:20px">${acao}</div>
+        <div id="contato-proprietario" style="margin-top:18px"></div>
       </div>
     </section>
     <section class="cartao" id="localizacao">
@@ -110,6 +112,87 @@ function renderizarImovel(imovel, perfil) {
       <div class="acoes" style="justify-content:center"><button type="button" class="btn" id="av-mais" hidden>Ver mais avaliações</button></div>
     </section>`;
   iniciarMapaDoImovel(imovel);
+  iniciarContato(imovel, perfil);
+}
+
+// Contato com o proprietario: mensagem pelo sistema (o e-mail dele nao aparece), WhatsApp e pedido de visita.
+async function iniciarContato(imovel, perfil) {
+  const area = document.getElementById('contato-proprietario');
+  if (!imovel.disponivel || perfil === 'LOCADOR' || perfil === 'ADMIN') {
+    area.hidden = true;
+    return;
+  }
+  if (!perfil) {
+    area.innerHTML = `<p class="info"><a href="login.html?redirect=${encodeURIComponent(`imovel.html?id=${imovel.id}`)}" style="color:var(--ouro-texto);font-weight:600">Entre</a> para falar com o proprietário e agendar uma visita.</p>`;
+    return;
+  }
+
+  let whatsapp = null;
+  try {
+    whatsapp = (await api(`/imoveis/${imovel.id}/contato`)).whatsapp;
+  } catch (erro) {
+    // Sem o WhatsApp, a mensagem e a visita continuam disponiveis.
+  }
+  const abertura = encodeURIComponent(`Olá! Vi o imóvel "${imovel.titulo}" no AlugaFácil e tenho interesse.`);
+  const agora = new Date(Date.now() + 3600000 - new Date().getTimezoneOffset() * 60000);
+  area.innerHTML = `
+    <p class="rotulo">Fale com o proprietário</p>
+    <div class="acoes acoes-quebra">
+      ${whatsapp ? `<a class="btn" href="https://wa.me/${whatsapp}?text=${abertura}" target="_blank" rel="noopener">WhatsApp</a>` : ''}
+      <button type="button" class="btn" data-contato="mensagem">Enviar mensagem</button>
+      <button type="button" class="btn" data-contato="visita">Agendar visita</button>
+    </div>
+    <form id="form-mensagem" hidden novalidate>
+      <label for="msg-texto">Sua mensagem</label>
+      <textarea id="msg-texto" rows="3" maxlength="1000" placeholder="Ex.: O imóvel aceita animais? Quando está disponível?"></textarea>
+      <button class="btn btn-ouro" type="submit" style="margin-top:10px">Enviar mensagem</button>
+    </form>
+    <form id="form-visita" hidden novalidate>
+      <label for="vis-data">Data e hora da visita</label>
+      <input id="vis-data" type="datetime-local" min="${agora.toISOString().slice(0, 16)}">
+      <label for="vis-msg">Mensagem <span class="info">(opcional)</span></label>
+      <textarea id="vis-msg" rows="2" maxlength="500" placeholder="Algum horário que você não pode?"></textarea>
+      <button class="btn btn-ouro" type="submit" style="margin-top:10px">Pedir visita</button>
+    </form>
+    <p class="aviso" id="contato-aviso" hidden style="margin-top:10px"></p>`;
+
+  const aviso = document.getElementById('contato-aviso');
+  const formularios = { mensagem: document.getElementById('form-mensagem'), visita: document.getElementById('form-visita') };
+  area.querySelectorAll('[data-contato]').forEach(botao => botao.addEventListener('click', () => {
+    mostrarAviso(aviso, '');
+    Object.entries(formularios).forEach(([nome, formulario]) => { formulario.hidden = nome !== botao.dataset.contato || !formulario.hidden; });
+  }));
+
+  async function enviar(formulario, caminho, corpo, sucesso) {
+    const botao = formulario.querySelector('button[type=submit]');
+    botao.disabled = true;
+    mostrarAviso(aviso, '');
+    try {
+      await api(caminho, { metodo: 'POST', corpo });
+      formulario.reset();
+      formulario.hidden = true;
+      mostrarAviso(aviso, sucesso, 'ok');
+    } catch (erro) {
+      mostrarAviso(aviso, erro.message);
+    }
+    botao.disabled = false;
+  }
+
+  formularios.mensagem.addEventListener('submit', e => {
+    e.preventDefault();
+    const texto = document.getElementById('msg-texto').value.trim();
+    if (texto.length < 5) return mostrarAviso(aviso, 'Escreva a mensagem com pelo menos 5 caracteres.');
+    enviar(formularios.mensagem, `/imoveis/${imovel.id}/mensagens`, { mensagem: texto },
+      'Mensagem enviada! O proprietário responde para o seu e-mail.');
+  });
+  formularios.visita.addEventListener('submit', e => {
+    e.preventDefault();
+    const data = document.getElementById('vis-data').value;
+    if (!data) return mostrarAviso(aviso, 'Escolha a data e a hora da visita.');
+    enviar(formularios.visita, `/imoveis/${imovel.id}/visitas`,
+      { dataHora: `${data}:00`, mensagem: document.getElementById('vis-msg').value.trim() || null },
+      'Pedido de visita enviado! Você recebe a resposta por e-mail e vê o andamento em Meus Aluguéis.');
+  });
 }
 
 // Sem posicao (cidade fora da lista) ou sem a biblioteca do mapa, a secao some em vez de mostrar um quadro vazio.
@@ -243,13 +326,13 @@ async function carregarPaginaDeAvaliacoes(zerar) {
     el('av-lista').innerHTML = '';
   }
   const pagina = await api(`/imoveis/${id}/avaliacoes?size=${POR_PAGINA}&page=${paginaAvaliacoes}`);
-  const ehAdmin = Sessao.dados().perfil === 'ADMIN';
+  const ehAdmin = Sessao.logado() && Sessao.dados().perfil === 'ADMIN';
   el('av-lista').insertAdjacentHTML('beforeend', pagina.content.map(a => htmlAvaliacao(a, ehAdmin)).join(''));
   el('av-mais').hidden = pagina.last;
 }
 
 async function carregarAvaliacoes() {
-  const perfil = Sessao.dados().perfil;
+  const perfil = Sessao.logado() ? Sessao.dados().perfil : null;
   const [resumo, minha] = await Promise.all([
     api(`/imoveis/${id}/avaliacoes/resumo`),
     perfil === 'LOCATARIO'
@@ -263,7 +346,8 @@ async function carregarAvaliacoes() {
     el('av-form').innerHTML = htmlFormulario();
     iniciarFormulario();
   } else {
-    el('av-form').innerHTML = '<p class="info" style="margin-top:12px">Somente os clientes (locatários) avaliam os imóveis.' +
+    el('av-form').innerHTML = (perfil ? '' : `<p class="info" style="margin-top:12px"><a href="login.html?redirect=${encodeURIComponent(`imovel.html?id=${id}`)}" style="color:var(--ouro-texto);font-weight:600">Entre</a> como locatário para avaliar este imóvel.</p>`) +
+      '<p class="info" style="margin-top:12px">Somente os clientes (locatários) avaliam os imóveis.' +
       (perfil === 'ADMIN' ? ' Como administrador, você só pode excluir avaliações indevidas.' : '') + '</p>';
   }
   await carregarPaginaDeAvaliacoes(true);
@@ -294,12 +378,10 @@ function iniciarAvaliacoes() {
 
 async function iniciar() {
   if (!/^\d+$/.test(id || '')) return mostrarErro('Imóvel não informado ou inválido.');
-  if (!Sessao.logado()) return irParaLogin();
-
   try {
     const [imovel, fotos] = await Promise.all([api(`/imoveis/${id}`), api(`/imoveis/${id}/fotos`)]);
     urlsDasFotos = fotos.length ? fotos.map(f => f.url) : [fotoFicticia(imovel.id)];
-    renderizarImovel(imovel, Sessao.dados().perfil);
+    renderizarImovel(imovel, Sessao.logado() ? Sessao.dados().perfil : null);
     iniciarGaleria();
     await iniciarAvaliacoes();
     if (location.hash === '#avaliacoes') el('avaliacoes').scrollIntoView();

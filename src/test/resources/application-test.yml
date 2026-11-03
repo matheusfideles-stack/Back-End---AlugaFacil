@@ -11,6 +11,9 @@ spring:
     enabled: false
 
 app:
+  # Data fixa nos testes: multa e juros nao podem depender do dia em que a suite roda.
+  relogio:
+    fixo-em: 2026-11-02
   lembretes:
     ativo: false
   geocodificacao:

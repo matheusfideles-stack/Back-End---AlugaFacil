@@ -32,6 +32,9 @@ public class AvaliacaoService {
     @Autowired
     private ImovelService imovelService;
 
+    @Autowired
+    private NotificacaoDeEventos notificador;
+
     public Page<Avaliacao> listar(Long imovelId, Pageable pageable) {
         imovelService.buscarPorId(imovelId);
         return avaliacaoRepository.findByImovelId(imovelId, pageable);
@@ -62,7 +65,8 @@ public class AvaliacaoService {
         if (autor.getPerfil() != Perfil.LOCATARIO) {
             throw new RegraDeNegocioException("Somente locatarios podem avaliar imoveis");
         }
-        Avaliacao avaliacao = avaliacaoRepository.findByImovelIdAndUsuarioId(imovelId, autor.getId())
+        var existente = avaliacaoRepository.findByImovelIdAndUsuarioId(imovelId, autor.getId());
+        Avaliacao avaliacao = existente
                 .orElseGet(() -> {
                     Avaliacao nova = new Avaliacao();
                     nova.setImovel(imovel);
@@ -73,7 +77,12 @@ public class AvaliacaoService {
         String comentario = dados.comentario() == null ? "" : dados.comentario().trim();
         avaliacao.setComentario(comentario.isEmpty() ? null : comentario);
         avaliacao.setAtualizadoEm(LocalDateTime.now());
-        return avaliacaoRepository.save(avaliacao);
+        Avaliacao salva = avaliacaoRepository.save(avaliacao);
+        // So a primeira avaliacao avisa o proprietario: editar a propria nao gera novo e-mail.
+        if (existente.isEmpty()) {
+            notificador.avaliacaoRecebida(salva);
+        }
+        return salva;
     }
 
     @Transactional

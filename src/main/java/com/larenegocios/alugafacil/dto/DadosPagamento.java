@@ -32,7 +32,9 @@ public record DadosPagamento(
 
         LocalDateTime expiraEm,
         LocalDate vencimento,
-        LocalDateTime pagoEm
+        LocalDateTime pagoEm,
+        BigDecimal multa,
+        BigDecimal juros
 ) {
     public DadosPagamento(Pagamento pagamento) {
         this(pagamento.getId(),
@@ -51,6 +53,8 @@ public record DadosPagamento(
                 pagamento.getUrlAutenticacao3ds(),
                 pagamento.getExpiraEm(),
                 pagamento.getVencimento(),
-                pagamento.getPagoEm());
+                pagamento.getPagoEm(),
+                pagamento.getMulta() == null ? BigDecimal.ZERO : pagamento.getMulta(),
+                pagamento.getJuros() == null ? BigDecimal.ZERO : pagamento.getJuros());
     }
 }

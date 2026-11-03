@@ -77,6 +77,7 @@ class AvaliacaoServiceTest {
                 .criar();
 
         service = new AvaliacaoService();
+        ReflectionTestUtils.setField(service, "notificador", Dobles.notificador());
         ReflectionTestUtils.setField(service, "avaliacaoRepository", repositorio);
         ReflectionTestUtils.setField(service, "imovelService", imovelService);
     }

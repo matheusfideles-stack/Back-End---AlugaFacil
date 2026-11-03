@@ -28,8 +28,13 @@ public class Pagamento {
     @Column(name = "referencia_mes", nullable = false)
     private String referenciaMes;
 
+    // Valor cobrado: o aluguel mais multa e juros, quando o pagamento foi gerado depois do vencimento.
     @Column(nullable = false)
     private BigDecimal valor;
+
+    private BigDecimal multa = BigDecimal.ZERO;
+
+    private BigDecimal juros = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

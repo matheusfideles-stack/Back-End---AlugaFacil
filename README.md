@@ -198,6 +198,13 @@ Antes de abrir o sistema para outras pessoas, leia **[`docs/PRODUCAO.md`](docs/P
 - O mapa usa **Leaflet** (guardado em `static/js/vendor/leaflet`, licença BSD-2) com os mapas do **OpenStreetMap**, sem chave de API. O OpenStreetMap pede uso moderado dos mapas; para um site com muito acesso, troque o endereço dos mapas em `static/js/mapa.js` por um provedor próprio.
 - A posição de cada imóvel vem do **Nominatim** (busca de endereços do OpenStreetMap), consultado pelo servidor quando o imóvel é cadastrado ou muda de endereço, no máximo 1 consulta por segundo, como a política deles pede. Imóveis antigos são completados ao subir o servidor. Se o endereço não for encontrado, o imóvel aparece perto do centro da cidade. Para não consultar a internet, use `APP_GEOCODIFICACAO_ATIVA=false`. Em produção, defina `app.geocodificacao.user-agent` com o nome do site e um e-mail de contato, como a política do Nominatim pede.
 
+## Propostas, visitas, PDFs e multa por atraso
+
+- **Contrato nasce de proposta:** o locatário faz uma proposta (`POST /propostas`); quando o proprietário aceita (`PUT /propostas/{id}/aceitar`) o contrato é criado. `POST /contratos` não existe mais. O locatário pode cancelar e uma proposta recusada pode ser refeita.
+- **Contato e visitas:** o imóvel é público; para falar com o proprietário (WhatsApp, mensagem) ou pedir visita (`/imoveis/{id}/visitas`) é preciso estar logado como locatário. Cada passo manda e-mail para a outra parte.
+- **PDF:** `GET /contratos/{id}/contrato.pdf` e `GET /pagamentos/{id}/recibo.pdf` (só depois de pago). O contrato não tem assinatura digital: tem linhas para assinar.
+- **Multa e juros:** depois do vencimento cobra-se multa de 2% (uma vez) e juros de 1% ao mês, proporcional aos dias. `GET /pagamentos/valor-atualizado` mostra o valor de hoje; boleto ou Pix vencido pede segunda via, que recalcula. Não há cobrança automática no cartão: o sistema lembra por e-mail.
+
 ## Testes
 
 ```bash

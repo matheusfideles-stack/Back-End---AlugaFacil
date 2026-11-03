@@ -1,6 +1,7 @@
 package com.larenegocios.alugafacil.controller;
 
 import com.larenegocios.alugafacil.domain.contrato.Contrato;
+import com.larenegocios.alugafacil.infra.pdf.GeradorDePdf;
 import com.larenegocios.alugafacil.domain.usuario.Usuario;
 import com.larenegocios.alugafacil.dto.DadosCadastroContrato;
 import com.larenegocios.alugafacil.dto.DadosContrato;
@@ -20,12 +21,8 @@ public class ContratoController {
     @Autowired
     private ContratoService contratoService;
 
-    @PostMapping
-    public ResponseEntity<DadosContrato> firmar(@RequestBody @Valid DadosCadastroContrato dados,
-                                                 @AuthenticationPrincipal Usuario locatario) {
-        Contrato contrato = contratoService.firmar(dados, locatario);
-        return ResponseEntity.ok(new DadosContrato(contrato));
-    }
+    @Autowired
+    private GeradorDePdf geradorDePdf;
 
     @GetMapping("/meus")
     public ResponseEntity<Page<DadosContrato>> meusContratos(@AuthenticationPrincipal Usuario usuario,
@@ -36,6 +33,13 @@ public class ContratoController {
                 : contratoService.listarDoLocatario(usuario.getId(), pageable);
 
         return ResponseEntity.ok(contratos.map(DadosContrato::new));
+    }
+
+    @GetMapping("/{id}/contrato.pdf")
+    public ResponseEntity<byte[]> contratoEmPdf(@PathVariable Long id, @AuthenticationPrincipal Usuario usuario) {
+        Contrato contrato = contratoService.buscarPorId(id);
+        contratoService.validarParticipante(contrato, usuario);
+        return RespostaPdf.de(geradorDePdf.contrato(contrato), "contrato-" + id + ".pdf");
     }
 
     @GetMapping("/{id}")

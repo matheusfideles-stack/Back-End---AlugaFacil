@@ -4,6 +4,8 @@ import com.larenegocios.alugafacil.domain.imovel.Imovel;
 import com.larenegocios.alugafacil.domain.usuario.Perfil;
 import com.larenegocios.alugafacil.domain.usuario.Usuario;
 
+import org.springframework.test.util.ReflectionTestUtils;
+
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -56,6 +58,18 @@ final class Dobles {
 
     static <T> Repositorio<T> repositorio(Class<T> tipo) {
         return new Repositorio<>(tipo);
+    }
+
+    // Notificador de verdade ligado a um e-mail de mentira: os testes de unidade conferem os envios por la.
+    static NotificacaoDeEventos notificador(ConfirmacaoEmailServiceTest.EmailFalso email) {
+        NotificacaoDeEventos notificador = new NotificacaoDeEventos();
+        ReflectionTestUtils.setField(notificador, "envioDeEmail", email);
+        ReflectionTestUtils.setField(notificador, "urlBase", "http://localhost:8080");
+        return notificador;
+    }
+
+    static NotificacaoDeEventos notificador() {
+        return notificador(new ConfirmacaoEmailServiceTest.EmailFalso());
     }
 
     static Usuario usuario(long id, Perfil perfil) {

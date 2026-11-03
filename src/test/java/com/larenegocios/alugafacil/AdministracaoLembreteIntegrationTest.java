@@ -35,7 +35,7 @@ class AdministracaoLembreteIntegrationTest extends IntegracaoBase {
         tokenLocatario = login(locatario);
         emailLocatario = (String) locatario.get("email");
         long imovelId = idDaResposta(mockMvc.perform(postJson("/imoveis", dadosImovel(), tokenLocador)));
-        contratoId = idDaResposta(mockMvc.perform(postJson("/contratos", dadosContrato(imovelId), tokenLocatario)));
+        contratoId = contratar(imovelId, tokenLocatario, tokenLocador);
         caixa.enviados.clear();
     }
 

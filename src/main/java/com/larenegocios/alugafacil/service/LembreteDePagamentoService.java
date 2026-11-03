@@ -3,6 +3,7 @@ package com.larenegocios.alugafacil.service;
 import com.larenegocios.alugafacil.domain.contrato.Contrato;
 import com.larenegocios.alugafacil.domain.contrato.ContratoRepository;
 import com.larenegocios.alugafacil.domain.contrato.StatusContrato;
+import com.larenegocios.alugafacil.domain.pagamento.CalculoDeAtraso;
 import com.larenegocios.alugafacil.domain.pagamento.EstagioDeLembrete;
 import com.larenegocios.alugafacil.domain.pagamento.LembretePagamento;
 import com.larenegocios.alugafacil.domain.pagamento.LembretePagamentoRepository;
@@ -124,7 +125,10 @@ public class LembreteDePagamentoService {
                 + (estagio.ehAtraso() ? "esta atrasado" : estagio == EstagioDeLembrete.VENCE_HOJE ? "vence hoje" : "esta para vencer");
         String texto = "Ola, " + contrato.getLocatario().getNome() + "!\n\n"
                 + "O aluguel de " + mesExibido(mes) + " do imovel " + titulo + " " + quando + ".\n"
-                + "Valor: " + moeda(contrato) + "\n\n"
+                + "Valor: " + moeda(contrato) + "\n"
+                + (estagio.ehAtraso() ? "Com multa de 2% e juros de 1% ao mes ate hoje: "
+                + moeda(CalculoDeAtraso.calcular(contrato.getValorMensal(), vencimento, hoje).total()) + "\n" : "")
+                + "\n"
                 + "Pague por Pix, boleto ou cartao em " + urlBase + "/pagamentos.html.\n\n"
                 + "Se voce ja pagou, pode ignorar este aviso: a confirmacao pode levar algum tempo.";
         envioDeEmail.enviar(contrato.getLocatario().getEmail(), assunto, texto);
@@ -148,7 +152,10 @@ public class LembreteDePagamentoService {
     }
 
     private static String moeda(Contrato contrato) {
-        return NumberFormat.getCurrencyInstance(Locale.of("pt", "BR")).format(contrato.getValorMensal())
-                .replace(' ', ' ');
+        return moeda(contrato.getValorMensal());
+    }
+
+    private static String moeda(java.math.BigDecimal valor) {
+        return NumberFormat.getCurrencyInstance(Locale.of("pt", "BR")).format(valor).replace(' ', ' ');
     }
 }

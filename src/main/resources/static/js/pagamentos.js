@@ -17,6 +17,8 @@ let modoModal = 'resultado';
 let cartaoMetodo = null;
 let parcelasEscolhidas = 1;
 let temporizador = null;
+let valorAtual = null;
+let consultasDeValor = 0;
 
 const BANDEIRAS = [
   { id: 'amex', nome: 'American Express', regex: /^3[47]/, credito: 'amex', debito: null, grupos: [4, 6, 5] },
@@ -57,7 +59,7 @@ function atualizarBotao() {
   botao.disabled = !mes || mesJaPago(mes);
   botao.textContent = mesJaPago(mes)
     ? 'Este mês já está pago'
-    : `Pagar ${formatarMoeda(contrato.valorMensal)} com ${NOMES_METODO[metodo]}`;
+    : `Pagar ${formatarMoeda(valorAtual ? valorAtual.total : contrato.valorMensal)} com ${NOMES_METODO[metodo]}`;
 }
 
 function renderizarMeses() {
@@ -67,6 +69,31 @@ function renderizarMeses() {
     `<option value="${m}">${nomeDoMes(m)}${mesJaPago(m) ? ' (pago)' : ''}</option>`).join('');
   const padrao = meses.includes(anterior) ? anterior : (meses.find(m => !mesJaPago(m)) || meses[0]);
   el('sel-mes').value = padrao;
+  atualizarBotao();
+  atualizarValor();
+}
+
+// Depois do vencimento o mes custa mais (multa e juros): o servidor calcula e a tela mostra a conta.
+async function atualizarValor() {
+  const consulta = ++consultasDeValor;
+  const mes = el('sel-mes').value;
+  let atualizado = null;
+  if (mes && !mesJaPago(mes)) {
+    try {
+      atualizado = await api(`/pagamentos/valor-atualizado?contratoId=${contrato.id}&referenciaMes=${mes}`);
+    } catch (erroDeConsulta) {
+      atualizado = null;
+    }
+  }
+  if (consulta !== consultasDeValor) return;
+  valorAtual = atualizado;
+  el('pg-valor').textContent = formatarMoeda(atualizado ? atualizado.total : contrato.valorMensal);
+  const aviso = el('pg-atraso');
+  aviso.hidden = !(atualizado && atualizado.diasEmAtraso > 0);
+  if (!aviso.hidden) {
+    aviso.textContent = `Em atraso há ${atualizado.diasEmAtraso} ${atualizado.diasEmAtraso === 1 ? 'dia' : 'dias'}: ` +
+      `aluguel ${formatarMoeda(atualizado.valorBase)} + multa ${formatarMoeda(atualizado.multa)} + juros ${formatarMoeda(atualizado.juros)}.`;
+  }
   atualizarBotao();
 }
 
@@ -127,19 +154,25 @@ async function mostrarContratacao(imovelId) {
   el('ct-assinar').onclick = async () => {
     const botao = el('ct-assinar');
     botao.disabled = true;
-    botao.textContent = 'Assinando...';
+    botao.textContent = 'Enviando...';
     try {
       const hoje = new Date();
       const fim = new Date(hoje.getFullYear() + 1, hoje.getMonth(), hoje.getDate());
-      const novo = await api('/contratos', {
+      await api('/propostas', {
         metodo: 'POST',
-        corpo: { imovelId: imovel.id, dataInicio: dataIso(hoje), dataFim: dataIso(fim), diaVencimento: Number(el('ct-dia').value) }
+        corpo: {
+          imovelId: imovel.id, dataInicio: dataIso(hoje), dataFim: dataIso(fim), diaVencimento: Number(el('ct-dia').value),
+          mensagem: el('ct-mensagem').value.trim() || null
+        }
       });
-      location.href = `pagamentos.html?contrato=${novo.id}&novo=1`;
+      el('sec-contratar').hidden = true;
+      mostrarAviso(el('confirmacao'), 'Proposta enviada! O proprietário foi avisado por e-mail e você recebe a resposta por e-mail. ' +
+        'Acompanhe em Meus Aluguéis.', 'ok');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (e) {
       erro(e.message);
       botao.disabled = false;
-      botao.textContent = 'Assinar contrato e continuar';
+      botao.textContent = 'Enviar proposta ao proprietário';
     }
   };
   return true;
@@ -220,7 +253,7 @@ function blocoPix(p) {
       '<button type="button" class="btn btn-ouro" id="pag-copiar">Copiar</button></div>';
   }
   if (!pago && p.expiraEm) corpo += `<p class="info" style="margin-top:8px">Este código vale até ${dataHora(p.expiraEm)}.</p>`;
-  return corpo;
+  return corpo + segundaVia(p, 'código Pix');
 }
 
 // A linha digitavel (47 digitos) e o codigo de barras (44) carregam os mesmos dados em ordem diferente.
@@ -269,13 +302,13 @@ function blocoBoleto(p) {
       '<button type="button" class="btn btn-ouro" id="pag-copiar">Copiar</button></div>';
   }
   corpo += '<div class="recibo">' +
-    `<div><span>Valor</span><strong>${formatarMoeda(p.valor)}</strong></div>` +
+    `<div><span>Valor</span><strong>${formatarMoeda(p.valor)}</strong></div>` + linhaDeAcrescimos(p) +
     (p.vencimento ? `<div><span>Vencimento</span><strong>${formatarData(p.vencimento)}</strong></div>` : '') +
     '</div>';
   if (!pago && p.linkPagamento) {
     corpo += `<div class="acoes-modal"><a class="btn" href="${escaparHtml(p.linkPagamento)}" target="_blank" rel="noopener">Abrir boleto</a></div>`;
   }
-  return corpo;
+  return corpo + segundaVia(p, 'boleto');
 }
 
 function blocoRecibo(p) {
@@ -283,10 +316,33 @@ function blocoRecibo(p) {
     ? 'Cartão de débito'
     : `Cartão de crédito${recemCriado && parcelasEscolhidas > 1 ? ` em ${parcelasEscolhidas}x` : ''}`;
   const linhas = [['Forma de pagamento', forma], ['Valor', formatarMoeda(p.valor)]];
+  if (acrescimos(p) > 0) linhas.push(['Multa e juros', formatarMoeda(acrescimos(p))]);
   if (p.pagoEm) linhas.push(['Pago em', new Date(p.pagoEm).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })]);
   linhas.push(['Comprovante', `PG-${String(p.id).padStart(6, '0')}`]);
   return '<div class="recibo">' + linhas.map(([rotulo, valor]) =>
     `<div><span>${rotulo}</span><strong>${escaparHtml(valor)}</strong></div>`).join('') + '</div>';
+}
+
+function acrescimos(p) {
+  return Number(p.multa || 0) + Number(p.juros || 0);
+}
+
+function linhaDeAcrescimos(p) {
+  return acrescimos(p) > 0 ? `<div><span>Multa e juros</span><strong>${formatarMoeda(acrescimos(p))}</strong></div>` : '';
+}
+
+// Boleto ou Pix vencido: gerar de novo recalcula o valor (multa e juros ate hoje).
+function segundaVia(p, nome) {
+  const vencido = p.status !== 'PAGO' && p.expiraEm && new Date(p.expiraEm) < new Date();
+  if (!vencido) return '';
+  return `<p class="aviso" style="margin-top:12px">Este ${nome} venceu. Gere uma segunda via com o valor atualizado.</p>` +
+    `<div class="acoes-modal"><button type="button" class="btn btn-ouro" data-segunda-via="${p.id}">Gerar segunda via</button></div>`;
+}
+
+function botaoDoRecibo(p) {
+  if (p.status !== 'PAGO') return '';
+  const comprovante = `PG-${String(p.id).padStart(6, '0')}`;
+  return `<div class="acoes-modal"><button type="button" class="btn" data-baixar="/pagamentos/${p.id}/recibo.pdf" data-arquivo="recibo-${comprovante}.pdf">Baixar recibo (PDF)</button></div>`;
 }
 
 function digitosDe(texto) {
@@ -497,7 +553,7 @@ function renderizarResultado(p) {
     parar();
     acao.hidden = true;
     el('pag-fechar').textContent = recemCriado ? 'Concluir' : 'Fechar';
-    el('pag-corpo').innerHTML = p.metodo === 'PIX' ? blocoPix(p) : (p.metodo === 'BOLETO' ? blocoBoleto(p) : blocoRecibo(p));
+    el('pag-corpo').innerHTML = (p.metodo === 'PIX' ? blocoPix(p) : (p.metodo === 'BOLETO' ? blocoBoleto(p) : blocoRecibo(p))) + botaoDoRecibo(p);
     mostrarStatusModal(`Pagamento aprovado! Comprovante PG-${String(p.id).padStart(6, '0')}.`, 'ok');
     return;
   }
@@ -714,7 +770,7 @@ async function iniciar() {
 }
 
 document.querySelectorAll('input[name="metodo"]').forEach(r => r.addEventListener('change', atualizarBotao));
-el('sel-mes').addEventListener('change', atualizarBotao);
+el('sel-mes').addEventListener('change', () => { atualizarBotao(); atualizarValor(); });
 el('sel-contrato').addEventListener('change', e => selecionarContrato(e.target.value));
 el('btn-pagar').addEventListener('click', pagar);
 el('pag-fechar').addEventListener('click', fecharModal);
@@ -733,6 +789,9 @@ el('modal-pagamento').addEventListener('click', e => {
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !el('modal-pagamento').hidden) fecharModal(); });
 el('pag-corpo').addEventListener('click', e => {
   if (e.target.id === 'pag-copiar') copiar(el('pag-codigo').value);
+  if (e.target.dataset.segundaVia && pagamentoAberto) {
+    enviarPagamento({ contratoId: contrato.id, referenciaMes: pagamentoAberto.referenciaMes, metodo: pagamentoAberto.metodo });
+  }
 });
 el('pag-corpo').addEventListener('submit', e => {
   e.preventDefault();

@@ -24,6 +24,9 @@ public class ManutencaoService {
     @Autowired
     private ContratoService contratoService;
 
+    @Autowired
+    private NotificacaoDeEventos notificador;
+
     @Transactional
     public Manutencao solicitar(DadosCadastroManutencao dados, Usuario solicitante) {
         Contrato contrato = contratoService.buscarPorId(dados.contratoId());
@@ -39,7 +42,9 @@ public class ManutencaoService {
         manutencao.setTipo(dados.tipo().trim());
         manutencao.setUrgencia(dados.urgencia());
         manutencao.setDescricao(dados.descricao().trim());
-        return manutencaoRepository.save(manutencao);
+        Manutencao salva = manutencaoRepository.save(manutencao);
+        notificador.manutencaoSolicitada(salva);
+        return salva;
     }
 
     public Page<Manutencao> listarDoLocatario(Long locatarioId, Pageable pageable) {
@@ -61,7 +66,11 @@ public class ManutencaoService {
             throw new RegraDeNegocioException("Voce nao tem permissao sobre esta solicitacao");
         }
 
+        boolean mudou = manutencao.getStatus() != status;
         manutencao.setStatus(status);
+        if (mudou) {
+            notificador.manutencaoAtualizada(manutencao);
+        }
         return manutencao;
     }
 }
