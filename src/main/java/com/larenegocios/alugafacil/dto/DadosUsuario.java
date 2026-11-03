@@ -10,10 +10,11 @@ public record DadosUsuario(
         String cpf,
         String telefone,
         Perfil perfil,
-        Boolean emailConfirmado
+        Boolean emailConfirmado,
+        Boolean ativo
 ) {
     public DadosUsuario(Usuario usuario) {
         this(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getCpf(),
-                usuario.getTelefone(), usuario.getPerfil(), usuario.getEmailConfirmado());
+                usuario.getTelefone(), usuario.getPerfil(), usuario.getEmailConfirmado(), usuario.getAtivo());
     }
 }

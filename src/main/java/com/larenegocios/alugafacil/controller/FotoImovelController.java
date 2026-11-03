@@ -45,7 +45,6 @@ public class FotoImovelController {
         return ResponseEntity.ok(paraDados(fotoService.listar(imovelId)));
     }
 
-    // O nome do arquivo no disco e gerado e imutavel, entao o navegador pode guardar a foto por muito tempo.
     @GetMapping("/fotos/{fotoId}/arquivo")
     public ResponseEntity<Resource> arquivo(@PathVariable Long imovelId, @PathVariable Long fotoId) {
         FotoImovel foto = fotoService.buscar(imovelId, fotoId);
@@ -57,7 +56,6 @@ public class FotoImovelController {
                 .body(conteudo);
     }
 
-    // Endereco estavel para <img>: leva para a foto de capa atual (ela muda quando o proprietario troca a capa).
     @GetMapping("/capa")
     public ResponseEntity<Void> capa(@PathVariable Long imovelId) {
         FotoImovel capa = fotoService.capa(imovelId)

@@ -4,6 +4,7 @@ import com.larenegocios.alugafacil.domain.contrato.Contrato;
 import com.larenegocios.alugafacil.domain.imovel.Imovel;
 import com.larenegocios.alugafacil.domain.pagamento.MetodoPagamento;
 import com.larenegocios.alugafacil.domain.pagamento.Pagamento;
+import com.larenegocios.alugafacil.domain.pagamento.PagamentoConfirmadoEvento;
 import com.larenegocios.alugafacil.domain.pagamento.PagamentoRepository;
 import com.larenegocios.alugafacil.domain.pagamento.StatusPagamento;
 import com.larenegocios.alugafacil.domain.pagamento.gateway.Pagador;
@@ -17,13 +18,13 @@ import com.larenegocios.alugafacil.infra.exception.RegraDeNegocioException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.EnumSet;
@@ -45,6 +46,9 @@ public class PagamentoService {
 
     @Autowired
     private PaymentGateway paymentGateway;
+
+    @Autowired
+    private ApplicationEventPublisher eventos;
 
     @Transactional
     public Pagamento gerarCobranca(DadosSolicitacaoPagamento dados, Usuario solicitante) {
@@ -168,7 +172,7 @@ public class PagamentoService {
         pagamento.setValor(contrato.getValorMensal());
         pagamento.setMetodo(dados.metodo());
         pagamento.setStatus(StatusPagamento.PROCESSANDO);
-        pagamento.setVencimento(calcularVencimento(dados.referenciaMes(), contrato.getDiaVencimento()));
+        pagamento.setVencimento(contrato.vencimentoEm(YearMonth.parse(dados.referenciaMes())));
 
         pagamento.setIdTransacaoGateway(null);
         pagamento.setStatusDetalhe(null);
@@ -183,6 +187,7 @@ public class PagamentoService {
     }
 
     private void aplicarResposta(Pagamento pagamento, RespostaCobranca resposta) {
+        StatusPagamento statusAnterior = pagamento.getStatus();
         pagamento.setIdTransacaoGateway(resposta.idTransacaoGateway());
         pagamento.setStatus(resposta.status());
         pagamento.setStatusDetalhe(resposta.statusDetalhe());
@@ -206,6 +211,11 @@ public class PagamentoService {
 
         if (resposta.status() == StatusPagamento.PAGO && pagamento.getPagoEm() == null) {
             pagamento.setPagoEm(LocalDateTime.now());
+        }
+
+        // So avisa na mudanca para PAGO: a mesma notificacao do gateway chegando de novo nao repete o e-mail.
+        if (resposta.status() == StatusPagamento.PAGO && statusAnterior != StatusPagamento.PAGO) {
+            eventos.publishEvent(PagamentoConfirmadoEvento.de(pagamento));
         }
     }
 
@@ -231,11 +241,5 @@ public class PagamentoService {
                 imovel.getCidade(),
                 imovel.getUf()
         );
-    }
-
-    private LocalDate calcularVencimento(String referenciaMes, Integer diaVencimento) {
-        YearMonth mesReferencia = YearMonth.parse(referenciaMes);
-        // Meses curtos: vencimento no dia 31 vira o ultimo dia do mes.
-        return mesReferencia.atDay(Math.min(diaVencimento, mesReferencia.lengthOfMonth()));
     }
 }

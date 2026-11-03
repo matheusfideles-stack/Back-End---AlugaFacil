@@ -3,6 +3,7 @@ package com.larenegocios.alugafacil.config;
 import com.larenegocios.alugafacil.infra.ratelimit.RateLimitFilter;
 import com.larenegocios.alugafacil.infra.security.SecurityFilter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,8 +34,14 @@ public class SecurityConfigurations {
     @Autowired
     private RateLimitFilter rateLimitFilter;
 
+    @Value("${app.https-obrigatorio:false}")
+    private boolean httpsObrigatorio;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        if (httpsObrigatorio) {
+            http.requiresChannel(canal -> canal.anyRequest().requiresSecure());
+        }
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

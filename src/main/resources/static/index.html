@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="js/vendor/leaflet/leaflet.css">
   <style>
     .landing {
       position: relative;
@@ -239,8 +240,8 @@
     </section>
     <section class="busca">
       <form class="cartao filtros" id="filtros" action="imoveis.html" method="get">
-        <div><label for="local">Localização</label><input id="local" name="local" type="text"
-            placeholder="Digite a cidade ou bairro"></div>
+        <div><label id="rotulo-cidade">Cidade e bairros</label><div class="seletor" id="seletor-cidade"></div>
+          <input type="hidden" id="cidade" name="cidade"></div>
         <div><label for="tipo">Tipo de imóvel</label><select id="tipo" name="tipo">
             <option value="">Todos</option>
             <option value="CASA">Casa</option>
@@ -250,8 +251,22 @@
             <option value="GALPAO">Galpão</option>
           </select></div>
         <div><label for="preco">Preço máximo</label><input id="preco" name="preco" type="text" placeholder="Ex.: 3000"></div>
+        <input type="hidden" id="comodidades-campo" name="comodidades">
         <button class="btn btn-ouro" type="submit">Buscar</button>
       </form>
+    </section>
+    <section class="vitrine" id="explorar" aria-label="Comodidades e mapa">
+      <section class="cartao comodidades-filtro" aria-labelledby="titulo-comodidades" style="margin-top:0">
+        <h2 id="titulo-comodidades">Comodidades</h2>
+        <p class="info">Mostre só os imóveis que têm o que você precisa.</p>
+        <div class="comodidades-grade" id="comodidades-grade"></div>
+      </section>
+      <div class="cabeca-mapa">
+        <h2 class="secao">Veja no mapa</h2>
+        <p class="info" id="contagem-mapa" aria-live="polite"></p>
+      </div>
+      <div class="mapa-caixa mapa-home"><div id="mapa"></div></div>
+      <div class="acoes" style="justify-content:center;margin-top:14px"><a class="btn" id="ver-mapa-completo" href="imoveis.html" style="flex:none;padding:10px 24px">Abrir o mapa completo</a></div>
     </section>
     <section class="vitrine">
       <h2 class="secao">Imóveis em destaque</h2>
@@ -286,6 +301,9 @@
   </main>
   <footer class="rodape">© <span data-ano>2026</span> AlugaFácil. Todos os direitos reservados. | Privacidade | Termos</footer>
   <script src="js/api.js"></script>
+  <script src="js/vendor/leaflet/leaflet.js"></script>
+  <script src="js/mapa.js"></script>
+  <script src="js/seletor-cidade.js"></script>
   <script src="js/vitrine.js"></script>
 </body>
 

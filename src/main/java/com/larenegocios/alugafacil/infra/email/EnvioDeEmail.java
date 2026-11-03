@@ -18,6 +18,10 @@ public class EnvioDeEmail {
     private final ObjectProvider<JavaMailSender> mailSender;
     private final String remetente;
 
+    // Uma variavel de ambiente vazia (SPRING_MAIL_HOST=) ainda cria o JavaMailSender, mas sem servidor: nao conta como configurado.
+    @Value("${spring.mail.host:}")
+    private String servidor = "";
+
     public EnvioDeEmail(ObjectProvider<JavaMailSender> mailSender,
                         @Value("${app.email-remetente}") String remetente) {
         this.mailSender = mailSender;
@@ -27,20 +31,19 @@ public class EnvioDeEmail {
     @EventListener(ApplicationReadyEvent.class)
     public void avisarSituacaoDoEmail() {
         if (enviaDeVerdade()) {
-            log.info("E-mail configurado: mensagens (recuperacao de senha e contato) serao enviadas de verdade.");
+            log.info("E-mail configurado: mensagens (codigo de verificacao, recuperacao de senha e contato) serao enviadas de verdade.");
         } else {
             log.warn("E-mail NAO configurado: nenhuma mensagem sera enviada, so aparecem no log. "
-                    + "Veja config/application.yml.exemplo para ativar o envio.");
+                    + "Veja docs/EMAIL.md para ativar o envio.");
         }
     }
 
     public boolean enviaDeVerdade() {
-        return mailSender.getIfAvailable() != null;
+        return mailSender.getIfAvailable() != null && servidor != null && !servidor.isBlank();
     }
 
     public void enviar(String para, String assunto, String texto) {
-        JavaMailSender sender = mailSender.getIfAvailable();
-        if (sender == null) {
+        if (!enviaDeVerdade()) {
             log.warn("SMTP nao configurado: e-mail NAO enviado.\nPara: {}\nAssunto: {}\n{}", para, assunto, texto);
             return;
         }
@@ -50,6 +53,6 @@ public class EnvioDeEmail {
         mensagem.setTo(para);
         mensagem.setSubject(assunto);
         mensagem.setText(texto);
-        sender.send(mensagem);
+        mailSender.getObject().send(mensagem);
     }
 }

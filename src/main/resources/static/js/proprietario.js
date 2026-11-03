@@ -195,14 +195,35 @@ const telas = {
     const editando = idDaUrl > 0;
     el('erro').hidden = true;
 
+    // A cidade vem de uma lista fixa (a mesma dos filtros da vitrine); cidade antiga fora da lista continua selecionavel.
+    function opcoesDeCidade(extra) {
+      const nomes = CIDADES.map(c => c.nome);
+      if (extra && !nomes.some(n => normalizarTexto(n) === normalizarTexto(extra))) nomes.push(extra);
+      form.elements.cidade.innerHTML = '<option value="">Selecione a cidade</option>' +
+        nomes.map(n => `<option value="${escaparHtml(n)}">${escaparHtml(n)}</option>`).join('');
+    }
+    opcoesDeCidade();
+    form.elements.cidade.addEventListener('change', () => {
+      const centro = centroDaCidade(form.elements.cidade.value);
+      if (centro) form.elements.uf.value = centro.uf;
+    });
+    el('comodidades-form').innerHTML = COMODIDADES.map(c =>
+      `<label class="comodidade-card"><input type="checkbox" name="comodidade" value="${c.id}">` +
+      `<span class="icone" aria-hidden="true">${c.icone}</span><span>${escaparHtml(c.rotulo)}</span></label>`).join('');
+
     if (editando) {
       document.title = 'Editar Imóvel | AlugaFácil';
       el('titulo-pagina').textContent = 'Editar Imóvel';
       try {
         const imovel = await api(`/imoveis/${idDaUrl}`);
+        opcoesDeCidade(imovel.cidade);
         Object.entries(imovel).forEach(([chave, valor]) => {
           const campo = form.elements[chave];
           if (campo && valor !== null) campo.value = valor;
+        });
+        (imovel.comodidades || []).forEach(id => {
+          const caixa = form.querySelector(`input[name="comodidade"][value="${id}"]`);
+          if (caixa) caixa.checked = true;
         });
       } catch (e) {
         el('conteudo-form').innerHTML = `<p class="aviso">${escaparHtml(e.status === 404 ? 'Imóvel não encontrado.' : e.message)}</p><a class="btn" href="meus-imoveis.html">Voltar</a>`;
@@ -297,7 +318,8 @@ const telas = {
         quartos: numero('quartos'),
         banheiros: numero('banheiros'),
         vagas: numero('vagas'),
-        areaM2: numero('areaM2')
+        areaM2: numero('areaM2'),
+        comodidades: [...form.querySelectorAll('input[name="comodidade"]:checked')].map(c => c.value)
       };
       const botao = form.querySelector('button[type=submit]');
       botao.disabled = true;

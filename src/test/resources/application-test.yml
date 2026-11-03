@@ -11,6 +11,10 @@ spring:
     enabled: false
 
 app:
+  lembretes:
+    ativo: false
+  geocodificacao:
+    ativa: false
   uploads:
     dir: target/uploads-teste
 

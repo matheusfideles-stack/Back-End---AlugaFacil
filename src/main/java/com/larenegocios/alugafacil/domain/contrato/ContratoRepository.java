@@ -4,6 +4,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface ContratoRepository extends JpaRepository<Contrato, Long> {
 
     Page<Contrato> findByLocatarioId(Long locatarioId, Pageable pageable);
@@ -11,4 +13,6 @@ public interface ContratoRepository extends JpaRepository<Contrato, Long> {
     Page<Contrato> findByImovelLocadorId(Long locadorId, Pageable pageable);
 
     boolean existsByImovelIdAndStatus(Long imovelId, StatusContrato status);
+
+    List<Contrato> findByStatus(StatusContrato status);
 }

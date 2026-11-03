@@ -7,7 +7,7 @@ Backend da **Lar & Negócios** para gestão de aluguel de imóveis: cadastro de 
 - Java 21 + Spring Boot 3
 - Spring Security (JWT via `java-jwt`)
 - Spring Data JPA / Hibernate
-- PostgreSQL + Flyway (migrations versionadas)
+- MySQL (H2 no perfil `dev`), com o Hibernate criando as tabelas
 - Bean Validation
 - Lombok
 - Swagger/OpenAPI (`/docs`)
@@ -178,8 +178,25 @@ Variáveis de ambiente: `DB_PASSWORD`, `JWT_SECRET`, `PAGAMENTO_PROVIDER`, `MP_A
 `MP_NOTIFICATION_URL`, `MP_WEBHOOK_SECRET`, `ADMIN_EMAIL`, `ADMIN_SENHA`, `APP_URL_BASE`, `SPRING_MAIL_HOST`, `SPRING_MAIL_USERNAME`,
 `SPRING_MAIL_PASSWORD`, `RATELIMIT_ENABLED`. Copie `.env.example` para `.env` e preencha as credenciais.
 
-> O `docker-compose.yml` ainda aponta para PostgreSQL, enquanto a aplicação está configurada para MySQL;
-> ajuste um dos dois antes de usar o Docker.
+> Para subir o sistema com Docker, rode `docker compose up --build` na raiz do projeto. Sobe o MySQL 8.4 e a aplicação.
+> Os dados do MySQL ficam no volume `alugafacil-data`. Para criar o administrador, defina `ADMIN_EMAIL` e `ADMIN_SENHA` no `.env`.
+
+## Produção
+
+Antes de abrir o sistema para outras pessoas, leia **[`docs/PRODUCAO.md`](docs/PRODUCAO.md)**. Com `SPRING_PROFILES_ACTIVE=prod`:
+
+- o sistema **não sobe** sem um `JWT_SECRET` próprio (32 caracteres ou mais) e recusa senha de administrador fraca ou conhecida;
+- **HTTPS é obrigatório** (atrás de um proxy como Caddy ou nginx), e o navegador recebe o cabeçalho HSTS;
+- os códigos de verificação só chegam por e-mail, nunca na tela, e o sistema **não sobe sem `SPRING_MAIL_HOST`**: veja [`docs/EMAIL.md`](docs/EMAIL.md), que também mostra como testar o envio sem usar o seu e-mail (Mailpit).
+- para cobrar de verdade (Pix, boleto, débito e crédito parcelado) siga [`docs/PAGAMENTOS.md`](docs/PAGAMENTOS.md); em `prod` o sistema não sobe com o gateway `fake` nem sem o segredo do webhook;
+- faça **backup** do banco e das fotos com `scripts/backup.ps1` (ou `backup.sh`) e teste a restauração: veja [`docs/BACKUP.md`](docs/BACKUP.md).
+
+## Mapa, cidades e comodidades
+
+- A vitrine (`imoveis.html`) tem seletor de **cidade e bairro**, filtro por **comodidades** (piscina, estacionamento gratuito, máquina de lavar, ar-condicionado, lareira, TV, aquecedor, churrasqueira) e um **mapa** com o preço de cada imóvel. Mexer no mapa mostra o botão "Buscar nesta região", que filtra a lista pela área visível. A página do imóvel também mostra as comodidades e a localização.
+- As cidades atendidas ficam em `CIDADES`, no começo de `static/js/api.js` (Patos de Minas, Lagoa Formosa, Nova Ponte e Tiros). Para incluir outra, acrescente uma linha com o nome, a UF e as coordenadas do centro.
+- O mapa usa **Leaflet** (guardado em `static/js/vendor/leaflet`, licença BSD-2) com os mapas do **OpenStreetMap**, sem chave de API. O OpenStreetMap pede uso moderado dos mapas; para um site com muito acesso, troque o endereço dos mapas em `static/js/mapa.js` por um provedor próprio.
+- A posição de cada imóvel vem do **Nominatim** (busca de endereços do OpenStreetMap), consultado pelo servidor quando o imóvel é cadastrado ou muda de endereço, no máximo 1 consulta por segundo, como a política deles pede. Imóveis antigos são completados ao subir o servidor. Se o endereço não for encontrado, o imóvel aparece perto do centro da cidade. Para não consultar a internet, use `APP_GEOCODIFICACAO_ATIVA=false`. Em produção, defina `app.geocodificacao.user-agent` com o nome do site e um e-mail de contato, como a política do Nominatim pede.
 
 ## Testes
 
@@ -189,11 +206,9 @@ mvn test
 
 Usa H2 em memória (perfil `test`) — não precisa de banco rodando para os testes. Cobrem autenticação,
 recuperação de senha, imóveis, fotos, avaliações, contratos, pagamentos, manutenção, permissões por perfil, limite
-de requisições e a entrega do frontend.
+de requisições e a entrega do frontend. Os testes de `service/` são unitários puros (sem Spring nem banco) e usam
+repositórios falsos de `Dobles.java`; os `*IntegrationTest` sobem a aplicação inteira.
 
 ## Próximos passos sugeridos
 
-- Job agendado para gerar cobranças automaticamente todo mês a partir dos contratos ativos.
-- Testes do `MercadoPagoGateway` com servidor HTTP stub (WireMock/MockWebServer).
-- Testes unitários de service (JUnit 5 + Mockito) e de integração de controller (MockMvc).
-- Notificar locador e locatário quando o pagamento é confirmado.
+- Gerar a cobrança (Pix/boleto) automaticamente todo mês. Hoje o sistema só **lembra por e-mail** (veja `docs/EMAIL.md`); o locatário ainda abre a tela de pagamentos para pagar.

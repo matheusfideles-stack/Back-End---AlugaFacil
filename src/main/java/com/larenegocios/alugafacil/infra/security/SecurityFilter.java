@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -37,7 +38,8 @@ public class SecurityFilter extends OncePerRequestFilter {
             // Token invalido ou de usuario inexistente segue anonimo: rotas publicas funcionam e as protegidas devolvem 401.
             try {
                 String subject = tokenService.getSubject(tokenJWT);
-                usuarioRepository.findByEmail(subject).ifPresent(usuario -> {
+                // Conta desativada nao autentica, mesmo com o token ainda valido.
+                usuarioRepository.findByEmail(subject).filter(UserDetails::isEnabled).ifPresent(usuario -> {
                     var authentication = new UsernamePasswordAuthenticationToken(
                             usuario, null, usuario.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(authentication);

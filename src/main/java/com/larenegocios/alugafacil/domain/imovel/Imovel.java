@@ -4,8 +4,13 @@ import com.larenegocios.alugafacil.domain.usuario.Usuario;
 import jakarta.persistence.*;
 import lombok.*;
 
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "imoveis")
@@ -67,6 +72,18 @@ public class Imovel {
 
     @Column(name = "area_m2")
     private Integer areaM2;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "imovel_comodidades", joinColumns = @JoinColumn(name = "imovel_id"))
+    @Enumerated(EnumType.STRING)
+    @Column(name = "comodidade", length = 40)
+    @Fetch(FetchMode.SUBSELECT)
+    private Set<Comodidade> comodidades = new LinkedHashSet<>();
+
+    // Posicao no mapa, preenchida pelo geocodificador. Nula quando o endereco nao foi encontrado.
+    private Double latitude;
+
+    private Double longitude;
 
     @Column(nullable = false)
     private Boolean disponivel = true;
