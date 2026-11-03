@@ -91,9 +91,16 @@ function renderizarImovel(imovel, perfil) {
           <p class="rotulo" style="margin-top:10px">Anunciado por</p>
           <p>${escaparHtml(imovel.nomeLocador)}</p>
         </div>
+        ${imovel.comodidades && imovel.comodidades.length ? `<p class="rotulo" style="margin-top:18px">O que este lugar oferece</p>
+          <div class="comodidades-lista">${htmlComodidades(imovel.comodidades)}</div>` : ''}
         ${imovel.descricao ? `<p class="descricao">${escaparHtml(imovel.descricao)}</p>` : ''}
         <div class="acoes" style="margin-top:20px">${acao}</div>
       </div>
+    </section>
+    <section class="cartao" id="localizacao">
+      <h2 class="secao" style="margin-top:0">Localização</h2>
+      <div id="mapa-imovel" class="mapa-imovel"></div>
+      <p class="info" id="mapa-nota" style="margin-top:8px"></p>
     </section>
     <section class="cartao avaliacoes" id="avaliacoes">
       <h2 class="secao" style="margin-top:0">Avaliações</h2>
@@ -102,6 +109,23 @@ function renderizarImovel(imovel, perfil) {
       <div id="av-lista"></div>
       <div class="acoes" style="justify-content:center"><button type="button" class="btn" id="av-mais" hidden>Ver mais avaliações</button></div>
     </section>`;
+  iniciarMapaDoImovel(imovel);
+}
+
+// Sem posicao (cidade fora da lista) ou sem a biblioteca do mapa, a secao some em vez de mostrar um quadro vazio.
+function iniciarMapaDoImovel(imovel) {
+  const secao = document.getElementById('localizacao');
+  const posicao = posicaoDoImovel(imovel);
+  if (!posicao || !mapaDisponivel()) {
+    secao.hidden = true;
+    return;
+  }
+  const mapaDoImovel = criarMapa(document.getElementById('mapa-imovel'), [posicao.lat, posicao.lng], posicao.aproximada ? 13 : 16,
+    { rolarParaAmpliar: false });
+  L.marker([posicao.lat, posicao.lng], { icon: iconePreco(imovel, true) }).addTo(mapaDoImovel);
+  document.getElementById('mapa-nota').textContent = posicao.aproximada
+    ? 'Posição aproximada: ainda não localizamos o endereço exato no mapa.'
+    : `${enderecoCompleto(imovel)} - ${imovel.bairro}, ${imovel.cidade}/${imovel.uf}`;
 }
 
 function htmlResumo(resumo) {

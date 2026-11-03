@@ -1,9 +1,11 @@
 package com.larenegocios.alugafacil.dto;
 
+import com.larenegocios.alugafacil.domain.imovel.Comodidade;
 import com.larenegocios.alugafacil.domain.imovel.Imovel;
 import com.larenegocios.alugafacil.domain.imovel.TipoImovel;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record DadosImovel(
         Long id,
@@ -27,7 +29,10 @@ public record DadosImovel(
         Long locadorId,
         String nomeLocador,
         Double mediaAvaliacoes,
-        Long totalAvaliacoes
+        Long totalAvaliacoes,
+        List<Comodidade> comodidades,
+        Double latitude,
+        Double longitude
 ) {
     public DadosImovel(Imovel imovel) {
         this(imovel, null, 0L);
@@ -39,6 +44,7 @@ public record DadosImovel(
                 imovel.getCidade(), imovel.getUf(), imovel.getCep(), imovel.getValorAluguel(),
                 imovel.getValorCondominio(), imovel.getQuartos(), imovel.getBanheiros(), imovel.getVagas(),
                 imovel.getAreaM2(), imovel.getDisponivel(), imovel.getLocador().getId(),
-                imovel.getLocador().getNome(), mediaAvaliacoes, totalAvaliacoes);
+                imovel.getLocador().getNome(), mediaAvaliacoes, totalAvaliacoes,
+                imovel.getComodidades().stream().sorted().toList(), imovel.getLatitude(), imovel.getLongitude());
     }
 }

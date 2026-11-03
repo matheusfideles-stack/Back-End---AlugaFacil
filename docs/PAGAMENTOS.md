@@ -37,6 +37,18 @@ próprio Mercado Pago). O fluxo correto é:
 
 O token é de uso único: cada tentativa de pagamento exige um token novo.
 
+**O frontend já faz isso** (`static/js/pagamentos.js`): quando o provider não é `fake` e existe `MP_PUBLIC_KEY`,
+ele carrega o MercadoPago.js, pede também o **CPF do titular** do cartão e troca os dados por um token direto com o
+Mercado Pago. O nosso servidor só recebe `tokenCartao`, `bandeiraCartao` e `parcelas`. Só a **public key** (feita para
+ser pública) vai ao navegador: o `MP_ACCESS_TOKEN` e o segredo do webhook ficam somente no servidor. Pix e boleto
+são criados inteiramente pelo servidor, sem o navegador falar com o Mercado Pago. Sem `MP_PUBLIC_KEY` a tela
+recusa o cartão e oferece só Pix e boleto.
+
+A **bandeira** do cartão (`bandeiraCartao`) também vem do Mercado Pago: o frontend pergunta ao MercadoPago.js qual é o
+método dos 8 primeiros dígitos e escolhe o de débito ou o de crédito. A tabela local de bandeiras só vale no modo
+`fake` e como reserva quando o Mercado Pago não reconhece o cartão. Se o cartão existe mas não é do tipo escolhido
+(débito num cartão só de crédito), a tela avisa antes de gastar o token.
+
 ---
 
 ## 2. Configuração
@@ -59,6 +71,9 @@ mvn spring-boot:run -Dspring-boot.run.profiles=local
 | `MP_NOTIFICATION_URL` | URL pública do webhook (deixe vazio em localhost) |
 | `MP_WEBHOOK_SECRET` | assinatura secreta do webhook |
 | `PAGAMENTO_PROVIDER` | `mercadopago` ou `fake` |
+
+> **Em produção (`prod`) o sistema não sobe** com `fake`, nem sem `MP_ACCESS_TOKEN`, `MP_WEBHOOK_SECRET` e uma
+> `MP_NOTIFICATION_URL` `https://` (veja `docs/PRODUCAO.md`).
 
 > Em `localhost` deixe `MP_NOTIFICATION_URL` vazio: o Mercado Pago valida a URL e **recusa a
 > cobrança** se ela não for pública. Use um túnel (`ngrok http 8080`) quando quiser testar o webhook.
@@ -208,6 +223,8 @@ Quando o banco exigir autenticação 3DS, a resposta vem com `status: PENDENTE` 
 | Visa crédito | `4235 6477 2802 5682` | 123 | 11/30 |
 | Elo débito | `5067 7667 8388 8311` | 123 | 11/30 |
 
+> O Visa de teste é um cartão **internacional**: o Mercado Pago recusa parcelamento nele (`installments_excludes_country`). Para testar crédito parcelado use o Mastercard de teste.
+
 O **nome do titular** controla o resultado no sandbox:
 
 | Nome | Resultado |
@@ -240,6 +257,15 @@ Em produção o Mercado Pago chama `POST /webhooks/mercadopago`. Para testar em 
 ngrok http 8080
 ```
 
+Alternativa **sem criar conta**: `winget install Cloudflare.cloudflared` e depois
+`cloudflared tunnel --url http://localhost:8080`. Ele imprime um endereço `https://….trycloudflare.com`; a URL do
+webhook é esse endereço mais `/webhooks/mercadopago`. O endereço muda a cada vez que o túnel é reiniciado, então
+suba o túnel primeiro, use a URL em `MP_NOTIFICATION_URL` e atualize o painel do Mercado Pago quando ela mudar.
+
+No ambiente de teste o Mercado Pago avisa o webhook assim que um pagamento é criado, com assinatura. Foi assim que
+se confirmou (2026-11-02) que a assinatura é aceita e que uma chamada sem assinatura ou com assinatura falsa volta
+`401`. O aviso de um pagamento que já está `PAGO` não muda nada e não manda e-mail de novo.
+
 Configure no painel do Mercado Pago (*Suas integrações > Webhooks*) a URL
 `https://SEU-TUNEL.ngrok-free.app/webhooks/mercadopago`, evento **Pagamentos**, copie a
 assinatura secreta e coloque em `MP_WEBHOOK_SECRET` / `application-local.yml`.
@@ -264,7 +290,7 @@ curl -s -w "\nHTTP %{http_code}\n" -X POST http://localhost:8080/webhooks/mercad
 
 Esperado: `200` com assinatura correta, `401` com assinatura errada ou ausente.
 Sem `MP_WEBHOOK_SECRET` configurado a validação é pulada (só para desenvolvimento —
-aparece um `WARN` no log).
+aparece um `WARN` no log). Em `prod` o sistema nem sobe sem ele.
 
 ---
 
@@ -279,6 +305,9 @@ aparece um `WARN` no log).
   e estornam cobranças.
 - **O webhook nunca confia no corpo da notificação:** dele só usamos o id, e o status vem de
   uma consulta à API do Mercado Pago.
+- **Pagamento confirmado avisa por e-mail:** quando o status passa para `PAGO` (na hora, no cartão; depois, em Pix e
+  boleto), o locatário recebe o comprovante `PG-xxxxxx` e o locador recebe o aviso de recebimento, uma vez só, mesmo
+  que o webhook chegue repetido. Falha no e-mail nunca desfaz o pagamento (veja `docs/EMAIL.md`).
 - **Falha no gateway derruba a transação** (`502` + rollback), então não sobra pagamento órfão
   no banco.
 
@@ -291,6 +320,8 @@ aparece um `WARN` no log).
 | `Payer email forbidden` | e-mail do pagador é o da conta vendedora ou de domínio reservado |
 | `The expiration date can not be greater than 29 days` | vencimento do boleto fora da janela (já tratado pelo clamp) |
 | `Invalid users involved` | access token e public key de contas diferentes |
+| `installments_excludes_country` | parcelamento em cartão internacional (o Visa de teste é um); use o Mastercard |
+| `500 internal_error` sem detalhe, em toda criação de pagamento | problema do lado do Mercado Pago ou da aplicação recém-criada/alterada; passou sozinho horas depois da troca do tipo da integração para Checkout Transparente |
 | `Invalid card token` | token já usado (é de uso único) ou expirado |
 | `pagamento.mercadopago.access-token nao configurado` | subiu com `provider=mercadopago` sem credencial |
 
@@ -299,7 +330,8 @@ aparece um `WARN` no log).
 ## 7. O que ainda falta
 
 - Job agendado para gerar as cobranças do mês automaticamente a partir dos contratos ativos.
-- Testes automatizados do `MercadoPagoGateway` com servidor HTTP stub (MockWebServer/WireMock).
 - Registrar o histórico de tentativas recusadas em tabela separada (hoje a retentativa
   sobrescreve a tentativa anterior).
-- Notificar locador e locatário quando o pagamento é confirmado.
+- Já testado com credenciais de teste reais (2026-11-02): Pix, boleto, débito, crédito à vista e parcelado, pelo
+  servidor **e** pelo formulário do navegador com o MercadoPago.js de verdade (inclusive cartão recusado `OTHE`).
+- Testar o webhook de verdade (precisa de URL pública).

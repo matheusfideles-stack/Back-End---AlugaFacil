@@ -56,10 +56,8 @@
                     <div><label for="complemento">Complemento</label><input id="complemento" name="complemento"
                             type="text" placeholder="Apto, bloco..."></div>
                     <div><label for="bairro">Bairro</label><input id="bairro" name="bairro" type="text" required></div>
-                    <div><label for="cidade">Cidade</label><input id="cidade" name="cidade" type="text"
-                            placeholder="Patos de Minas" required></div>
-                    <div><label for="uf">UF</label><input id="uf" name="uf" type="text" maxlength="2" placeholder="MG"
-                            required></div>
+                    <div><label for="cidade">Cidade</label><select id="cidade" name="cidade" required></select></div>
+                    <div><label for="uf">UF</label><input id="uf" name="uf" type="text" maxlength="2" readonly required></div>
                     <div><label for="quartos">Quartos</label><input id="quartos" name="quartos" type="number"
                             min="0"></div>
                     <div><label for="banheiros">Banheiros</label><input id="banheiros" name="banheiros" type="number"
@@ -68,6 +66,8 @@
                             type="number" min="0"></div>
                     <div class="cheio"><label for="descricao">Descrição</label><textarea id="descricao" name="descricao"
                             rows="4"></textarea></div>
+                    <div class="cheio"><label>Comodidades <span class="info">(marque o que o imóvel oferece)</span></label>
+                        <div class="comodidades-grade" id="comodidades-form"></div></div>
                     <div class="cheio" id="fotos-gerencia">
                         <label>Fotos do imóvel <span class="info">(até 10 fotos JPG, PNG ou WebP de até 5 MB; a primeira é a capa)</span></label>
                         <div class="fotos-grade" id="fotos-grade"></div>

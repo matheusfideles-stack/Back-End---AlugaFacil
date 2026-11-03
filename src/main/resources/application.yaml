@@ -7,9 +7,10 @@ spring:
   profiles:
     active: local
   datasource:
-    url: jdbc:mysql://localhost:3306/alugafacil
+    # Padrões para uso local; o Docker sobrescreve DB_HOST, DB_PORT, DB_NAME e DB_USER.
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:alugafacil}
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
+    username: ${DB_USER:root}
     # Defina DB_PASSWORD no ambiente ou em application-local.yml (ignorado pelo git).
     password: ${DB_PASSWORD:}
   servlet:
@@ -33,6 +34,10 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+      # Sem estes limites, um servidor de e-mail que nao responde trava o cadastro para sempre.
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 10000
+      mail.smtp.writetimeout: 10000
 
 app:
   url-base: ${APP_URL_BASE:http://localhost:8080}
@@ -48,6 +53,12 @@ app:
     validade-minutos: 60
   codigo:
     max-tentativas: 5
+  lembretes:
+    ativo: ${APP_LEMBRETES_ATIVO:true}
+    cron: "0 0 9 * * *"
+  geocodificacao:
+    # Posicao dos imoveis no mapa, pelo Nominatim (OpenStreetMap). Use false para nao consultar a internet.
+    ativa: ${APP_GEOCODIFICACAO_ATIVA:true}
   uploads:
     dir: ${UPLOADS_DIR:./uploads}
 

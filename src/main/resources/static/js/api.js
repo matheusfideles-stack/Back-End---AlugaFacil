@@ -166,6 +166,79 @@ const rotuloTipo = {
   GALPAO: 'Galpão'
 };
 
+// ---- Cidades atendidas e comodidades: a mesma lista nos filtros, no cadastro do imovel e no mapa.
+// lat e lng sao o centro de cada cidade; servem de posicao de reserva quando o imovel ainda nao foi localizado.
+const CIDADES = [
+  { nome: 'Patos de Minas', uf: 'MG', lat: -18.6041, lng: -46.5097 },
+  { nome: 'Lagoa Formosa', uf: 'MG', lat: -18.7742, lng: -46.4083 },
+  { nome: 'Nova Ponte', uf: 'MG', lat: -19.1692, lng: -47.6718 },
+  { nome: 'Tiros', uf: 'MG', lat: -19.0039, lng: -45.9636 }
+];
+const NOMES_ESTADOS = { MG: 'Minas Gerais' };
+// Icones de traco, no mesmo estilo dos icones do site: 24x24, cor herdada do texto.
+const ICONE = conteudo => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${conteudo}</svg>`;
+
+const COMODIDADES = [
+  { id: 'PISCINA', rotulo: 'Piscina', icone: ICONE('<path d="M2 16c1.7 0 1.7-1.2 3.3-1.2S7 16 8.7 16s1.7-1.2 3.3-1.2S13.7 16 15.3 16s1.7-1.2 3.3-1.2S20.3 16 22 16"/><path d="M2 20c1.7 0 1.7-1.2 3.3-1.2S7 20 8.7 20s1.7-1.2 3.3-1.2S13.7 20 15.3 20s1.7-1.2 3.3-1.2S20.3 20 22 20"/><path d="M8 12V4m0 4h3"/>') },
+  { id: 'ESTACIONAMENTO_GRATUITO', rotulo: 'Estacionamento gratuito', icone: ICONE('<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 17V7h3.5a3 3 0 0 1 0 6H9"/>') },
+  { id: 'MAQUINA_DE_LAVAR', rotulo: 'Máquina de lavar', icone: ICONE('<rect x="4" y="2.5" width="16" height="19" rx="2"/><path d="M4 6.5h16"/><circle cx="12" cy="13.5" r="4.5"/><path d="M7.5 5h.01"/>') },
+  { id: 'AR_CONDICIONADO', rotulo: 'Ar-condicionado', icone: ICONE('<path d="M12 2.5v19"/><path d="M4.2 7.2l15.6 9.6"/><path d="M4.2 16.8l15.6-9.6"/>') },
+  { id: 'LAREIRA', rotulo: 'Lareira', icone: ICONE('<path d="M12 3c.5 3 4.5 5.2 4.5 9.5a4.5 4.5 0 0 1-9 0c0-2.2 1-3.6 2-4.6.2 1.8 1 2.8 2 3.1C11.4 8.2 11.6 5.6 12 3z"/><path d="M5 21h14"/>') },
+  { id: 'TV', rotulo: 'TV', icone: ICONE('<rect x="2.5" y="6" width="19" height="12.5" rx="2"/><path d="M8 21.5h8"/><path d="M9 3l3 3 3-3"/>') },
+  { id: 'AQUECEDOR', rotulo: 'Aquecedor', icone: ICONE('<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7.5 8v8M12 8v8M16.5 8v8"/>') },
+  { id: 'CHURRASQUEIRA', rotulo: 'Churrasqueira', icone: ICONE('<path d="M3.5 11h17a8.5 8.5 0 0 1-17 0z"/><path d="M8 19.5l-1 2.5M16 19.5l1 2.5M12 11V4"/>') }
+];
+
+function comodidadePorId(id) {
+  return COMODIDADES.find(c => c.id === id) || null;
+}
+
+function htmlComodidades(ids) {
+  return (ids || []).map(comodidadePorId).filter(Boolean)
+    .map(c => `<span class="comodidade-chip"><span aria-hidden="true">${c.icone}</span> ${escaparHtml(c.rotulo)}</span>`).join('');
+}
+
+function centroDaCidade(nome) {
+  const alvo = normalizarTexto(nome);
+  return CIDADES.find(c => normalizarTexto(c.nome) === alvo) || null;
+}
+
+function aleatorioFixo(semente) {
+  const x = Math.sin(semente * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+// Posicao exata quando o imovel foi localizado; senao, o centro da cidade com um pequeno desvio fixo por imovel, para os
+// pinos nao ficarem empilhados. Cidade desconhecida: sem posicao (nao aparece no mapa).
+function posicaoDoImovel(imovel) {
+  if (imovel.latitude != null && imovel.longitude != null) {
+    return { lat: imovel.latitude, lng: imovel.longitude, aproximada: false };
+  }
+  const centro = centroDaCidade(imovel.cidade);
+  if (!centro) return null;
+  return {
+    lat: centro.lat + (aleatorioFixo(Number(imovel.id) + 101) - 0.5) * 0.024,
+    lng: centro.lng + (aleatorioFixo(Number(imovel.id)) - 0.5) * 0.024,
+    aproximada: true
+  };
+}
+
+// Preco digitado pelo usuario ("3000", "3.000,50", "R$ 3000"); vazio ou invalido nao limita nada.
+function lerPreco(texto) {
+  const limpo = String(texto).replace(/[^\d,.]/g, '');
+  if (!limpo) return Infinity;
+  const numero = parseFloat(limpo.includes(',') ? limpo.replace(/\./g, '').replace(',', '.') : limpo.replace(/\.(?=\d{3}\b)/g, ''));
+  return Number.isFinite(numero) && numero > 0 ? numero : Infinity;
+}
+
+// Cartoes de comodidade para os filtros (a pagina escuta o clique em [data-comodidade]).
+function htmlCartoesDeComodidades(escolhidas) {
+  return COMODIDADES.map(c =>
+    `<button type="button" class="comodidade-card${escolhidas.has(c.id) ? ' ativo' : ''}" data-comodidade="${c.id}" ` +
+    `aria-pressed="${escolhidas.has(c.id)}"><span class="icone" aria-hidden="true">${c.icone}</span>` +
+    `<span>${escaparHtml(c.rotulo)}</span></button>`).join('');
+}
+
 const NOMES_MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
 const MESES_CURTOS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
@@ -248,7 +321,7 @@ function normalizarTexto(texto) {
 function cardImovel(imovel) {
   const detalhes = detalhesDoImovel(imovel);
   return `
-    <article class="cartao imovel">
+    <article class="cartao imovel" data-imovel="${imovel.id}">
       ${fotoImovel(imovel.id)}
       <div class="corpo">
         <strong>${escaparHtml(imovel.titulo)}</strong>
@@ -324,13 +397,18 @@ function montarMenu(nav) {
   if (dados && dados.perfil === 'LOCATARIO') {
     itens = [['Início', 'cliente.html'], ['Imóveis', 'imoveis.html'], ['Meus Aluguéis', 'alugueis.html'],
       ['Pagamentos', 'pagamentos.html'], ['Ajuda', 'ajuda.html']];
+  } else if (dados && dados.perfil === 'ADMIN') {
+    itens = [['Proprietários', 'admin.html#proprietarios', 'proprietarios'], ['Usuários', 'admin.html#usuarios', 'usuarios'],
+      ['Imóveis', 'admin.html#imoveis', 'imoveis'], ['Avaliações', 'admin.html#avaliacoes', 'avaliacoes'],
+      ['Contratos', 'admin.html#contratos', 'contratos'], ['Pagamentos', 'admin.html#pagamentos', 'pagamentos'],
+      ['Vitrine', 'imoveis.html']];
   } else if (dados) {
-    itens = [[dados.perfil === 'ADMIN' ? 'Administração' : 'Meu painel', paginaInicial(dados.perfil)], ['Imóveis', 'imoveis.html'], ['Ajuda', 'ajuda.html']];
+    itens = [['Meu painel', paginaInicial(dados.perfil)], ['Imóveis', 'imoveis.html'], ['Ajuda', 'ajuda.html']];
   } else {
     itens = [['Início', 'index.html'], ['Imóveis', 'imoveis.html'], ['Ajuda', 'ajuda.html']];
   }
-  nav.innerHTML = itens.map(([rotulo, destino]) =>
-    `<a href="${destino}"${destino === atual ? ' class="ativo"' : ''}>${rotulo}</a>`).join('');
+  nav.innerHTML = itens.map(([rotulo, destino, aba]) =>
+    `<a href="${destino}"${aba ? ` data-aba="${aba}"` : ''}${destino === atual ? ' class="ativo"' : ''}>${rotulo}</a>`).join('');
 }
 
 function preencherRodape() {

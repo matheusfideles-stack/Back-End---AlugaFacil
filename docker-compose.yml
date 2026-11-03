@@ -1,38 +1,80 @@
 services:
   db:
-    image: postgres:16
+    image: mysql:8.4
     container_name: alugafacil-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: alugafacil
-      POSTGRES_USER: alugafacil
-      POSTGRES_PASSWORD: alugafacil
+      MYSQL_DATABASE: alugafacil
+      MYSQL_USER: alugafacil
+      MYSQL_PASSWORD: alugafacil
+      MYSQL_ROOT_PASSWORD: root-alugafacil
     ports:
-      - "5432:5432"
+      # Porta 3307 no computador para não colidir com um MySQL instalado localmente.
+      - "3307:3306"
     volumes:
-      - alugafacil-data:/var/lib/postgresql/data
+      - alugafacil-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot-alugafacil"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   app:
     build: .
     container_name: alugafacil-api
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
+      # local = uso de teste. Em produção use prod (veja docs/PRODUCAO.md).
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       DB_HOST: db
-      DB_PORT: 5432
+      DB_PORT: 3306
       DB_NAME: alugafacil
       DB_USER: alugafacil
       DB_PASSWORD: alugafacil
-      JWT_SECRET: troque-esta-chave-em-producao
+      # Troque em produção. Pode vir do arquivo .env.
+      JWT_SECRET: ${JWT_SECRET:-troque-esta-chave-em-producao}
+      # Sem essas duas variáveis não existe administrador. Defina no .env.
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_SENHA: ${ADMIN_SENHA:-}
       # Credenciais do gateway: preencha no arquivo .env (copie de .env.example)
       PAGAMENTO_PROVIDER: ${PAGAMENTO_PROVIDER:-mercadopago}
-      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN}
-      MP_PUBLIC_KEY: ${MP_PUBLIC_KEY}
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN:-}
+      MP_PUBLIC_KEY: ${MP_PUBLIC_KEY:-}
       MP_NOTIFICATION_URL: ${MP_NOTIFICATION_URL:-}
       MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET:-}
+      # As fotos ficam em um volume, para sobreviver a atualizações da imagem.
+      UPLOADS_DIR: /data/uploads
+      # E-mail (veja docs/EMAIL.md). Sem valor aqui, o dado vem do arquivo .env ou do ambiente;
+      # variável não definida fica sem definir no container, e o e-mail só liga se SPRING_MAIL_HOST existir.
+      APP_URL_BASE: ${APP_URL_BASE:-http://localhost:8080}
+      APP_LEMBRETES_ATIVO: ${APP_LEMBRETES_ATIVO:-true}
+      APP_GEOCODIFICACAO_ATIVA: ${APP_GEOCODIFICACAO_ATIVA:-true}
+      SPRING_MAIL_HOST:
+      SPRING_MAIL_PORT:
+      SPRING_MAIL_USERNAME:
+      SPRING_MAIL_PASSWORD:
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH:
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE:
+      MAIL_REMETENTE:
+      MAIL_SUPORTE:
+    volumes:
+      - alugafacil-uploads:/data/uploads
     ports:
       - "8080:8080"
 
+  # Caixa de e-mail de teste: recebe tudo que o sistema enviar e mostra em http://localhost:8025.
+  # Só sobe com: docker compose --profile email-teste up -d  (veja docs/EMAIL.md)
+  mailpit:
+    image: axllent/mailpit
+    container_name: alugafacil-mailpit
+    profiles: ["email-teste"]
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+
 volumes:
   alugafacil-data:
+  alugafacil-uploads:

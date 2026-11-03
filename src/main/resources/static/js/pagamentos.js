@@ -344,9 +344,14 @@ function formularioCartao(metodo) {
       <div><label for="cc-validade">Validade</label><input id="cc-validade" type="text" inputmode="numeric" autocomplete="cc-exp" placeholder="MM/AA" maxlength="5"></div>
       <div><label for="cc-cvv">CVV</label><input id="cc-cvv" type="text" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4"></div>
     </div>
+    ${config.provider === 'fake' ? '' :
+      '<label for="cc-cpf">CPF do titular do cartão</label>' +
+      '<input id="cc-cpf" type="text" inputmode="numeric" autocomplete="off" placeholder="000.000.000-00" maxlength="14">'}
     ${parcelas}
     <p class="aviso" id="cc-erro" hidden style="margin-top:12px"></p>
-    <p class="info nota">Ambiente de teste: os dados do cartão ficam só neste navegador e não são enviados ao servidor.</p>
+    <p class="info nota">${config.provider === 'fake'
+      ? 'Ambiente de teste: os dados do cartão ficam só neste navegador e não são enviados ao servidor.'
+      : 'Os dados do cartão vão direto para o Mercado Pago, por conexão segura, e não passam pelo nosso servidor.'}</p>
     <button type="submit" hidden></button>
   </form>`;
 }
@@ -371,8 +376,11 @@ function lerCartao() {
   const digitos = digitosDe(el('cc-numero').value);
   const bandeira = bandeiraDoNumero(digitos);
   if (digitos.length < 13 || !luhnValido(digitos)) return invalido('Número do cartão inválido. Confira os dígitos.', 'cc-numero');
-  if (!bandeira) return invalido('Bandeira do cartão não reconhecida.', 'cc-numero');
-  if (cartaoMetodo === 'debito' && !bandeira.debito) {
+  // No pagamento real quem diz a bandeira e se o cartao aceita debito ou credito e o proprio Mercado Pago (depois,
+  // em bandeiraPeloMercadoPago); a tabela local nao cobre todas as faixas de cartao e so vale para o modo de teste.
+  const real = config.provider !== 'fake';
+  if (!real && !bandeira) return invalido('Bandeira do cartão não reconhecida.', 'cc-numero');
+  if (!real && cartaoMetodo === 'debito' && !bandeira.debito) {
     return invalido(`O cartão ${bandeira.nome} não aceita débito. Use Crédito, PIX ou boleto.`, 'cc-numero');
   }
   if (el('cc-nome').value.trim().length < 3) return invalido('Digite o nome como está impresso no cartão.', 'cc-nome');
@@ -381,13 +389,98 @@ function lerCartao() {
   if (new Date(2000 + Number(validade[2]), Number(validade[1]), 0, 23, 59, 59) < new Date()) {
     return invalido('Cartão vencido. Use outro cartão.', 'cc-validade');
   }
-  const tamanhoCvv = bandeira.id === 'amex' ? 4 : 3;
-  if (el('cc-cvv').value.length !== tamanhoCvv) return invalido(`O CVV tem ${tamanhoCvv} dígitos.`, 'cc-cvv');
+  const tamanhoCvv = bandeira ? (bandeira.id === 'amex' ? 4 : 3) : null;
+  const tamanhoDigitado = el('cc-cvv').value.length;
+  if (tamanhoCvv ? tamanhoDigitado !== tamanhoCvv : (tamanhoDigitado < 3 || tamanhoDigitado > 4)) {
+    return invalido(`O CVV tem ${tamanhoCvv || '3 ou 4'} dígitos.`, 'cc-cvv');
+  }
+  const cpf = el('cc-cpf') ? digitosDe(el('cc-cpf').value) : '';
+  if (el('cc-cpf') && cpf.length !== 11) return invalido('Informe os 11 dígitos do CPF do titular do cartão.', 'cc-cpf');
   mostrarAviso(el('cc-erro'), '');
   return {
-    bandeira: cartaoMetodo === 'debito' ? bandeira.debito : bandeira.credito,
-    parcelas: cartaoMetodo === 'credito' ? Number(el('cc-parcelas').value) : 1
+    bandeira: bandeira ? (cartaoMetodo === 'debito' ? bandeira.debito : bandeira.credito) : null,
+    parcelas: cartaoMetodo === 'credito' ? Number(el('cc-parcelas').value) : 1,
+    // Só existem na memória até o token ser gerado; nunca vão para o nosso servidor.
+    cartao: {
+      cardNumber: digitos,
+      cardholderName: el('cc-nome').value.trim(),
+      cardExpirationMonth: validade[1],
+      cardExpirationYear: String(2000 + Number(validade[2])),
+      securityCode: el('cc-cvv').value,
+      identificationType: 'CPF',
+      identificationNumber: cpf
+    }
   };
+}
+
+let mercadoPagoPromessa = null;
+
+// A biblioteca do Mercado Pago so e carregada quando existe pagamento real com cartao. O Access Token nunca vem
+// para ca: a chave publica serve apenas para trocar os dados do cartao por um token de uso unico.
+function carregarMercadoPago() {
+  if (!mercadoPagoPromessa) {
+    mercadoPagoPromessa = new Promise((resolve, reject) => {
+      const iniciar = () => resolve(new window.MercadoPago(config.publicKey, { locale: 'pt-BR' }));
+      if (window.MercadoPago) return iniciar();
+      const script = document.createElement('script');
+      script.src = 'https://sdk.mercadopago.com/js/v2';
+      script.onload = iniciar;
+      script.onerror = () => {
+        mercadoPagoPromessa = null;
+        reject(new Error('Não foi possível carregar o Mercado Pago. Verifique sua conexão e tente de novo.'));
+      };
+      document.head.appendChild(script);
+    });
+  }
+  return mercadoPagoPromessa;
+}
+
+function mensagemDoErroDeCartao(erro) {
+  const causas = Array.isArray(erro) ? erro : (erro && erro.cause) || [];
+  const codigos = causas.map(c => String(c.code));
+  if (codigos.some(c => ['205', 'E301'].includes(c))) return 'Número do cartão inválido.';
+  if (codigos.some(c => ['208', '209', '325', '326'].includes(c))) return 'Validade do cartão inválida.';
+  if (codigos.some(c => ['224', '225', 'E203', 'E302'].includes(c))) return 'Código de segurança (CVV) inválido.';
+  if (codigos.some(c => ['212', '213', '214', '221', '316'].includes(c))) return 'Confira o nome e o CPF do titular do cartão.';
+  const descricao = causas.map(c => c.description).filter(Boolean).join('; ');
+  return descricao ? `Cartão recusado pelo Mercado Pago: ${descricao}` : 'Não foi possível validar o cartão. Confira os dados.';
+}
+
+// O Mercado Pago responde com os metodos possiveis para os 8 primeiros digitos; escolhe-se o de debito ou o de credito.
+// Se o Mercado Pago nao conhece o cartao (resposta vazia), vale a bandeira da tabela local, quando ela existe.
+async function bandeiraPeloMercadoPago(numero, daTabelaLocal) {
+  const mp = await carregarMercadoPago();
+  let resposta;
+  try {
+    resposta = await mp.getPaymentMethods({ bin: numero.slice(0, 8) });
+  } catch (e) {
+    throw new Error('Não foi possível identificar o cartão. Confira o número e tente de novo.');
+  }
+  const resultados = (resposta && resposta.results) || [];
+  if (resultados.length === 0) {
+    if (daTabelaLocal) return daTabelaLocal;
+    throw new Error('Cartão não reconhecido. Confira o número ou use outro cartão, PIX ou boleto.');
+  }
+  const tipo = cartaoMetodo === 'debito' ? 'debit_card' : 'credit_card';
+  const metodo = resultados.find(m => m.payment_type_id === tipo);
+  if (!metodo) {
+    throw new Error(cartaoMetodo === 'debito'
+      ? 'Este cartão não aceita débito. Use Crédito, PIX ou boleto.'
+      : 'Este cartão não aceita crédito. Use Débito, PIX ou boleto.');
+  }
+  return metodo.id;
+}
+
+async function gerarTokenDoCartao(cartao) {
+  if (config.provider === 'fake') return 'token-de-teste';
+  const mp = await carregarMercadoPago();
+  try {
+    const token = await mp.createCardToken(cartao);
+    if (!token || !token.id) throw token;
+    return token.id;
+  } catch (e) {
+    throw new Error(mensagemDoErroDeCartao(e));
+  }
 }
 
 function renderizarResultado(p) {
@@ -481,12 +574,28 @@ function abrirFormularioCartao(metodo) {
 async function confirmarCartao() {
   const dados = lerCartao();
   if (!dados) return;
+
+  let tokenCartao;
+  let bandeiraCartao = dados.bandeira;
+  const botao = el('pag-acao');
+  botao.disabled = true;
+  try {
+    // A bandeira vem antes do token: o token e de uso unico e nao deve ser gasto num cartao que sera recusado.
+    if (config.provider !== 'fake') bandeiraCartao = await bandeiraPeloMercadoPago(dados.cartao.cardNumber, dados.bandeira);
+    tokenCartao = await gerarTokenDoCartao(dados.cartao);
+  } catch (e) {
+    mostrarAviso(el('cc-erro'), e.message);
+    return;
+  } finally {
+    botao.disabled = false;
+  }
+
   await enviarPagamento({
     contratoId: contrato.id,
     referenciaMes: el('sel-mes').value,
     metodo: METODO_API[cartaoMetodo],
-    tokenCartao: 'token-de-teste',
-    bandeiraCartao: dados.bandeira,
+    tokenCartao,
+    bandeiraCartao,
     parcelas: dados.parcelas
   });
 }
@@ -546,7 +655,7 @@ async function pagar() {
   const metodo = metodoEscolhido();
 
   if (metodo === 'debito' || metodo === 'credito') {
-    if (config.provider !== 'fake') {
+    if (config.provider !== 'fake' && !config.publicKey) {
       erro('Pagamento com cartão ainda não está habilitado neste ambiente. Use PIX ou boleto.');
       return;
     }
@@ -643,6 +752,10 @@ el('pag-corpo').addEventListener('input', e => {
     campo.value = digitos.length > 2 ? `${digitos.slice(0, 2)}/${digitos.slice(2)}` : digitos;
   } else if (campo.id === 'cc-cvv') {
     campo.value = digitosDe(campo.value).slice(0, 4);
+  } else if (campo.id === 'cc-cpf') {
+    const d = digitosDe(campo.value).slice(0, 11);
+    campo.value = d.replace(/^(\d{3})(\d)/, '$1.$2').replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3').replace(/\.(\d{3})(\d)/, '.$1-$2');
+    return;
   } else {
     return;
   }

@@ -1,0 +1,8 @@
+# Perfil de producao: rode com SPRING_PROFILES_ACTIVE=prod. Nao tem segredos; eles vem de variaveis de ambiente.
+server:
+  # Atras de um proxy com HTTPS (Caddy, nginx), usa X-Forwarded-Proto para saber se a conexao original era segura.
+  forward-headers-strategy: framework
+
+app:
+  https-obrigatorio: true
+  exibir-links-de-teste: false

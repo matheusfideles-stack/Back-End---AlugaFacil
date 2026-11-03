@@ -31,3 +31,7 @@ uploads/
 
 ### Configuracao local do Claude Code ###
 .claude/
+
+### Backups (tem dados de pessoas e hashes de senha) ###
+backups/
+backups-sh/

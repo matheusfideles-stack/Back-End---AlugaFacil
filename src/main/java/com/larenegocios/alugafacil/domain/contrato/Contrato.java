@@ -8,6 +8,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 
 @Entity
 @Table(name = "contratos")
@@ -48,4 +49,9 @@ public class Contrato {
 
     @Column(name = "criado_em", nullable = false, updatable = false)
     private LocalDateTime criadoEm = LocalDateTime.now();
+
+    // Meses curtos: vencimento no dia 31 vira o ultimo dia do mes.
+    public LocalDate vencimentoEm(YearMonth mes) {
+        return mes.atDay(Math.min(diaVencimento, mes.lengthOfMonth()));
+    }
 }

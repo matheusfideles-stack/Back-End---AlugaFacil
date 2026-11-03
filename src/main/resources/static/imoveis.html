@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="js/vendor/leaflet/leaflet.css">
 </head>
 
 <body>
@@ -21,11 +22,15 @@
     </div>
   </header>
   <main>
-    <section class="vitrine" style="padding-top:32px">
+    <section class="vitrine larga" style="padding-top:32px">
       <h1 class="titulo">Imóveis disponíveis para alugar</h1>
-      <form class="cartao filtros completo" id="filtros" style="margin-top:16px" novalidate>
-        <div><label for="local">Localização</label><input id="local" type="search" autocomplete="off"
-            placeholder="Cidade, bairro, rua ou título"></div>
+      <form class="cartao filtros completo com-cidade" id="filtros" style="margin-top:16px" novalidate>
+        <div>
+          <label id="rotulo-cidade">Cidade e bairros</label>
+          <div class="seletor" id="seletor-cidade"></div>
+        </div>
+        <div><label for="local">Buscar</label><input id="local" type="search" autocomplete="off"
+            placeholder="Rua, bairro ou título"></div>
         <div><label for="tipo">Tipo de imóvel</label><select id="tipo">
             <option value="">Todos</option>
             <option value="CASA">Casa</option>
@@ -51,13 +56,36 @@
           </select></div>
         <button class="btn" type="button" id="limpar">Limpar</button>
       </form>
-      <p class="info" id="contagem" style="margin-top:16px" aria-live="polite"></p>
-      <p class="aviso" id="erro" hidden></p>
-      <div id="vitrine" class="grade g3" style="margin-top:12px"></div>
+
+      <section class="cartao comodidades-filtro" aria-labelledby="titulo-comodidades">
+        <h2 id="titulo-comodidades">Comodidades</h2>
+        <p class="info">Mostre só os imóveis que têm o que você precisa.</p>
+        <div class="comodidades-grade" id="comodidades-grade"></div>
+      </section>
+
+      <div class="vitrine-mapa">
+        <div class="coluna-lista">
+          <p class="info" id="contagem" aria-live="polite"></p>
+          <div class="chip-regiao" id="chip-regiao" hidden>
+            <span>Mostrando só esta região do mapa</span><button type="button" id="limpar-regiao">Mostrar todos</button>
+          </div>
+          <p class="aviso" id="erro" hidden></p>
+          <div id="vitrine" class="grade g2" style="margin-top:12px"></div>
+        </div>
+        <aside class="coluna-mapa" aria-label="Mapa dos imóveis">
+          <div class="mapa-caixa">
+            <button type="button" class="btn-regiao" id="buscar-regiao" hidden>↻ Buscar nesta região</button>
+            <div id="mapa"></div>
+          </div>
+        </aside>
+      </div>
     </section>
   </main>
   <footer class="rodape">© <span data-ano>2026</span> AlugaFácil. Todos os direitos reservados.</footer>
   <script src="js/api.js"></script>
+  <script src="js/vendor/leaflet/leaflet.js"></script>
+  <script src="js/mapa.js"></script>
+  <script src="js/seletor-cidade.js"></script>
   <script src="js/imoveis.js"></script>
 </body>
 

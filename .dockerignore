@@ -1,0 +1,21 @@
+# Segredos e configuração local: nunca entram na imagem
+.env
+config/application.yml
+src/main/resources/application-local.yml
+src/main/resources/application-secrets.yml
+
+# Dados e arquivos gerados
+data/
+uploads/
+target/
+
+# Ferramentas e histórico
+.git
+.idea
+.claude
+docs
+*.md
+
+# Backups
+backups
+backups-sh
