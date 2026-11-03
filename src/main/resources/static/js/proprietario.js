@@ -99,7 +99,8 @@ function linhaInquilino(contrato, imoveis, pagamentos) {
     `<div><strong>${escaparHtml(contrato.tituloImovel)}</strong><p class="info">Desde ${formatarData(contrato.dataInicio)}</p></div>` +
     `<div><p class="info">Aluguel: ${formatarMoeda(contrato.valorMensal)}</p><p class="info">Vence todo dia ${contrato.diaVencimento}</p></div>` +
     `<span class="selo${pendente ? ' alerta' : ''}">${pendente ? '⚠ Pendente' : '✓ Em Dia'}</span>` +
-    `<div class="acoes" style="margin:0"><a class="btn" href="inquilino.html?id=${contrato.id}">Ver</a></div></div>`;
+    `<div class="acoes" style="margin:0"><a class="btn" href="inquilino.html?id=${contrato.id}">Ver</a>` +
+    `<button type="button" class="btn" data-baixar="/contratos/${contrato.id}/contrato.pdf" data-arquivo="contrato-${contrato.id}.pdf">Contrato (PDF)</button></div></div>`;
 }
 
 function listaManutencao(itens, vazio) {
@@ -354,6 +355,7 @@ const telas = {
     el('lista').innerHTML = ativos.length
       ? ativos.map(c => linhaInquilino(c, base.imoveis, pagamentos)).join('')
       : '<p class="info" style="padding:8px 0">Você ainda não tem inquilinos. Quando alguém alugar um dos seus imóveis, aparecerá aqui.</p>';
+    iniciarSolicitacoes('locador', el('propostas'), el('visitas'));
   },
 
   async inquilino() {

@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.ZoneId;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -112,10 +114,59 @@ class PagamentoServiceTest {
         };
 
         service = new PagamentoService();
+        ReflectionTestUtils.setField(service, "notificador", Dobles.notificador());
+        relogioEm(LocalDate.of(2026, 11, 2));
         ReflectionTestUtils.setField(service, "pagamentoRepository", repositorio);
         ReflectionTestUtils.setField(service, "contratoService", contratoService);
         ReflectionTestUtils.setField(service, "paymentGateway", gateway);
         ReflectionTestUtils.setField(service, "eventos", (org.springframework.context.ApplicationEventPublisher) eventos::add);
+    }
+
+    private void relogioEm(LocalDate dia) {
+        ZoneId zona = ZoneId.of("America/Sao_Paulo");
+        ReflectionTestUtils.setField(service, "relogio", Clock.fixed(dia.atTime(12, 0).atZone(zona).toInstant(), zona));
+    }
+
+    @Test
+    void mesEmAtrasoSaiComMultaEJurosNoValorCobradoEnviadoAoGateway() {
+        relogioEm(LocalDate.of(2026, 12, 20));
+
+        Pagamento pagamento = service.gerarCobranca(pix("2026-12"), locatario);
+
+        assertEquals(new BigDecimal("1842.00"), pagamento.getValor());
+        assertEquals(new BigDecimal("36.00"), pagamento.getMulta());
+        assertEquals(new BigDecimal("6.00"), pagamento.getJuros());
+        assertEquals(new BigDecimal("1842.00"), cobrancas.get(0).valor());
+    }
+
+    @Test
+    void mesQueNaoVenceuSaiPeloValorDoContrato() {
+        Pagamento pagamento = service.gerarCobranca(pix("2026-12"), locatario);
+
+        assertEquals(new BigDecimal("1800.00"), pagamento.getValor());
+        assertEquals(new BigDecimal("0.00"), pagamento.getMulta());
+    }
+
+    @Test
+    void novaTentativaRecalculaOsAcrescimosComADataDeHoje() {
+        respostaDaCriacao = resposta("TX-1", StatusPagamento.RECUSADO);
+        relogioEm(LocalDate.of(2026, 12, 11));
+        Pagamento primeiro = service.gerarCobranca(pix("2026-12"), locatario);
+        assertEquals(new BigDecimal("1836.60"), primeiro.getValor());
+
+        respostaDaCriacao = resposta("TX-2", StatusPagamento.PENDENTE);
+        relogioEm(LocalDate.of(2026, 12, 20));
+        Pagamento segundo = service.gerarCobranca(pix("2026-12"), locatario);
+
+        assertEquals(new BigDecimal("1842.00"), segundo.getValor());
+    }
+
+    @Test
+    void valorAtualizadoSoParaParticipantes() {
+        relogioEm(LocalDate.of(2026, 12, 20));
+
+        assertEquals(new BigDecimal("1842.00"), service.valorAtualizado(50L, "2026-12", locatario).total());
+        assertThrows(RegraDeNegocioException.class, () -> service.valorAtualizado(50L, "2026-12", estranho));
     }
 
     private DadosSolicitacaoPagamento pix(String mes) {

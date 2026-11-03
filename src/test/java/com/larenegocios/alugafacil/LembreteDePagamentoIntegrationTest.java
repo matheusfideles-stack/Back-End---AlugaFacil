@@ -49,7 +49,7 @@ class LembreteDePagamentoIntegrationTest extends IntegracaoBase {
         dados.put("dataInicio", mesQueVem.atDay(1).toString());
         dados.put("dataFim", mesQueVem.plusMonths(12).atDay(1).toString());
         dados.put("diaVencimento", 10);
-        mockMvc.perform(postJson("/contratos", dados, tokenLocatario)).andExpect(status().isOk());
+        contratar(dados, tokenLocatario, login(locador));
         caixa.enviados.clear();
     }
 

@@ -1942,3 +1942,19 @@ textarea {
   width: 1.1em;
   height: 1.1em
 }
+
+/* ===== Propostas e visitas ===== */
+.linha-admin.solicitacao {
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.3fr) minmax(0, .9fr) auto
+}
+
+.linha-admin.solicitacao .acoes {
+  margin: 0
+}
+
+@media (max-width:768px) {
+  .linha-admin.solicitacao {
+    grid-template-columns: 1fr;
+    gap: 6px
+  }
+}

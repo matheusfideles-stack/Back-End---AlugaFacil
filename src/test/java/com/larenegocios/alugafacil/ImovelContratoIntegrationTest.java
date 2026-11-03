@@ -114,7 +114,7 @@ class ImovelContratoIntegrationTest extends IntegracaoBase {
     void imovelComContratoAtivoNaoPodeSerReativado() throws Exception {
         String token = tokenDe("LOCADOR");
         long id = criarImovel(token);
-        mockMvc.perform(postJson("/contratos", dadosContrato(id), tokenDe("LOCATARIO"))).andExpect(status().isOk());
+        contratar(id, tokenDe("LOCATARIO"), token);
 
         mockMvc.perform(put("/imoveis/" + id + "/reativar").header("Authorization", bearer(token)))
                 .andExpect(status().isUnprocessableEntity());
@@ -123,8 +123,9 @@ class ImovelContratoIntegrationTest extends IntegracaoBase {
     @Test
     void encerrarContratoLiberaOImovelDeNovo() throws Exception {
         String tokenLocatario = tokenDe("LOCATARIO");
-        long imovelId = criarImovel(tokenDe("LOCADOR"));
-        long contratoId = idDaResposta(mockMvc.perform(postJson("/contratos", dadosContrato(imovelId), tokenLocatario)));
+        String tokenLocador = tokenDe("LOCADOR");
+        long imovelId = criarImovel(tokenLocador);
+        long contratoId = contratar(imovelId, tokenLocatario, tokenLocador);
 
         mockMvc.perform(put("/contratos/" + contratoId + "/encerrar").header("Authorization", bearer(tokenLocatario)))
                 .andExpect(status().isNoContent());
@@ -155,12 +156,12 @@ class ImovelContratoIntegrationTest extends IntegracaoBase {
     }
 
     @Test
-    void locadorNaoPodeAlugarOProprioImovel() throws Exception {
+    void locadorNaoEnviaPropostaDeAluguel() throws Exception {
         String token = tokenDe("LOCADOR");
         long id = criarImovel(token);
 
-        mockMvc.perform(postJson("/contratos", dadosContrato(id), token))
-                .andExpect(status().isUnprocessableEntity());
+        mockMvc.perform(postJson("/propostas", dadosContrato(id), token))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -170,8 +171,7 @@ class ImovelContratoIntegrationTest extends IntegracaoBase {
         String tokenLocador = tokenDe("LOCADOR");
         long imovelId = criarImovel(tokenLocador);
 
-        mockMvc.perform(postJson("/contratos", dadosContrato(imovelId), tokenLocatario))
-                .andExpect(status().isOk());
+        contratar(imovelId, tokenLocatario, tokenLocador);
 
         mockMvc.perform(get("/contratos/meus?papel=locador").header("Authorization", bearer(tokenLocador)))
                 .andExpect(status().isOk())
@@ -182,9 +182,10 @@ class ImovelContratoIntegrationTest extends IntegracaoBase {
     @Test
     void imovelAlugadoSaiDaVitrineEContratoApareceParaOLocatario() throws Exception {
         String tokenLocatario = tokenDe("LOCATARIO");
-        long imovelId = criarImovel(tokenDe("LOCADOR"));
+        String tokenLocador = tokenDe("LOCADOR");
+        long imovelId = criarImovel(tokenLocador);
 
-        mockMvc.perform(postJson("/contratos", dadosContrato(imovelId), tokenLocatario)).andExpect(status().isOk());
+        contratar(imovelId, tokenLocatario, tokenLocador);
 
         mockMvc.perform(get("/imoveis?size=200"))
                 .andExpect(jsonPath("$.content[*].id").value(not(hasItem((int) imovelId))));

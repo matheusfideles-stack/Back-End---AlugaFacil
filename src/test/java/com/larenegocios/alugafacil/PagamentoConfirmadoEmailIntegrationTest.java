@@ -32,7 +32,7 @@ class PagamentoConfirmadoEmailIntegrationTest extends IntegracaoBase {
         tokenLocatario = login(locatario);
 
         long imovelId = idDaResposta(mockMvc.perform(postJson("/imoveis", dadosImovel(), login(locador))));
-        contratoId = idDaResposta(mockMvc.perform(postJson("/contratos", dadosContrato(imovelId), tokenLocatario)));
+        contratoId = contratar(imovelId, tokenLocatario, login(locador));
         caixa.enviados.clear();
     }
 

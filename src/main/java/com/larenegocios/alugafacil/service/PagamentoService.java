@@ -1,6 +1,8 @@
 package com.larenegocios.alugafacil.service;
 
 import com.larenegocios.alugafacil.domain.contrato.Contrato;
+import com.larenegocios.alugafacil.domain.pagamento.CalculoDeAtraso;
+import com.larenegocios.alugafacil.dto.DadosValorAtualizado;
 import com.larenegocios.alugafacil.domain.imovel.Imovel;
 import com.larenegocios.alugafacil.domain.pagamento.MetodoPagamento;
 import com.larenegocios.alugafacil.domain.pagamento.Pagamento;
@@ -25,6 +27,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.EnumSet;
@@ -50,6 +54,12 @@ public class PagamentoService {
     @Autowired
     private ApplicationEventPublisher eventos;
 
+    @Autowired
+    private NotificacaoDeEventos notificador;
+
+    @Autowired
+    private Clock relogio;
+
     @Transactional
     public Pagamento gerarCobranca(DadosSolicitacaoPagamento dados, Usuario solicitante) {
         Contrato contrato = contratoService.buscarPorId(dados.contratoId());
@@ -72,6 +82,15 @@ public class PagamentoService {
 
         aplicarResposta(pagamento, paymentGateway.criarCobranca(solicitacao));
         return pagamento;
+    }
+
+    // Quanto custa pagar aquele mes hoje: o aluguel, e a multa e os juros se ja venceu.
+    public DadosValorAtualizado valorAtualizado(Long contratoId, String referenciaMes, Usuario solicitante) {
+        Contrato contrato = contratoService.buscarPorId(contratoId);
+        contratoService.validarParticipante(contrato, solicitante);
+        LocalDate vencimento = contrato.vencimentoEm(YearMonth.parse(referenciaMes));
+        return new DadosValorAtualizado(referenciaMes, vencimento,
+                CalculoDeAtraso.calcular(contrato.getValorMensal(), vencimento, LocalDate.now(relogio)));
     }
 
     public Pagamento buscarPorId(Long id) {
@@ -169,10 +188,14 @@ public class PagamentoService {
 
         pagamento.setContrato(contrato);
         pagamento.setReferenciaMes(dados.referenciaMes());
-        pagamento.setValor(contrato.getValorMensal());
         pagamento.setMetodo(dados.metodo());
         pagamento.setStatus(StatusPagamento.PROCESSANDO);
         pagamento.setVencimento(contrato.vencimentoEm(YearMonth.parse(dados.referenciaMes())));
+        // Depois do vencimento a cobranca ja sai com multa e juros ate hoje.
+        CalculoDeAtraso.Resultado atraso = CalculoDeAtraso.calcular(contrato.getValorMensal(), pagamento.getVencimento(), LocalDate.now(relogio));
+        pagamento.setValor(atraso.total());
+        pagamento.setMulta(atraso.multa());
+        pagamento.setJuros(atraso.juros());
 
         pagamento.setIdTransacaoGateway(null);
         pagamento.setStatusDetalhe(null);
@@ -211,6 +234,10 @@ public class PagamentoService {
 
         if (resposta.status() == StatusPagamento.PAGO && pagamento.getPagoEm() == null) {
             pagamento.setPagoEm(LocalDateTime.now());
+        }
+
+        if (resposta.status() == StatusPagamento.RECUSADO && statusAnterior != StatusPagamento.RECUSADO) {
+            notificador.pagamentoRecusado(pagamento);
         }
 
         // So avisa na mudanca para PAGO: a mesma notificacao do gateway chegando de novo nao repete o e-mail.

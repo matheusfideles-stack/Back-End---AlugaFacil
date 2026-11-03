@@ -1,0 +1,2 @@
+ALTER TABLE pagamentos ADD COLUMN multa DECIMAL(12, 2) NULL;
+ALTER TABLE pagamentos ADD COLUMN juros DECIMAL(12, 2) NULL;
