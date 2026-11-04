@@ -9,8 +9,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.ZoneId;
 
-// Relogio do sistema, no horario de Brasilia. Os testes fixam uma data (app.relogio.fixo-em) para que multa e juros
-// nao dependam do dia em que a suite roda.
 @Configuration
 public class RelogioConfig {
 

@@ -87,6 +87,8 @@ public class ImovelService {
         imovel.setDisponivel(false);
     }
 
+    // Com contrato ativo o imovel fica fora da busca de proposito: ContratoService.firmar o desliga e so o encerramento o religa.
+    // Por isso reativar aqui e recusado enquanto o contrato durar. Desativar nunca e recusado.
     @Transactional
     public void reativar(Long id, Usuario solicitante) {
         Imovel imovel = buscarPorId(id);

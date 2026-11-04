@@ -1,0 +1,5 @@
+# HTTPS automático (certificado gratuito do Let's Encrypt) para o endereço definido em DOMINIO no .env.
+# Não há limite de tamanho de envio por padrão no Caddy, e o proprietário manda até 10 fotos de 5 MB.
+{$DOMINIO} {
+	reverse_proxy app:8080
+}

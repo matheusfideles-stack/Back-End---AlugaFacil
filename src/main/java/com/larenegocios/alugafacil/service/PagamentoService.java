@@ -111,6 +111,7 @@ public class PagamentoService {
         return pagamento;
     }
 
+    // O aviso do gateway so traz o id da transacao: o status vem de uma consulta nova, nunca do corpo da notificacao.
     @Transactional
     public void processarNotificacao(String idTransacaoGateway) {
         pagamentoRepository.findByIdTransacaoGateway(idTransacaoGateway).ifPresentOrElse(

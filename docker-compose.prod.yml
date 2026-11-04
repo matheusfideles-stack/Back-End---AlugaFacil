@@ -1,0 +1,83 @@
+# Produção: MySQL e aplicação ficam numa rede interna; só o Caddy (HTTPS) é aberto para a internet.
+# Uso (veja docs/DEPLOY.md):  docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+# Diferente do docker-compose.yml de teste: sem senhas fixas e sem portas do banco ou da aplicação expostas.
+services:
+  db:
+    image: mysql:8.4
+    container_name: alugafacil-db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: alugafacil
+      MYSQL_USER: alugafacil
+      MYSQL_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?defina MYSQL_ROOT_PASSWORD no .env}
+    volumes:
+      - alugafacil-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build: .
+    container_name: alugafacil-api
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: alugafacil
+      DB_USER: alugafacil
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:?defina ADMIN_EMAIL no .env}
+      ADMIN_SENHA: ${ADMIN_SENHA:?defina ADMIN_SENHA no .env}
+      APP_URL_BASE: https://${DOMINIO:?defina DOMINIO no .env}
+      PAGAMENTO_PROVIDER: mercadopago
+      MP_ACCESS_TOKEN: ${MP_ACCESS_TOKEN:?defina MP_ACCESS_TOKEN no .env}
+      MP_PUBLIC_KEY: ${MP_PUBLIC_KEY:?defina MP_PUBLIC_KEY no .env}
+      MP_WEBHOOK_SECRET: ${MP_WEBHOOK_SECRET:?defina MP_WEBHOOK_SECRET no .env}
+      MP_NOTIFICATION_URL: https://${DOMINIO}/webhooks/mercadopago
+      SPRING_MAIL_HOST: ${SPRING_MAIL_HOST:?defina SPRING_MAIL_HOST no .env}
+      SPRING_MAIL_PORT: ${SPRING_MAIL_PORT:-587}
+      SPRING_MAIL_USERNAME: ${SPRING_MAIL_USERNAME:?defina SPRING_MAIL_USERNAME no .env}
+      SPRING_MAIL_PASSWORD: ${SPRING_MAIL_PASSWORD:?defina SPRING_MAIL_PASSWORD no .env}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: "true"
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: "true"
+      MAIL_REMETENTE: ${MAIL_REMETENTE:-}
+      MAIL_SUPORTE: ${MAIL_SUPORTE:-}
+      APP_LEMBRETES_ATIVO: "true"
+      APP_GEOCODIFICACAO_ATIVA: "true"
+      # As fotos ficam em um volume, para sobreviver a atualizações da imagem.
+      UPLOADS_DIR: /data/uploads
+    volumes:
+      - alugafacil-uploads:/data/uploads
+    # Sem "ports": a aplicação só é alcançada pelo Caddy, dentro da rede do compose.
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2
+    container_name: alugafacil-caddy
+    restart: unless-stopped
+    depends_on:
+      - app
+    environment:
+      DOMINIO: ${DOMINIO}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  alugafacil-data:
+  alugafacil-uploads:
+  caddy-data:
+  caddy-config:
