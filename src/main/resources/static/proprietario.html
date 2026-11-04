@@ -14,33 +14,26 @@
 
 <body data-pagina="visao-geral" data-exige="LOCADOR">
     <header class="topo">
-        <div class="topo-int largo">
+        <div class="topo-int">
             <a class="logo" href="proprietario.html">Aluga<span>Fácil</span></a>
-            <a class="info" href="proprietario.html" style="text-decoration:underline" data-saudacao="curta">Olá!</a>
+            <nav class="menu" id="menu-principal"></nav>
+            <div class="topo-acoes" id="topo-acoes"></div>
         </div>
     </header>
-    <div class="painel">
-        <aside class="lateral">
-            <p>Menu</p>
-            <nav><a href="proprietario.html" class="ativo">Visão Geral</a><a href="meus-imoveis.html">Meus Imóveis</a><a
-                    href="financeiro.html">Financeiro</a><a href="inquilinos.html">Inquilinos</a><a
-                    href="proprietario-ajuda.html">Ajuda</a><a href="sair.html">Sair</a></nav>
-        </aside>
-        <main class="conteudo">
-            <h1 class="titulo">Visão Geral</h1>
-            <p class="aviso" id="erro" hidden></p>
-            <section class="cartao" style="margin-top:20px">
-                <h2 class="secao" style="margin-top:0">Receitas por Mês</h2>
-                <svg class="grafico" id="grafico" viewBox="0 0 660 190" role="img" aria-label="Receitas por mês"></svg>
-            </section>
-            <h2 class="secao">Meus Imóveis</h2>
-            <section class="cartao" id="lista-imoveis"><p class="info">Carregando...</p></section>
-            <h2 class="secao">Meus Inquilinos</h2>
-            <section class="cartao" id="lista-inquilinos"><p class="info">Carregando...</p></section>
-            <h2 class="secao">Solicitações de Manutenção</h2>
-            <section class="cartao" id="lista-manutencao"><p class="info">Carregando...</p></section>
-        </main>
-    </div>
+    <main class="container">
+        <h1 class="titulo">Visão Geral</h1>
+        <p class="aviso" id="erro" hidden></p>
+        <section class="cartao" style="margin-top:20px">
+            <h2 class="secao" style="margin-top:0">Receitas por Mês</h2>
+            <svg class="grafico" id="grafico" viewBox="0 0 660 190" role="img" aria-label="Receitas por mês"></svg>
+        </section>
+        <h2 class="secao">Meus Imóveis</h2>
+        <section class="cartao" id="lista-imoveis"><p class="info">Carregando...</p></section>
+        <h2 class="secao">Meus Inquilinos</h2>
+        <section class="cartao" id="lista-inquilinos"><p class="info">Carregando...</p></section>
+        <h2 class="secao">Solicitações de Manutenção</h2>
+        <section class="cartao" id="lista-manutencao"><p class="info">Carregando...</p></section>
+    </main>
     <script src="js/api.js"></script>
     <script src="js/proprietario.js"></script>
 </body>

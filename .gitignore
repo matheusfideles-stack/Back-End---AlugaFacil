@@ -3,6 +3,8 @@ target/
 
 ### Credenciais locais - nunca versionar ###
 .env
+.env.*
+!.env.example
 src/main/resources/application-local.yml
 src/main/resources/application-secrets.yml
 
