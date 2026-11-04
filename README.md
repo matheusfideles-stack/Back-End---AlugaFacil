@@ -69,7 +69,3 @@ mvn test
 
 Os testes usam H2 em memória e não precisam de banco rodando.
 
-## Próximos passos
-
-- Cobrança automática do aluguel todo mês (hoje o sistema só lembra por e-mail).
-- Assinatura digital do contrato.
