@@ -50,6 +50,8 @@ public class MercadoPagoWebhookValidator {
             return false;
         }
 
+        // Formato que o Mercado Pago assina: "id:<data.id>;request-id:<x-request-id>;ts:<timestamp>;".
+        // Se o request-id nao vier no cabecalho, a parte dele some do texto assinado, como manda a documentacao.
         String manifesto = "id:" + dataId.toLowerCase() + ";"
                 + (StringUtils.hasText(xRequestId) ? "request-id:" + xRequestId + ";" : "")
                 + "ts:" + timestamp + ";";

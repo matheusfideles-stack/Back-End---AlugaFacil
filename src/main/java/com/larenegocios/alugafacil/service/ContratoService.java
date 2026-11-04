@@ -49,6 +49,8 @@ public class ContratoService {
         contrato.setValorMensal(imovel.getValorAluguel().add(imovel.getValorCondominio()));
         contrato.setStatus(StatusContrato.ATIVO);
 
+        // O aluguel mensal soma o condominio: e esse o valor que PagamentoService cobra e CalculoDeAtraso corrige.
+        // O imovel sai da busca aqui e so volta em encerrar().
         imovel.setDisponivel(false);
 
         return contratoRepository.save(contrato);
@@ -75,6 +77,7 @@ public class ContratoService {
         contrato.getImovel().setDisponivel(true);
     }
 
+    // Regra de acesso usada por pagamentos, lembretes e PDFs: so locatario, locador do imovel ou admin passam.
     public void validarParticipante(Contrato contrato, Usuario solicitante) {
         boolean ehLocatario = contrato.getLocatario().getId().equals(solicitante.getId());
         boolean ehLocador = contrato.getImovel().getLocador().getId().equals(solicitante.getId());

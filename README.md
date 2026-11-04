@@ -1,209 +1,65 @@
-# AlugaFacil
+# AlugaFácil
 
-Backend da **Lar & Negócios** para gestão de aluguel de imóveis: cadastro de imóveis, contratos de locação e cobrança de aluguéis, com autenticação JWT e RBAC.
+Sistema de aluguel de imóveis: anúncio, proposta, contrato, pagamento do aluguel e manutenção.
 
-## Stack
+## Como rodar
 
-- Java 21 + Spring Boot 3
-- Spring Security (JWT via `java-jwt`)
-- Spring Data JPA / Hibernate
-- MySQL (H2 no perfil `dev`), com o Hibernate criando as tabelas
-- Bean Validation
-- Lombok
-- Swagger/OpenAPI (`/docs`)
-- Docker + Docker Compose
-
-## Arquitetura
-
-```
-domain/
-  usuario/    -> Usuario, Perfil (ADMIN, LOCADOR, LOCATARIO), UsuarioRepository
-  imovel/     -> Imovel, TipoImovel, FotoImovel, ImovelRepository
-  avaliacao/  -> Avaliacao (nota de 0 a 5 e comentario, uma por locatario e imovel)
-  contrato/   -> Contrato, StatusContrato, ContratoRepository
-  pagamento/  -> Pagamento, StatusPagamento, MetodoPagamento, PagamentoRepository
-  pagamento/gateway/ -> abstração do provedor de pagamento (ver seção abaixo)
-service/      -> regras de negócio (validações, orquestração)
-controller/   -> endpoints REST
-dto/          -> records de entrada/saída (nunca expõe entidade JPA direto)
-infra/security -> JWT (TokenService, SecurityFilter)
-infra/exception -> exceções de domínio + @RestControllerAdvice
-config/       -> SecurityConfigurations (CORS, RBAC, sessão stateless)
-```
-
-## Sistema de pagamento (Mercado Pago)
-
-O pagamento é uma **porta/adapter** (`PaymentGateway`) com duas implementações, escolhidas por
-configuração (`pagamento.gateway.provider`):
-
-- `mercadopago` (padrão) — integração real com a API `POST /v1/payments`, cobrindo **Pix, boleto,
-  cartão de crédito e cartão de débito**, com webhook de confirmação assíncrona e estorno.
-- `fake` — aprova tudo localmente, sem rede. É o que os testes automatizados usam.
-
-Dados de cartão nunca passam pelo backend: o frontend tokeniza o cartão com a public key
-(`GET /pagamentos/config`) e envia só o token.
-
-> **Configuração:** `MP_ACCESS_TOKEN` e `MP_PUBLIC_KEY` por variável de ambiente, ou
-> `src/main/resources/application-local.yml` (fora do git). Credenciais não vão para o repositório.
-
-📄 **Guia completo de uso e teste: [`docs/PAGAMENTOS.md`](docs/PAGAMENTOS.md)** — inclui cartões de
-teste, como simular o webhook e os erros mais comuns da API.
-
-## Frontend
-
-As telas (HTML/CSS/JS puros) ficam em `src/main/resources/static` e são servidas pelo próprio Spring
-Boot: com a aplicação rodando, abra `http://localhost:8080`. Como front e API compartilham a origem,
-não há configuração de CORS nem de URL base.
-
-| Tela | Quem acessa | O que faz |
-|---|---|---|
-| `index.html` | público | página inicial com imóveis em destaque e busca rápida |
-| `imoveis.html` | público | todos os imóveis, com busca por local, tipo, preço e quartos e ordenação (inclusive por melhor avaliação) |
-| `login.html` | público | entrar e criar conta (o cadastro do site cria sempre um locatário) |
-| `esqueci-senha.html` / `redefinir-senha.html` | público | recuperação de senha: pede o código por e-mail e define a nova senha |
-| `confirmar-email.html` | público | digita o código de verificação do e-mail e ativa a conta |
-| `imovel.html`, `pagamentos.html`, `cliente.html`, `alugueis.html` | LOCATARIO | galeria de fotos, avaliações, alugar, pagar (Pix, boleto, cartão), contratos e manutenção |
-| `proprietario.html`, `meus-imoveis.html`, `novo-imovel.html`, `editar-imovel.html`, `inquilinos.html`, `financeiro.html` | LOCADOR | gestão de imóveis, inquilinos, recebimentos e manutenções |
-| `admin.html` | ADMIN | cadastra os proprietários e lista os já cadastrados |
-
-A sessão é o JWT guardado no navegador; as páginas privadas redirecionam para o login quando ele
-falta ou expira, e quem abre a área do outro perfil é levado para a própria.
-
-## Senhas, confirmação de e-mail e recuperação de conta
-
-- **Código de verificação:** toda conta nova (locatário pelo site ou proprietário cadastrado pelo administrador) recebe um
-  e-mail com um **código de 6 dígitos** (vale 60 minutos). A pessoa digita o código na própria tela de login (ou em
-  `confirmar-email.html`). **Sem confirmar, o login é recusado** (403 com `codigo: EMAIL_NAO_CONFIRMADO`) e a tela oferece
-  reenviar um novo código. Contas criadas antes desse recurso e o administrador inicial já nascem confirmados.
-  Redefinir a senha com o código do e-mail também confirma a conta.
-
-- A senha é guardada com **BCrypt** (nunca em texto puro) e o login compara o hash.
-- `POST /auth/esqueci-senha` sempre responde 200, exista ou não o e-mail (não revela quem tem conta). O e-mail traz um
-  código de 6 dígitos, que a pessoa digita em `redefinir-senha.html` junto com a nova senha.
-- O código de recuperação vale 30 minutos e só pode ser usado uma vez. Pedir um novo código invalida os anteriores, e
-  **5 tentativas erradas bloqueiam o código** (é preciso pedir outro). No banco fica apenas o **SHA-256** do código
-  junto com o id do usuário, nunca o código em texto puro.
-- **E-mail:** copie `config/application.yml.exemplo` para `config/application.yml` (ignorado pelo git),
-  preencha o SMTP (no Gmail, use uma *senha de app*) e reinicie. Também dá para usar as variáveis
-  `SPRING_MAIL_HOST`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` e `APP_URL_BASE`.
-- **Sem SMTP** o e-mail não é enviado e o código vai para o log do servidor. No perfil `dev` ele também
-  aparece na própria tela ("modo de teste", tanto na confirmação quanto na recuperação); essa opção (`app.exibir-links-de-teste`)
-  fica desligada fora do `dev`. Não deixe produção sem SMTP, porque o código vazaria para os logs.
-- **Quem cria cada perfil:** o cadastro do site (`POST /auth/registro`) cria **somente locatários**; qualquer outro perfil é recusado.
-  Os proprietários (LOCADOR) são cadastrados por um **administrador** em `admin.html` (`POST /admin/locadores`).
-  O primeiro administrador é criado na subida a partir de `ADMIN_EMAIL` e `ADMIN_SENHA` (se ainda não existir).
-  Nos perfis `dev` e `local` o padrão é `admin@alugafacil.local` / `Admin1234`: **troque em qualquer ambiente real**.
-
-## Endpoints principais
-
-| Método | Rota | Acesso |
-|---|---|---|
-| POST | `/auth/registro` | público (cria somente locatário) |
-| POST | `/auth/login` | público (devolve `token`, `nome`, `perfil`) |
-| POST | `/auth/esqueci-senha` | público |
-| POST | `/auth/redefinir-senha` | público (`email`, `codigo` de 6 dígitos e `novaSenha`) |
-| POST | `/auth/confirmar-email` | público (`email` e `codigo` de 6 dígitos) |
-| POST | `/auth/reenviar-confirmacao` | público |
-| POST | `/admin/locadores` | ADMIN (cadastra proprietário) |
-| GET | `/admin/locadores` | ADMIN (lista proprietários) |
-| POST | `/contato` | público (formulário da Ajuda; vai para `MAIL_SUPORTE`) |
-| POST | `/imoveis` | LOCADOR, ADMIN |
-| GET | `/imoveis`, `/imoveis/{id}` | público |
-| GET | `/imoveis/meus` | LOCADOR, ADMIN |
-| PUT | `/imoveis/{id}` | dono do imóvel, ADMIN |
-| DELETE | `/imoveis/{id}` | dono do imóvel, ADMIN (tira do ar) |
-| PUT | `/imoveis/{id}/reativar` | dono do imóvel, ADMIN |
-| POST | `/imoveis/{id}/fotos` | dono do imóvel, ADMIN (multipart, campo `fotos`) |
-| GET | `/imoveis/{id}/fotos`, `/imoveis/{id}/fotos/{fotoId}/arquivo`, `/imoveis/{id}/capa` | público |
-| PUT | `/imoveis/{id}/fotos/{fotoId}/capa` | dono do imóvel, ADMIN |
-| DELETE | `/imoveis/{id}/fotos/{fotoId}` | dono do imóvel, ADMIN |
-| GET | `/imoveis/{id}/avaliacoes`, `/imoveis/{id}/avaliacoes/resumo` | público |
-| GET, PUT, DELETE | `/imoveis/{id}/avaliacoes/minha` | LOCATARIO (PUT cria ou atualiza a própria avaliação) |
-| DELETE | `/avaliacoes/{id}` | ADMIN (moderação) |
-| POST | `/contratos` | LOCATARIO |
-| GET | `/contratos/meus?papel=locatario\|locador` | autenticado |
-| PUT | `/contratos/{id}/encerrar` | participantes do contrato |
-| GET | `/pagamentos/config` | autenticado |
-| POST | `/pagamentos` | participantes do contrato |
-| GET | `/pagamentos/meus`, `/pagamentos/recebidos` | locatário / locador |
-| GET | `/pagamentos/{id}` | participantes do contrato |
-| POST | `/pagamentos/{id}/sincronizar` | participantes do contrato |
-| POST | `/pagamentos/{id}/estornar` | participantes do contrato |
-| POST | `/manutencoes` | LOCATARIO do contrato |
-| GET | `/manutencoes/meus`, `/manutencoes/recebidas` | locatário / locador |
-| PUT | `/manutencoes/{id}/status` | LOCADOR do imóvel |
-| POST | `/webhooks/mercadopago` | público (assinatura HMAC) |
-
-Limite de requisições por IP (`ratelimit.*` no `application.yaml`): login/cadastro/recuperação e
-`/pagamentos` têm limites próprios e mais rígidos; as telas estáticas não contam. Passou do limite,
-a API responde `429` com `Retry-After`.
-
-## Fotos e avaliações dos imóveis
-
-- **Fotos:** o proprietário (ou o admin) envia até **10 fotos por imóvel** em `novo-imovel.html` e `editar-imovel.html`
-  (JPG, PNG ou WebP, até **5 MB** cada). A primeira é a **capa**, e dá para trocar a capa ou remover fotos na edição.
-  O servidor confere o tipo pelo **conteúdo** do arquivo (não pelo nome nem pelo `Content-Type`), recusa SVG e qualquer
-  coisa que não seja imagem, e grava com um nome gerado, nunca com o nome enviado.
-  Os arquivos ficam em `./uploads` (mude com `UPLOADS_DIR`); a pasta é ignorada pelo git, então faça backup dela
-  junto com o banco. Imóvel sem fotos usa uma foto de exemplo.
-- **Avaliações:** só **locatários** avaliam, com **nota de 0 a 5** e comentário opcional (até 1000 caracteres), **uma
-  avaliação por imóvel**: avaliar de novo atualiza a anterior, e a própria avaliação pode ser excluída. O admin pode
-  excluir qualquer uma (moderação). A lista mostra quem avaliou como `Ana T.` (primeiro nome e inicial do último).
-  A média e o total aparecem nos cards, no detalhe do imóvel e na ordenação "Melhor avaliados".
-
-Documentação interativa em `http://localhost:8080/docs` com a aplicação rodando.
-
-## Rodando localmente
-
-**Sem instalar nada (H2 + gateway de pagamento falso), com os dados salvos em `./data`:**
+Com Java 21 e Maven instalados:
 
 ```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
+mvn spring-boot:run "-Dspring-boot.run.profiles=dev"
 ```
 
-Abra `http://localhost:8080`. Crie a conta de locatário pela tela, e ela continua lá depois de reiniciar.
-Para cadastrar proprietários, entre com o administrador (`admin@alugafacil.local` / `Admin1234`).
+Abra `http://localhost:8080`. O perfil `dev` usa um banco H2 em `./data` e um gateway de pagamento falso, então não precisa de MySQL nem de conta no Mercado Pago.
 
-**Com MySQL** (perfil `local`, padrão): crie o banco `alugafacil`, ponha a senha em
-`src/main/resources/application-local.yml` (fora do git) ou em `DB_PASSWORD`, e rode:
+Contas de teste do perfil `dev`:
 
-```bash
-mvn spring-boot:run
-```
+| Perfil | E-mail | Senha |
+|---|---|---|
+| Administrador | `admin@alugafacil.local` | `Admin1234` |
+| Locador (demo) | `demo.locador329023@alugafacil.local` | `Demo1234` |
+| Locatário (demo) | `demo.locatario329023@alugafacil.local` | `Demo1234` |
 
-O perfil `local` usa o gateway falso por padrão (`PAGAMENTO_PROVIDER=mercadopago` ativa o real). As
-tabelas são criadas e atualizadas pelo Hibernate (`ddl-auto: update`), sem apagar dados ao reiniciar.
+Com Docker: `docker compose up --build`. Sobe o MySQL e a aplicação.
 
-Variáveis de ambiente: `DB_PASSWORD`, `JWT_SECRET`, `PAGAMENTO_PROVIDER`, `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`,
-`MP_NOTIFICATION_URL`, `MP_WEBHOOK_SECRET`, `ADMIN_EMAIL`, `ADMIN_SENHA`, `APP_URL_BASE`, `SPRING_MAIL_HOST`, `SPRING_MAIL_USERNAME`,
-`SPRING_MAIL_PASSWORD`, `RATELIMIT_ENABLED`. Copie `.env.example` para `.env` e preencha as credenciais.
+## Quem faz o quê
 
-> Para subir o sistema com Docker, rode `docker compose up --build` na raiz do projeto. Sobe o MySQL 8.4 e a aplicação.
-> Os dados do MySQL ficam no volume `alugafacil-data`. Para criar o administrador, defina `ADMIN_EMAIL` e `ADMIN_SENHA` no `.env`.
+- **Locatário:** cadastra a própria conta pelo site, procura imóveis, faz proposta de aluguel, paga o aluguel (Pix, boleto ou cartão), pede manutenção e avalia o imóvel.
+- **Locador:** cadastra imóveis com fotos e comodidades, aceita ou recusa propostas, marca visitas, acompanha recebimentos e responde manutenções.
+- **Administrador:** cadastra locadores, ativa ou desativa contas e imóveis, modera avaliações e manda lembrete de pagamento.
 
-## Produção
+Quem não está logado vê a vitrine e a página de cada imóvel. Para falar com o proprietário ou pedir visita é preciso entrar como locatário.
 
-Antes de abrir o sistema para outras pessoas, leia **[`docs/PRODUCAO.md`](docs/PRODUCAO.md)**. Com `SPRING_PROFILES_ACTIVE=prod`:
+## Regras principais
 
-- o sistema **não sobe** sem um `JWT_SECRET` próprio (32 caracteres ou mais) e recusa senha de administrador fraca ou conhecida;
-- **HTTPS é obrigatório** (atrás de um proxy como Caddy ou nginx), e o navegador recebe o cabeçalho HSTS;
-- os códigos de verificação só chegam por e-mail, nunca na tela, e o sistema **não sobe sem `SPRING_MAIL_HOST`**: veja [`docs/EMAIL.md`](docs/EMAIL.md), que também mostra como testar o envio sem usar o seu e-mail (Mailpit).
-- para cobrar de verdade (Pix, boleto, débito e crédito parcelado) siga [`docs/PAGAMENTOS.md`](docs/PAGAMENTOS.md); em `prod` o sistema não sobe com o gateway `fake` nem sem o segredo do webhook;
-- faça **backup** do banco e das fotos com `scripts/backup.ps1` (ou `backup.sh`) e teste a restauração: veja [`docs/BACKUP.md`](docs/BACKUP.md).
+- **Contrato nasce de proposta.** O locatário propõe; o proprietário aceita ou recusa. Ao aceitar, o contrato é criado e o imóvel sai da busca até o contrato ser encerrado.
+- **Multa e juros por atraso:** multa de 2% uma vez, mais juros de 1% ao mês, proporcionais aos dias. O valor atualizado aparece na tela de pagamentos.
+- **Lembretes por e-mail:** o sistema avisa o locatário antes do vencimento e nos primeiros dias de atraso. Não cobra sozinho.
+- **PDFs:** contrato (`/contratos/{id}/contrato.pdf`) e recibo, que só sai depois do pagamento confirmado. O contrato tem linhas para assinar à mão; não há assinatura digital.
+- **Imóvel com contrato ativo não pode ser reativado** enquanto o contrato durar. Desativar sempre funciona.
 
-## Mapa, cidades e comodidades
+## Configuração
 
-- A vitrine (`imoveis.html`) tem seletor de **cidade e bairro**, filtro por **comodidades** (piscina, estacionamento gratuito, máquina de lavar, ar-condicionado, lareira, TV, aquecedor, churrasqueira) e um **mapa** com o preço de cada imóvel. Mexer no mapa mostra o botão "Buscar nesta região", que filtra a lista pela área visível. A página do imóvel também mostra as comodidades e a localização.
-- As cidades atendidas ficam em `CIDADES`, no começo de `static/js/api.js` (Patos de Minas, Lagoa Formosa, Nova Ponte e Tiros). Para incluir outra, acrescente uma linha com o nome, a UF e as coordenadas do centro.
-- O mapa usa **Leaflet** (guardado em `static/js/vendor/leaflet`, licença BSD-2) com os mapas do **OpenStreetMap**, sem chave de API. O OpenStreetMap pede uso moderado dos mapas; para um site com muito acesso, troque o endereço dos mapas em `static/js/mapa.js` por um provedor próprio.
-- A posição de cada imóvel vem do **Nominatim** (busca de endereços do OpenStreetMap), consultado pelo servidor quando o imóvel é cadastrado ou muda de endereço, no máximo 1 consulta por segundo, como a política deles pede. Imóveis antigos são completados ao subir o servidor. Se o endereço não for encontrado, o imóvel aparece perto do centro da cidade. Para não consultar a internet, use `APP_GEOCODIFICACAO_ATIVA=false`. Em produção, defina `app.geocodificacao.user-agent` com o nome do site e um e-mail de contato, como a política do Nominatim pede.
+Credenciais e senhas ficam fora do git: use variáveis de ambiente ou o arquivo `.env` (copie de `.env.example`). Nunca suba `.env`, `config/application.yml` nem `application-local.yml`.
 
-## Propostas, visitas, PDFs e multa por atraso
+| Variável | Para que serve |
+|---|---|
+| `JWT_SECRET` | chave que assina o login (obrigatória em produção) |
+| `PAGAMENTO_PROVIDER` | `fake` para testar, `mercadopago` para cobrar de verdade |
+| `MP_ACCESS_TOKEN`, `MP_PUBLIC_KEY`, `MP_WEBHOOK_SECRET`, `MP_NOTIFICATION_URL` | credenciais do Mercado Pago |
+| `SPRING_MAIL_HOST`, `SPRING_MAIL_USERNAME`, `SPRING_MAIL_PASSWORD` | envio de e-mail (sem isso, os e-mails só aparecem no log) |
+| `ADMIN_EMAIL`, `ADMIN_SENHA` | administrador criado na primeira subida |
+| `APP_URL_BASE` | endereço público do site, usado nos links dos e-mails |
+| `APP_GEOCODIFICACAO_ATIVA` | `false` para não consultar a posição dos imóveis na internet |
 
-- **Contrato nasce de proposta:** o locatário faz uma proposta (`POST /propostas`); quando o proprietário aceita (`PUT /propostas/{id}/aceitar`) o contrato é criado. `POST /contratos` não existe mais. O locatário pode cancelar e uma proposta recusada pode ser refeita.
-- **Contato e visitas:** o imóvel é público; para falar com o proprietário (WhatsApp, mensagem) ou pedir visita (`/imoveis/{id}/visitas`) é preciso estar logado como locatário. Cada passo manda e-mail para a outra parte.
-- **PDF:** `GET /contratos/{id}/contrato.pdf` e `GET /pagamentos/{id}/recibo.pdf` (só depois de pago). O contrato não tem assinatura digital: tem linhas para assinar.
-- **Multa e juros:** depois do vencimento cobra-se multa de 2% (uma vez) e juros de 1% ao mês, proporcional aos dias. `GET /pagamentos/valor-atualizado` mostra o valor de hoje; boleto ou Pix vencido pede segunda via, que recalcula. Não há cobrança automática no cartão: o sistema lembra por e-mail.
+## Documentação detalhada
+
+- [`docs/PAGAMENTOS.md`](docs/PAGAMENTOS.md): como cobrar com Mercado Pago, cartões de teste e webhook.
+- [`docs/EMAIL.md`](docs/EMAIL.md): como ligar o envio de e-mail e testar com o Mailpit.
+- [`docs/DEPLOY.md`](docs/DEPLOY.md): passo a passo para colocar no ar de graça (Oracle Cloud, DuckDNS e HTTPS).
+- [`docs/PRODUCAO.md`](docs/PRODUCAO.md): o que configurar antes de abrir para outras pessoas (perfil `prod`, HTTPS, segredos).
+- [`docs/BACKUP.md`](docs/BACKUP.md): backup e restauração do banco e das fotos.
+- API interativa com a aplicação rodando: `http://localhost:8080/docs`.
 
 ## Testes
 
@@ -211,11 +67,9 @@ Antes de abrir o sistema para outras pessoas, leia **[`docs/PRODUCAO.md`](docs/P
 mvn test
 ```
 
-Usa H2 em memória (perfil `test`) — não precisa de banco rodando para os testes. Cobrem autenticação,
-recuperação de senha, imóveis, fotos, avaliações, contratos, pagamentos, manutenção, permissões por perfil, limite
-de requisições e a entrega do frontend. Os testes de `service/` são unitários puros (sem Spring nem banco) e usam
-repositórios falsos de `Dobles.java`; os `*IntegrationTest` sobem a aplicação inteira.
+Os testes usam H2 em memória e não precisam de banco rodando.
 
-## Próximos passos sugeridos
+## Próximos passos
 
-- Gerar a cobrança (Pix/boleto) automaticamente todo mês. Hoje o sistema só **lembra por e-mail** (veja `docs/EMAIL.md`); o locatário ainda abre a tela de pagamentos para pagar.
+- Cobrança automática do aluguel todo mês (hoje o sistema só lembra por e-mail).
+- Assinatura digital do contrato.
