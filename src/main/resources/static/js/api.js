@@ -439,6 +439,9 @@ function montarMenu(nav) {
   if (dados && dados.perfil === 'LOCATARIO') {
     itens = [['Início', 'cliente.html'], ['Imóveis', 'imoveis.html'], ['Meus Aluguéis', 'alugueis.html'],
       ['Pagamentos', 'pagamentos.html'], ['Ajuda', 'ajuda.html']];
+  } else if (dados && dados.perfil === 'LOCADOR') {
+    itens = [['Visão Geral', 'proprietario.html'], ['Meus Imóveis', 'meus-imoveis.html'], ['Financeiro', 'financeiro.html'],
+      ['Inquilinos', 'inquilinos.html'], ['Ajuda', 'proprietario-ajuda.html']];
   } else if (dados && dados.perfil === 'ADMIN') {
     itens = [['Proprietários', 'admin.html#proprietarios', 'proprietarios'], ['Usuários', 'admin.html#usuarios', 'usuarios'],
       ['Imóveis', 'admin.html#imoveis', 'imoveis'], ['Avaliações', 'admin.html#avaliacoes', 'avaliacoes'],

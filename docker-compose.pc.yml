@@ -1,0 +1,8 @@
+# Rodar a produção no seu próprio computador, atrás do Tailscale Funnel (veja docs/DEPLOY-PC.md).
+# O Funnel já faz o HTTPS, então o Caddy não é usado: este arquivo só abre a porta 8080 para o próprio computador
+# (127.0.0.1), nunca para a rede nem para a internet.
+# Uso:  docker compose -f docker-compose.prod.yml -f docker-compose.pc.yml up -d --build db app
+services:
+  app:
+    ports:
+      - "127.0.0.1:8080:8080"
