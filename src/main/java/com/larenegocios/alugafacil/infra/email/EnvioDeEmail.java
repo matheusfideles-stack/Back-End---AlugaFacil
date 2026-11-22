@@ -1,5 +1,6 @@
 package com.larenegocios.alugafacil.infra.email;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
@@ -10,17 +11,33 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+
 @Service
 public class EnvioDeEmail {
 
     private static final Logger log = LoggerFactory.getLogger(EnvioDeEmail.class);
+    private static final URI API_BREVO = URI.create("https://api.brevo.com/v3/smtp/email");
 
     private final ObjectProvider<JavaMailSender> mailSender;
     private final String remetente;
+    private final HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+    private final ObjectMapper json = new ObjectMapper();
 
     // Uma variavel de ambiente vazia (SPRING_MAIL_HOST=) ainda cria o JavaMailSender, mas sem servidor: nao conta como configurado.
     @Value("${spring.mail.host:}")
     private String servidor = "";
+
+    // Hospedagens como o Railway bloqueiam as portas SMTP. Com esta chave, o envio vai pela API da Brevo (porta 443).
+    @Value("${BREVO_API_KEY:}")
+    private String chaveBrevo = "";
 
     public EnvioDeEmail(ObjectProvider<JavaMailSender> mailSender,
                         @Value("${app.email-remetente}") String remetente) {
@@ -39,6 +56,9 @@ public class EnvioDeEmail {
     }
 
     public boolean enviaDeVerdade() {
+        if (chaveBrevo != null && !chaveBrevo.isBlank()) {
+            return true;
+        }
         return mailSender.getIfAvailable() != null && servidor != null && !servidor.isBlank();
     }
 
@@ -48,11 +68,42 @@ public class EnvioDeEmail {
             return;
         }
 
+        if (chaveBrevo != null && !chaveBrevo.isBlank()) {
+            enviarPelaApiDaBrevo(para, assunto, texto);
+            return;
+        }
+
         SimpleMailMessage mensagem = new SimpleMailMessage();
         mensagem.setFrom(remetente);
         mensagem.setTo(para);
         mensagem.setSubject(assunto);
         mensagem.setText(texto);
         mailSender.getObject().send(mensagem);
+    }
+
+    private void enviarPelaApiDaBrevo(String para, String assunto, String texto) {
+        Map<String, Object> corpo = Map.of(
+                "sender", Map.of("email", remetente),
+                "to", List.of(Map.of("email", para)),
+                "subject", assunto,
+                "textContent", texto);
+        try {
+            HttpRequest pedido = HttpRequest.newBuilder(API_BREVO)
+                    .timeout(Duration.ofSeconds(15))
+                    .header("api-key", chaveBrevo)
+                    .header("accept", "application/json")
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(corpo)))
+                    .build();
+            HttpResponse<String> resposta = http.send(pedido, HttpResponse.BodyHandlers.ofString());
+            if (resposta.statusCode() / 100 != 2) {
+                throw new IllegalStateException("API da Brevo recusou o e-mail: HTTP " + resposta.statusCode());
+            }
+        } catch (IOException e) {
+            throw new IllegalStateException("Falha ao chamar a API da Brevo", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Envio de e-mail interrompido", e);
+        }
     }
 }
