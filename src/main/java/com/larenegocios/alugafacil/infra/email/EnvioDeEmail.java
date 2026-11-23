@@ -25,6 +25,7 @@ public class EnvioDeEmail {
 
     private static final Logger log = LoggerFactory.getLogger(EnvioDeEmail.class);
     private static final URI API_BREVO = URI.create("https://api.brevo.com/v3/smtp/email");
+    private static final URI API_RESEND = URI.create("https://api.resend.com/emails");
 
     private final ObjectProvider<JavaMailSender> mailSender;
     private final String remetente;
@@ -38,6 +39,10 @@ public class EnvioDeEmail {
     // Hospedagens como o Railway bloqueiam as portas SMTP. Com esta chave, o envio vai pela API da Brevo (porta 443).
     @Value("${BREVO_API_KEY:}")
     private String chaveBrevo = "";
+
+    // Resend: envia pela API HTTPS (porta 443). Sem dominio verificado, so entrega para o e-mail da propria conta do Resend.
+    @Value("${RESEND_API_KEY:}")
+    private String chaveResend = "";
 
     public EnvioDeEmail(ObjectProvider<JavaMailSender> mailSender,
                         @Value("${app.email-remetente}") String remetente) {
@@ -56,6 +61,9 @@ public class EnvioDeEmail {
     }
 
     public boolean enviaDeVerdade() {
+        if (chaveResend != null && !chaveResend.isBlank()) {
+            return true;
+        }
         if (chaveBrevo != null && !chaveBrevo.isBlank()) {
             return true;
         }
@@ -68,6 +76,10 @@ public class EnvioDeEmail {
             return;
         }
 
+        if (chaveResend != null && !chaveResend.isBlank()) {
+            enviarPelaApiDoResend(para, assunto, texto);
+            return;
+        }
         if (chaveBrevo != null && !chaveBrevo.isBlank()) {
             enviarPelaApiDaBrevo(para, assunto, texto);
             return;
@@ -79,6 +91,32 @@ public class EnvioDeEmail {
         mensagem.setSubject(assunto);
         mensagem.setText(texto);
         mailSender.getObject().send(mensagem);
+    }
+
+    private void enviarPelaApiDoResend(String para, String assunto, String texto) {
+        Map<String, Object> corpo = Map.of(
+                "from", remetente,
+                "to", List.of(para),
+                "subject", assunto,
+                "text", texto);
+        try {
+            HttpRequest pedido = HttpRequest.newBuilder(API_RESEND)
+                    .timeout(Duration.ofSeconds(15))
+                    .header("Authorization", "Bearer " + chaveResend)
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(corpo)))
+                    .build();
+            HttpResponse<String> resposta = http.send(pedido, HttpResponse.BodyHandlers.ofString());
+            if (resposta.statusCode() / 100 != 2) {
+                throw new IllegalStateException("API do Resend recusou o e-mail: HTTP " + resposta.statusCode() + " " + resposta.body());
+            }
+            log.info("E-mail aceito pela API do Resend (HTTP {}, assunto: {}): {}", resposta.statusCode(), assunto, resposta.body());
+        } catch (IOException e) {
+            throw new IllegalStateException("Falha ao chamar a API do Resend", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Envio de e-mail interrompido", e);
+        }
     }
 
     private void enviarPelaApiDaBrevo(String para, String assunto, String texto) {
