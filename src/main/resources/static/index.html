@@ -301,6 +301,10 @@
   </main>
   <footer class="rodape">© <span data-ano>2026</span> AlugaFácil. Todos os direitos reservados. | Privacidade | Termos</footer>
   <script src="js/api.js"></script>
+  <script>
+    // Quem ja entrou vai direto para o proprio painel; a landing page fica para quem nao esta logado.
+    if (Sessao.logado()) location.replace(paginaInicial(Sessao.dados().perfil));
+  </script>
   <script src="js/vendor/leaflet/leaflet.js"></script>
   <script src="js/mapa.js"></script>
   <script src="js/seletor-cidade.js"></script>
