@@ -99,6 +99,7 @@ public class EnvioDeEmail {
             if (resposta.statusCode() / 100 != 2) {
                 throw new IllegalStateException("API da Brevo recusou o e-mail: HTTP " + resposta.statusCode());
             }
+            log.info("E-mail aceito pela API da Brevo (HTTP {}, assunto: {}): {}", resposta.statusCode(), assunto, resposta.body());
         } catch (IOException e) {
             throw new IllegalStateException("Falha ao chamar a API da Brevo", e);
         } catch (InterruptedException e) {
