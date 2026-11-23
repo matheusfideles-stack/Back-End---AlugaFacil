@@ -1958,3 +1958,20 @@ textarea {
     gap: 6px
   }
 }
+
+/* Celular: botoes quebram de linha e a vitrine usa uma coluna, para o card ocupar a tela */
+@media (max-width:768px) {
+  .vitrine .g3 {
+    grid-template-columns: 1fr
+  }
+
+  .acoes {
+    flex-wrap: wrap
+  }
+
+  .acoes .btn {
+    flex: 1 1 auto;
+    white-space: nowrap;
+    text-align: center
+  }
+}
