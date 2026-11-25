@@ -54,10 +54,6 @@ Credenciais e senhas ficam fora do git: use variáveis de ambiente ou o arquivo 
 
 ## Documentação detalhada
 
-- [`docs/PAGAMENTOS.md`](docs/PAGAMENTOS.md): como cobrar com Mercado Pago, cartões de teste e webhook.
-- [`docs/EMAIL.md`](docs/EMAIL.md): como ligar o envio de e-mail e testar com o Mailpit.
-- [`docs/PRODUCAO.md`](docs/PRODUCAO.md): o que configurar antes de abrir para outras pessoas (perfil `prod`, HTTPS, segredos).
-- [`docs/BACKUP.md`](docs/BACKUP.md): backup e restauração do banco e das fotos.
 - API interativa com a aplicação rodando: `http://localhost:8080/docs`.
 
 ## Testes
