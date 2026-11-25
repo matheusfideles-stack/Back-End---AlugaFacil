@@ -5,13 +5,16 @@ import com.larenegocios.alugafacil.domain.usuario.Usuario;
 import com.larenegocios.alugafacil.domain.usuario.UsuarioRepository;
 import com.larenegocios.alugafacil.dto.DadosCadastroUsuario;
 import com.larenegocios.alugafacil.infra.exception.RegraDeNegocioException;
+import com.larenegocios.alugafacil.domain.usuario.Cpf;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Locale;
 
 @Service
@@ -22,6 +25,14 @@ public class AutenticacaoService implements UserDetailsService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    // Ligado por padrao. Desligado (EXIGIR_CONFIRMACAO_EMAIL=false), a conta nasce confirmada e o cadastro passa
+    // a exigir CPF com digitos validos e e-mail de um provedor conhecido, no lugar do codigo enviado por e-mail.
+    @Value("${EXIGIR_CONFIRMACAO_EMAIL:true}")
+    private boolean exigirConfirmacaoDeEmail = true;
+
+    @Value("${DOMINIOS_EMAIL_PERMITIDOS:gmail.com,outlook.com,hotmail.com,live.com,msn.com,yahoo.com,yahoo.com.br,icloud.com,me.com,proton.me,protonmail.com,bol.com.br,uol.com.br,terra.com.br,ig.com.br}")
+    private String dominiosPermitidos = "";
 
     public static String normalizarEmail(String email) {
         return email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
@@ -51,6 +62,10 @@ public class AutenticacaoService implements UserDetailsService {
             throw new RegraDeNegocioException("CPF invalido: informe os 11 digitos");
         }
 
+        if (!exigirConfirmacaoDeEmail) {
+            validarCadastroSemConfirmacao(email, cpf);
+        }
+
         if (usuarioRepository.existsByEmailOrCpf(email, cpf)) {
             throw new RegraDeNegocioException("Ja existe um usuario cadastrado com este email ou CPF");
         }
@@ -63,8 +78,25 @@ public class AutenticacaoService implements UserDetailsService {
         usuario.setSenha(passwordEncoder.encode(dados.senha()));
         usuario.setPerfil(perfil);
         usuario.setAtivo(true);
-        usuario.setEmailConfirmado(false);
+        usuario.setEmailConfirmado(!exigirConfirmacaoDeEmail);
 
         return usuarioRepository.save(usuario);
+    }
+
+    public boolean exigeConfirmacaoDeEmail() {
+        return exigirConfirmacaoDeEmail;
+    }
+
+    private void validarCadastroSemConfirmacao(String email, String cpf) {
+        if (!Cpf.valido(cpf)) {
+            throw new RegraDeNegocioException("CPF invalido: confira os numeros digitados");
+        }
+        String dominio = email.substring(email.lastIndexOf('@') + 1);
+        boolean conhecido = Arrays.stream(dominiosPermitidos.split(","))
+                .map(String::trim)
+                .anyMatch(permitido -> !permitido.isEmpty() && permitido.equalsIgnoreCase(dominio));
+        if (!conhecido && !dominio.endsWith(".edu.br")) {
+            throw new RegraDeNegocioException("Use um e-mail de um provedor conhecido, como Gmail ou Outlook");
+        }
     }
 }

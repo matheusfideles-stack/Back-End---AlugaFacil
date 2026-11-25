@@ -48,9 +48,16 @@ public class ConfirmacaoEmailService {
     @Value("${app.exibir-links-de-teste:false}")
     private boolean exibirLinksDeTeste;
 
+    // Mesma chave do AutenticacaoService: sem confirmacao exigida, nenhum codigo e gerado nem enviado.
+    @Value("${EXIGIR_CONFIRMACAO_EMAIL:true}")
+    private boolean exigirConfirmacaoDeEmail = true;
+
     // O codigo so volta na resposta quando exibir-links-de-teste esta ligado (perfil dev) e nao ha SMTP.
     @Transactional
     public Optional<String> enviarConfirmacao(Usuario usuario) {
+        if (!exigirConfirmacaoDeEmail) {
+            return Optional.empty();
+        }
         LocalDateTime agora = LocalDateTime.now();
         tokenRepository.invalidarPendentes(usuario.getId(), agora);
 

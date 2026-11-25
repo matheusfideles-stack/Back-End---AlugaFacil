@@ -168,6 +168,14 @@ formCadastro.addEventListener('submit', async e => {
       }
     });
     avisar('');
+    if (criada.emailConfirmado) {
+      // Servidor sem confirmacao por e-mail: a conta ja nasce ativa, entao vai direto para o login.
+      ocupado(formCadastro, false);
+      mostrarAba('entrar');
+      document.getElementById('email').value = email;
+      avisar('Conta criada! Entre com seu e-mail e a senha que você escolheu.', 'ok');
+      return;
+    }
     formCadastro.hidden = true;
     mostrarConfirmacao(email, `Conta criada! Enviamos um código de verificação de 6 dígitos para ${email}. Digite o código abaixo para ativar sua conta (vale 60 minutos). Só depois da confirmação é possível entrar.`, criada.codigoDeTeste);
   } catch (erro) {

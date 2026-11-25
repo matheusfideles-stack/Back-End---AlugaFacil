@@ -56,7 +56,7 @@ public class AutenticacaoController {
         Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
         Usuario usuario = (Usuario) authentication.getPrincipal();
-        if (!usuario.getEmailConfirmado()) {
+        if (autenticacaoService.exigeConfirmacaoDeEmail() && !usuario.getEmailConfirmado()) {
             throw new EmailNaoConfirmadoException(
                     "Confirme seu e-mail para entrar: enviamos um codigo de verificacao para " + usuario.getEmail());
         }
