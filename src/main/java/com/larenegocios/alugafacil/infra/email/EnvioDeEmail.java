@@ -27,6 +27,7 @@ public class EnvioDeEmail {
     private static final URI API_BREVO = URI.create("https://api.brevo.com/v3/smtp/email");
     private static final URI API_RESEND = URI.create("https://api.resend.com/emails");
     private static final URI API_SMTP2GO = URI.create("https://api.smtp2go.com/v3/email/send");
+    private static final URI API_ELASTIC = URI.create("https://api.elasticemail.com/v4/emails/transactional");
 
     private final ObjectProvider<JavaMailSender> mailSender;
     private final String remetente;
@@ -49,6 +50,10 @@ public class EnvioDeEmail {
     @Value("${SMTP2GO_API_KEY:}")
     private String chaveSmtp2go = "";
 
+    // Elastic Email: envio pela API HTTPS (porta 443), com remetente verificado.
+    @Value("${ELASTICEMAIL_API_KEY:}")
+    private String chaveElastic = "";
+
     public EnvioDeEmail(ObjectProvider<JavaMailSender> mailSender,
                         @Value("${app.email-remetente}") String remetente) {
         this.mailSender = mailSender;
@@ -66,6 +71,9 @@ public class EnvioDeEmail {
     }
 
     public boolean enviaDeVerdade() {
+        if (chaveElastic != null && !chaveElastic.isBlank()) {
+            return true;
+        }
         if (chaveSmtp2go != null && !chaveSmtp2go.isBlank()) {
             return true;
         }
@@ -84,6 +92,10 @@ public class EnvioDeEmail {
             return;
         }
 
+        if (chaveElastic != null && !chaveElastic.isBlank()) {
+            enviarPelaApiDaElasticEmail(para, assunto, texto);
+            return;
+        }
         if (chaveSmtp2go != null && !chaveSmtp2go.isBlank()) {
             enviarPelaApiDoSmtp2go(para, assunto, texto);
             return;
@@ -103,6 +115,34 @@ public class EnvioDeEmail {
         mensagem.setSubject(assunto);
         mensagem.setText(texto);
         mailSender.getObject().send(mensagem);
+    }
+
+    private void enviarPelaApiDaElasticEmail(String para, String assunto, String texto) {
+        Map<String, Object> corpo = Map.of(
+                "Recipients", Map.of("To", List.of(para)),
+                "Content", Map.of(
+                        "From", remetente,
+                        "Subject", assunto,
+                        "Body", List.of(Map.of("ContentType", "PlainText", "Content", texto))));
+        try {
+            HttpRequest pedido = HttpRequest.newBuilder(API_ELASTIC)
+                    .timeout(Duration.ofSeconds(15))
+                    .header("X-ElasticEmail-ApiKey", chaveElastic)
+                    .header("accept", "application/json")
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(corpo)))
+                    .build();
+            HttpResponse<String> resposta = http.send(pedido, HttpResponse.BodyHandlers.ofString());
+            if (resposta.statusCode() / 100 != 2) {
+                throw new IllegalStateException("API da Elastic Email recusou o e-mail: HTTP " + resposta.statusCode() + " " + resposta.body());
+            }
+            log.info("E-mail aceito pela API da Elastic Email (HTTP {}, assunto: {}): {}", resposta.statusCode(), assunto, resposta.body());
+        } catch (IOException e) {
+            throw new IllegalStateException("Falha ao chamar a API da Elastic Email", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Envio de e-mail interrompido", e);
+        }
     }
 
     private void enviarPelaApiDoSmtp2go(String para, String assunto, String texto) {
