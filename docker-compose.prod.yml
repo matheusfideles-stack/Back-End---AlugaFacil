@@ -1,5 +1,5 @@
 # Produção: MySQL e aplicação ficam numa rede interna; só o Caddy (HTTPS) é aberto para a internet.
-# Uso (veja docs/DEPLOY.md):  docker compose -f docker-compose.prod.yml --env-file .env up -d --build
+# Uso:  docker compose -f docker-compose.prod.yml --env-file .env up -d --build
 # Diferente do docker-compose.yml de teste: sem senhas fixas e sem portas do banco ou da aplicação expostas.
 services:
   db:
