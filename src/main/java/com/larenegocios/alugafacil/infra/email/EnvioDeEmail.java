@@ -26,6 +26,7 @@ public class EnvioDeEmail {
     private static final Logger log = LoggerFactory.getLogger(EnvioDeEmail.class);
     private static final URI API_BREVO = URI.create("https://api.brevo.com/v3/smtp/email");
     private static final URI API_RESEND = URI.create("https://api.resend.com/emails");
+    private static final URI API_SMTP2GO = URI.create("https://api.smtp2go.com/v3/email/send");
 
     private final ObjectProvider<JavaMailSender> mailSender;
     private final String remetente;
@@ -44,6 +45,10 @@ public class EnvioDeEmail {
     @Value("${RESEND_API_KEY:}")
     private String chaveResend = "";
 
+    // SMTP2GO: envio pela API HTTPS (porta 443). Aceita um remetente verificado, sem dominio proprio.
+    @Value("${SMTP2GO_API_KEY:}")
+    private String chaveSmtp2go = "";
+
     public EnvioDeEmail(ObjectProvider<JavaMailSender> mailSender,
                         @Value("${app.email-remetente}") String remetente) {
         this.mailSender = mailSender;
@@ -61,6 +66,9 @@ public class EnvioDeEmail {
     }
 
     public boolean enviaDeVerdade() {
+        if (chaveSmtp2go != null && !chaveSmtp2go.isBlank()) {
+            return true;
+        }
         if (chaveResend != null && !chaveResend.isBlank()) {
             return true;
         }
@@ -76,6 +84,10 @@ public class EnvioDeEmail {
             return;
         }
 
+        if (chaveSmtp2go != null && !chaveSmtp2go.isBlank()) {
+            enviarPelaApiDoSmtp2go(para, assunto, texto);
+            return;
+        }
         if (chaveResend != null && !chaveResend.isBlank()) {
             enviarPelaApiDoResend(para, assunto, texto);
             return;
@@ -91,6 +103,33 @@ public class EnvioDeEmail {
         mensagem.setSubject(assunto);
         mensagem.setText(texto);
         mailSender.getObject().send(mensagem);
+    }
+
+    private void enviarPelaApiDoSmtp2go(String para, String assunto, String texto) {
+        Map<String, Object> corpo = Map.of(
+                "sender", remetente,
+                "to", List.of(para),
+                "subject", assunto,
+                "text_body", texto);
+        try {
+            HttpRequest pedido = HttpRequest.newBuilder(API_SMTP2GO)
+                    .timeout(Duration.ofSeconds(15))
+                    .header("X-Smtp2go-Api-Key", chaveSmtp2go)
+                    .header("accept", "application/json")
+                    .header("content-type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(corpo)))
+                    .build();
+            HttpResponse<String> resposta = http.send(pedido, HttpResponse.BodyHandlers.ofString());
+            if (resposta.statusCode() / 100 != 2) {
+                throw new IllegalStateException("API da SMTP2GO recusou o e-mail: HTTP " + resposta.statusCode() + " " + resposta.body());
+            }
+            log.info("E-mail aceito pela API da SMTP2GO (HTTP {}, assunto: {}): {}", resposta.statusCode(), assunto, resposta.body());
+        } catch (IOException e) {
+            throw new IllegalStateException("Falha ao chamar a API da SMTP2GO", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Envio de e-mail interrompido", e);
+        }
     }
 
     private void enviarPelaApiDoResend(String para, String assunto, String texto) {
